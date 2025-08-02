@@ -1,0 +1,666 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Filter, MessageCircle, CheckCircle, Star, BookOpen, Loader2, Eye, Heart, ShoppingCart, ChevronDown, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { BookEntity, BookFilter, getBooks } from '@/lib/BookEntity';
+import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import Navigation from '@/components/Navigation';
+import BookDetailsDialog from '@/components/BookDetailsDialog';
+import MessageDialog from '@/components/MessageDialog';
+
+const bookConditions = [
+  { value: 'new', label: 'নতুন' },
+  { value: 'like_new', label: 'নতুনের মতো' },
+  { value: 'good', label: 'ভালো' },
+  { value: 'acceptable', label: 'মোটামুটি' },
+  { value: 'poor', label: 'পুরনো' }
+];
+
+const bookCategories = [
+  { value: 'academic', label: 'একাডেমিক' },
+  { value: 'novel', label: 'উপন্যাস' },
+  { value: 'story', label: 'গল্প' },
+  { value: 'scifi', label: 'সাইন্স ফিকশন' },
+  { value: 'religious', label: 'ধর্মীয়' },
+  { value: 'selfhelp', label: 'আত্ম-উন্নয়ন' },
+  { value: 'biography', label: 'জীবনী' },
+  { value: 'history', label: 'ইতিহাস' },
+  { value: 'science', label: 'বিজ্ঞান' },
+  { value: 'poetry', label: 'কবিতা' },
+  { value: 'comics', label: 'কমিকস' },
+  { value: 'reference', label: 'রেফারেন্স' },
+  { value: 'other', label: 'অন্যান্য' }
+];
+
+const BrowseBooksPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [books, setBooks] = useState<BookEntity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<BookFilter>({});
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreBooks, setHasMoreBooks] = useState(true);
+  const [page, setPage] = useState(0);
+  const [sortOption, setSortOption] = useState('newest');
+  const BOOKS_PER_PAGE = 9;
+  
+  // State for book details dialog
+  const [selectedBook, setSelectedBook] = useState<BookEntity | null>(null);
+  const [isBookDetailsDialogOpen, setIsBookDetailsDialogOpen] = useState(false);
+  const [showPurchaseRequest, setShowPurchaseRequest] = useState(false);
+  
+  // State for message dialog
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [messageBook, setMessageBook] = useState<BookEntity | null>(null);
+  
+  // State for wishlist
+  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+
+  // Memoize the callback function to prevent infinite updates
+  const handleRealtimeUpdate = useCallback((payload) => {
+    const newBook = payload.new as BookEntity;
+    if (newBook.status === 'available') {
+      // Check if the book matches current filters
+      const matchesFilters = 
+        (!filters.category || newBook.category === filters.category) &&
+        (!filters.condition || newBook.condition === filters.condition) &&
+        (newBook.price >= priceRange[0] && newBook.price <= priceRange[1]);
+        
+      if (matchesFilters) {
+        setBooks(prev => [newBook, ...prev]);
+      }
+    }
+  }, [filters.category, filters.condition, priceRange]);
+
+  // Setup realtime updates for books
+  useSupabaseRealtime(
+    { table: 'books', event: 'INSERT' },
+    handleRealtimeUpdate
+  );
+  
+  // Handle filter changes
+  const handleFilterChange = (key: keyof BookFilter, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+  
+  // Handle price range changes
+  const handlePriceRangeChange = (values: number[]) => {
+    setPriceRange([values[0], values[1]]);
+  };
+  
+  // Initial fetch and when filters change
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Build filters for API
+        const apiFilters: BookFilter = {
+          ...filters,
+          min_price: priceRange[0],
+          max_price: priceRange[1]
+        };
+        
+        const { data, error } = await getBooks(apiFilters, BOOKS_PER_PAGE, 0);
+        
+        if (error) throw error;
+        
+        setBooks(data);
+        setPage(0);
+        setHasMoreBooks(data.length === BOOKS_PER_PAGE);
+      } catch (err) {
+        console.error('Error fetching books:', err);
+        setError('বই লোড করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Reset to first page when filters change
+    fetchBooks();
+  }, [filters, priceRange[0], priceRange[1]]);
+  
+  // Load more books
+  const loadMoreBooks = async () => {
+    if (isLoadingMore || !hasMoreBooks) return;
+    
+    try {
+      setIsLoadingMore(true);
+      
+      const nextPage = page + 1;
+      const offset = nextPage * BOOKS_PER_PAGE;
+      
+      // Build filters for API
+      const apiFilters: BookFilter = {
+        ...filters,
+        min_price: priceRange[0],
+        max_price: priceRange[1]
+      };
+      
+      const { data, error } = await getBooks(apiFilters, BOOKS_PER_PAGE, offset);
+      
+      if (error) throw error;
+      
+      setBooks(prev => [...prev, ...data]);
+      setPage(nextPage);
+      setHasMoreBooks(data.length === BOOKS_PER_PAGE);
+    } catch (err) {
+      console.error('Error loading more books:', err);
+      toast({
+        title: 'ত্রুটি',
+        description: 'আরও বই লোড করতে সমস্যা হয়েছে',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+  
+  // Filter books by search term locally
+  const filteredBooks = books.filter(book => {
+    if (!searchTerm) return true;
+    
+    const term = searchTerm.toLowerCase();
+    return (
+      book.title.toLowerCase().includes(term) ||
+      book.author.toLowerCase().includes(term) ||
+      (book.description && book.description.toLowerCase().includes(term))
+    );
+  });
+  
+  // Sort books based on selected option
+  const sortedBooks = [...filteredBooks].sort((a, b) => {
+    switch (sortOption) {
+      case 'price_low':
+        return a.price - b.price;
+      case 'price_high':
+        return b.price - a.price;
+      case 'newest':
+        return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
+      default:
+        return 0;
+    }
+  });
+  
+  // Send message to seller
+  const handleContactSeller = (book: BookEntity) => {
+    if (!user) {
+      toast({
+        title: 'লগইন প্রয়োজন',
+        description: 'বিক্রেতার সাথে যোগাযোগ করতে লগইন করুন',
+        variant: 'destructive'
+      });
+      navigate('/login');
+      return;
+    }
+    
+    // Open message dialog
+    setMessageBook(book);
+    setIsMessageDialogOpen(true);
+  };
+
+  // Get condition label
+  const getConditionLabel = (condition: string) => {
+    return bookConditions.find(c => c.value === condition)?.label || condition;
+  };
+  
+  // Handle view book details
+  const handleViewBookDetails = (book: BookEntity) => {
+    setSelectedBook(book);
+    setShowPurchaseRequest(false);
+    setIsBookDetailsDialogOpen(true);
+  };
+  
+  // Handle purchase request
+  const handlePurchaseRequest = (book: BookEntity) => {
+    if (!user) {
+      toast({
+        title: 'লগইন প্রয়োজন',
+        description: 'বই কেনার অনুরোধ পাঠাতে লগইন করুন',
+        variant: 'destructive'
+      });
+      navigate('/login');
+      return;
+    }
+    
+    setSelectedBook(book);
+    setShowPurchaseRequest(true);
+    setIsBookDetailsDialogOpen(true);
+  };
+  
+  // Get category label
+  const getCategoryLabel = (category: string) => {
+    return bookCategories.find(c => c.value === category)?.label || category;
+  };
+  
+  // Toggle wishlist
+  const toggleWishlist = (bookId: string) => {
+    if (!user) {
+      toast({
+        title: 'লগইন প্রয়োজন',
+        description: 'ইচ্ছেতালিকায় যোগ করতে লগইন করুন',
+        variant: 'destructive'
+      });
+      navigate('/login');
+      return;
+    }
+    
+    setWishlist(prev => {
+      const newWishlist = new Set(prev);
+      if (newWishlist.has(bookId)) {
+        newWishlist.delete(bookId);
+        toast({
+          title: 'সফল',
+          description: 'বইটি ইচ্ছেতালিকা থেকে সরানো হয়েছে',
+        });
+      } else {
+        newWishlist.add(bookId);
+        toast({
+          title: 'সফল',
+          description: 'বইটি ইচ্ছেতালিকায় যোগ করা হয়েছে',
+        });
+      }
+      return newWishlist;
+    });
+  };
+
+  // Generate book card skeletons for loading state
+  const renderSkeletons = () => {
+    return Array(6).fill(0).map((_, index) => (
+      <Card key={`skeleton-${index}`} className="overflow-hidden">
+        <div className="aspect-[3/4] relative">
+          <Skeleton className="w-full h-full" />
+        </div>
+        <CardContent className="p-4">
+          <Skeleton className="h-6 w-3/4 mb-2" />
+          <Skeleton className="h-4 w-1/2 mb-3" />
+          <div className="flex justify-between mb-2">
+            <Skeleton className="h-5 w-1/4" />
+            <Skeleton className="h-5 w-1/4" />
+          </div>
+          <Skeleton className="h-4 w-3/4 mb-4" />
+          <div className="flex justify-between">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-8 w-1/2" />
+          </div>
+        </CardContent>
+      </Card>
+    ));
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      {/* Header with breadcrumb - Enhanced with better styling */}
+      <header className="relative z-40 bg-gradient-to-b from-background to-background/95 border-b border-primary/5 pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col space-y-6">
+            {/* Breadcrumb */}
+            <Breadcrumb className="mb-2">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/browse" className="text-primary hover:text-primary/80 transition-colors">বই খুঁজুন</BreadcrumbLink>
+                </BreadcrumbItem>
+                {filters.category && (
+                  <>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink className="text-foreground/70">
+                        {getCategoryLabel(filters.category)}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                  </>
+                )}
+              </BreadcrumbList>
+            </Breadcrumb>
+            
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <h1 className="text-3xl font-bold gradient-text">বই খুঁজুন</h1>
+              
+              {/* Sort options */}
+              <div className="flex items-center">
+                <span className="text-sm mr-3 text-muted-foreground">সাজানঃ</span>
+                <Select 
+                  value={sortOption} 
+                  onValueChange={setSortOption}
+                >
+                  <SelectTrigger className="w-[180px] h-10 bg-white/5 backdrop-blur-sm border-primary/10 hover:border-primary/30 transition-colors">
+                    <SelectValue placeholder="সাজানোর ক্রম" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">সর্বশেষ যোগ করা</SelectItem>
+                    <SelectItem value="price_low">কম দাম থেকে বেশি</SelectItem>
+                    <SelectItem value="price_high">বেশি দাম থেকে কম</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            {/* Search Bar - Enhanced */}
+            <div className="flex flex-col md:flex-row gap-4 mt-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-primary h-4 w-4" />
+                <Input
+                  placeholder="বইয়ের নাম বা লেখকের নাম লিখুন..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 h-12 rounded-full border-primary/20 focus:border-primary bg-white/5 backdrop-blur-sm"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="h-12 rounded-full bg-white/5 backdrop-blur-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 flex items-center px-6"
+              >
+                <Filter className="h-4 w-4 mr-2 text-primary" />
+                ফিল্টার {showFilters ? <ChevronDown className="ml-2 h-4 w-4" /> : <ChevronRight className="ml-2 h-4 w-4" />}
+              </Button>
+            </div>
+
+            {/* Filters - Enhanced with better styling */}
+            {showFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6 p-8 rounded-xl bg-white/5 backdrop-blur-md shadow-xl border border-primary/10 animate-fade-in">
+                {/* Category Filter */}
+                <div>
+                  <label className="text-sm font-medium mb-3 block text-foreground/80">ক্যাটেগরি</label>
+                  <Select 
+                    value={filters.category || ''} 
+                    onValueChange={(value) => handleFilterChange('category', value || undefined)}
+                  >
+                    <SelectTrigger className="w-full h-11 border-primary/20 focus:border-primary bg-white/5">
+                      <SelectValue placeholder="সব ক্যাটেগরি" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">সব ক্যাটেগরি</SelectItem>
+                      {bookCategories.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Condition Filter */}
+                <div>
+                  <label className="text-sm font-medium mb-3 block text-foreground/80">অবস্থা</label>
+                  <Select 
+                    value={filters.condition || ''} 
+                    onValueChange={(value) => handleFilterChange('condition', value || undefined)}
+                  >
+                    <SelectTrigger className="w-full h-11 border-primary/20 focus:border-primary bg-white/5">
+                      <SelectValue placeholder="সব অবস্থা" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">সব অবস্থা</SelectItem>
+                      {bookConditions.map((condition) => (
+                        <SelectItem key={condition.value} value={condition.value}>
+                          {condition.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Price Range Filter */}
+                <div>
+                  <div className="flex justify-between mb-3">
+                    <label className="text-sm font-medium text-foreground/80">মূল্য সীমা</label>
+                    <span className="text-sm font-medium text-primary">৳{priceRange[0]} - ৳{priceRange[1]}</span>
+                  </div>
+                  <Slider
+                    defaultValue={[0, 5000]}
+                    min={0}
+                    max={5000}
+                    step={100}
+                    value={priceRange}
+                    onValueChange={handlePriceRangeChange}
+                    className="py-4"
+                  />
+                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                    <span>৳0</span>
+                    <span>৳5000</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content - Enhanced with better padding */}
+      <main className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* Results summary - Enhanced */}
+        {!loading && !error && filteredBooks.length > 0 && (
+          <div className="mb-8 flex justify-between items-center bg-white/5 backdrop-blur-sm rounded-lg px-6 py-4 border border-primary/5">
+            <p className="text-sm text-foreground/70">
+              মোট <span className="font-medium text-primary">{filteredBooks.length}</span> টি বই পাওয়া গেছে
+            </p>
+            <div className="flex items-center text-sm text-foreground/70">
+              <span className="mr-2">দেখানো হচ্ছেঃ</span>
+              <Badge variant="outline" className="font-normal border-primary/20 bg-white/5">
+                {Math.min(page * BOOKS_PER_PAGE + filteredBooks.length, filteredBooks.length)} / {filteredBooks.length}
+              </Badge>
+            </div>
+          </div>
+        )}
+        
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {renderSkeletons()}
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="glass-card p-10 rounded-xl max-w-md text-center shadow-lg border border-primary/10">
+              <p className="text-destructive mb-6">{error}</p>
+              <Button onClick={() => window.location.reload()} className="px-6 py-2 rounded-full">আবার চেষ্টা করুন</Button>
+            </div>
+          </div>
+        ) : sortedBooks.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {sortedBooks.map((book) => (
+                <Card 
+                  key={book.id} 
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 border-primary/10 hover:border-primary/30 group rounded-xl bg-white/5 backdrop-blur-sm"
+                >
+                  <div 
+                    className="aspect-[3/4] relative overflow-hidden bg-muted cursor-pointer rounded-t-lg"
+                    onClick={() => handleViewBookDetails(book)}
+                  >
+                    {book.cover_image_url ? (
+                      <img 
+                        src={book.cover_image_url} 
+                        alt={book.title} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+                        <BookOpen className="h-16 w-16 text-primary/40" />
+                      </div>
+                    )}
+                    
+                    {/* Status badge - Enhanced */}
+                    <div className="absolute top-4 right-4">
+                      <Badge 
+                        variant={book.status === 'sold' ? 'destructive' : 'default'}
+                        className="shadow-md font-medium px-3 py-1 text-xs rounded-full"
+                      >
+                        {book.status === 'sold' ? 'বিক্রিত' : 'বিক্রয়যোগ্য'}
+                      </Badge>
+                    </div>
+                    
+                    {/* Wishlist button - Enhanced */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={`absolute top-4 left-4 rounded-full w-9 h-9 ${
+                        wishlist.has(book.id) 
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                          : 'bg-background/80 hover:bg-background'
+                      } backdrop-blur-sm transition-all duration-200 shadow-md border-white/20`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleWishlist(book.id);
+                      }}
+                    >
+                      <Heart 
+                        className={`h-4 w-4 ${wishlist.has(book.id) ? 'fill-current' : ''}`} 
+                      />
+                    </Button>
+                    
+                    {/* Quick view overlay - Enhanced */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-6">
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        className="bg-white/90 backdrop-blur-sm hover:bg-white text-primary font-medium rounded-full px-5 py-2 shadow-lg"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewBookDetails(book);
+                        }}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        দ্রুত দেখুন
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <CardContent className="p-6">
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => handleViewBookDetails(book)}
+                    >
+                      <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors duration-200">{book.title}</h3>
+                      <p className="text-muted-foreground text-sm mb-3">{book.author}</p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-4 mb-3">
+                      <p className="text-xl font-bold text-primary">৳{book.price}</p>
+                      <Badge variant="outline" className="font-normal border-primary/20 bg-white/5">{getConditionLabel(book.condition)}</Badge>
+                    </div>
+                    
+                    <div className="flex items-center mt-3 text-xs text-muted-foreground">
+                      <Badge variant="secondary" className="mr-2 font-normal bg-primary/10 text-primary hover:bg-primary/20 rounded-full px-3">
+                        {getCategoryLabel(book.category)}
+                      </Badge>
+                      {book.location && (
+                        <span className="truncate">{book.location}</span>
+                      )}
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="px-6 pb-6 pt-0 flex justify-between gap-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleContactSeller(book)}
+                      className="flex-1 h-10 rounded-full border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      মেসেজ
+                    </Button>
+                    
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={() => handlePurchaseRequest(book)}
+                      className="flex-1 h-10 rounded-full shadow-md hover:shadow-lg transition-all"
+                      disabled={book.status === 'sold'}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      কেনার অনুরোধ
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+            
+            {/* Load More Button - Enhanced */}
+            {hasMoreBooks && (
+              <div className="flex justify-center mt-16">
+                <Button 
+                  variant="outline" 
+                  onClick={loadMoreBooks}
+                  disabled={isLoadingMore}
+                  className="px-10 py-6 rounded-full bg-white/5 backdrop-blur-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
+                  size="lg"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                      লোড হচ্ছে...
+                    </>
+                  ) : (
+                    'আরও বই দেখুন'
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-20">
+            <div className="glass-card max-w-md mx-auto p-10 rounded-xl shadow-xl border border-primary/10">
+              <div className="w-28 h-28 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <Search className="h-14 w-14 text-primary/70" />
+              </div>
+              <h3 className="text-2xl font-semibold text-foreground mb-3">
+                কোন বই পাওয়া যায়নি
+              </h3>
+              <p className="text-muted-foreground mb-8">
+                আপনার ফিল্টার বা সার্চ টার্ম পরিবর্তন করে আবার চেষ্টা করুন
+              </p>
+              <Button 
+                onClick={() => {
+                  setFilters({});
+                  setPriceRange([0, 5000]);
+                  setSearchTerm('');
+                }}
+                className="px-6 py-2 rounded-full"
+              >
+                সব ফিল্টার মুছুন
+              </Button>
+            </div>
+          </div>
+        )}
+      </main>
+      
+      {/* Book Details Dialog */}
+      <BookDetailsDialog
+        book={selectedBook}
+        open={isBookDetailsDialogOpen}
+        onOpenChange={setIsBookDetailsDialogOpen}
+        showPurchaseRequest={showPurchaseRequest}
+      />
+      
+      {/* Message Dialog */}
+      <MessageDialog
+        book={messageBook}
+        open={isMessageDialogOpen}
+        onOpenChange={setIsMessageDialogOpen}
+      />
+    </div>
+  );
+};
+
+export default BrowseBooksPage;

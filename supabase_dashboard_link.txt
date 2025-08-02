@@ -1,0 +1,24 @@
+সুপাবেস ড্যাশবোর্ড থেকে ইমেইল ভেরিফিকেশন সমস্যা সমাধান করার নির্দেশাবলী:
+
+1. সুপাবেস ড্যাশবোর্ডে লগইন করুন: https://supabase.com/dashboard/project/yryerjgidsyfiohmpeoc
+
+2. SQL এডিটর খুলুন: https://supabase.com/dashboard/project/yryerjgidsyfiohmpeoc/sql
+
+3. নিম্নলিখিত SQL কমান্ড রান করুন:
+
+```sql
+-- সমস্ত বিদ্যমান ব্যবহারকারীদের ইমেইল নিশ্চিত করুন
+UPDATE auth.users
+SET email_confirmed_at = NOW()
+WHERE email_confirmed_at IS NULL;
+
+-- ইমেইল যাচাইকরণ নিষ্ক্রিয় করুন (auth.config টেবিলে)
+UPDATE auth.config
+SET value = jsonb_set(value, '{email_confirmations}', 'false'::jsonb)
+WHERE name = 'auth';
+```
+
+4. Authentication সেটিংস থেকে "Email Confirmation" অপশন বন্ধ করুন:
+   - Authentication > Providers > Email > Disable "Confirm Email"
+
+5. সাইটে গিয়ে রেজিস্ট্রেশন টেস্ট করুন। 

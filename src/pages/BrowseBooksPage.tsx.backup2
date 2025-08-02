@@ -1,0 +1,489 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Filter, MessageCircle, CheckCircle, Star, BookOpen, Loader2, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { BookEntity, BookFilter, getBooks } from '@/lib/BookEntity';
+import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
+import Navigation from '@/components/Navigation';
+import BookDetailsDialog from '@/components/BookDetailsDialog';
+import MessageDialog from '@/components/MessageDialog';
+
+const bookConditions = [
+  { value: 'new', label: 'নতুন' },
+  { value: 'like_new', label: 'নতুনের মতো' },
+  { value: 'good', label: 'ভালো' },
+  { value: 'acceptable', label: 'মোটামুটি' },
+  { value: 'poor', label: 'পুরনো' }
+];
+
+const bookCategories = [
+  { value: 'academic', label: 'একাডেমিক' },
+  { value: 'novel', label: 'উপন্যাস' },
+  { value: 'story', label: 'গল্প' },
+  { value: 'scifi', label: 'সাইন্স ফিকশন' },
+  { value: 'religious', label: 'ধর্মীয়' },
+  { value: 'selfhelp', label: 'আত্ম-উন্নয়ন' },
+  { value: 'biography', label: 'জীবনী' },
+  { value: 'history', label: 'ইতিহাস' },
+  { value: 'science', label: 'বিজ্ঞান' },
+  { value: 'poetry', label: 'কবিতা' },
+  { value: 'comics', label: 'কমিকস' },
+  { value: 'reference', label: 'রেফারেন্স' },
+  { value: 'other', label: 'অন্যান্য' }
+];
+
+const BrowseBooksPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [books, setBooks] = useState<BookEntity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<BookFilter>({});
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreBooks, setHasMoreBooks] = useState(true);
+  const [page, setPage] = useState(0);
+  const BOOKS_PER_PAGE = 9;
+  
+  // State for book details dialog
+  const [selectedBook, setSelectedBook] = useState<BookEntity | null>(null);
+  const [isBookDetailsDialogOpen, setIsBookDetailsDialogOpen] = useState(false);
+  const [showPurchaseRequest, setShowPurchaseRequest] = useState(false);
+  
+  // State for message dialog
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [messageBook, setMessageBook] = useState<BookEntity | null>(null);
+
+  // Memoize the callback function to prevent infinite updates
+  const handleRealtimeUpdate = useCallback((payload) => {
+    const newBook = payload.new as BookEntity;
+    if (newBook.status === 'available') {
+      // Check if the book matches current filters
+      const matchesFilters = 
+        (!filters.category || newBook.category === filters.category) &&
+        (!filters.condition || newBook.condition === filters.condition) &&
+        (newBook.price >= priceRange[0] && newBook.price <= priceRange[1]);
+        
+      if (matchesFilters) {
+        setBooks(prev => [newBook, ...prev]);
+      }
+    }
+  }, [filters.category, filters.condition, priceRange]);
+
+  // Setup realtime updates for books
+  useSupabaseRealtime(
+    { table: 'books', event: 'INSERT' },
+    handleRealtimeUpdate
+  );
+  
+  // Handle filter changes
+  const handleFilterChange = (key: keyof BookFilter, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+  
+  // Handle price range changes
+  const handlePriceRangeChange = (values: number[]) => {
+    setPriceRange([values[0], values[1]]);
+  };
+  
+  // Initial fetch and when filters change
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Build filters for API
+        const apiFilters: BookFilter = {
+          ...filters,
+          min_price: priceRange[0],
+          max_price: priceRange[1]
+        };
+        
+        const { data, error } = await getBooks(apiFilters, BOOKS_PER_PAGE, 0);
+        
+        if (error) throw error;
+        
+        setBooks(data);
+        setPage(0);
+        setHasMoreBooks(data.length === BOOKS_PER_PAGE);
+      } catch (err) {
+        console.error('Error fetching books:', err);
+        setError('বই লোড করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Reset to first page when filters change
+    fetchBooks();
+  }, [filters, priceRange[0], priceRange[1]]);
+  
+  // Load more books
+  const loadMoreBooks = async () => {
+    if (isLoadingMore || !hasMoreBooks) return;
+    
+    try {
+      setIsLoadingMore(true);
+      
+      const nextPage = page + 1;
+      const offset = nextPage * BOOKS_PER_PAGE;
+      
+      // Build filters for API
+      const apiFilters: BookFilter = {
+        ...filters,
+        min_price: priceRange[0],
+        max_price: priceRange[1]
+      };
+      
+      const { data, error } = await getBooks(apiFilters, BOOKS_PER_PAGE, offset);
+      
+      if (error) throw error;
+      
+      setBooks(prev => [...prev, ...data]);
+      setPage(nextPage);
+      setHasMoreBooks(data.length === BOOKS_PER_PAGE);
+    } catch (err) {
+      console.error('Error loading more books:', err);
+      toast({
+        title: 'ত্রুটি',
+        description: 'আরও বই লোড করতে সমস্যা হয়েছে',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+  
+  // Filter books by search term locally
+  const filteredBooks = books.filter(book => {
+    if (!searchTerm) return true;
+    
+    const term = searchTerm.toLowerCase();
+    return (
+      book.title.toLowerCase().includes(term) ||
+      book.author.toLowerCase().includes(term) ||
+      (book.description && book.description.toLowerCase().includes(term))
+    );
+  });
+  
+  // Send message to seller
+  const handleContactSeller = (book: BookEntity) => {
+    if (!user) {
+      toast({
+        title: 'লগইন প্রয়োজন',
+        description: 'বিক্রেতার সাথে যোগাযোগ করতে লগইন করুন',
+        variant: 'destructive'
+      });
+      navigate('/login');
+      return;
+    }
+    
+    // Open message dialog
+    setMessageBook(book);
+    setIsMessageDialogOpen(true);
+  };
+
+  // Get condition label
+  const getConditionLabel = (condition: string) => {
+    return bookConditions.find(c => c.value === condition)?.label || condition;
+  };
+  
+  // Handle view book details
+  const handleViewBookDetails = (book: BookEntity) => {
+    setSelectedBook(book);
+    setShowPurchaseRequest(false);
+    setIsBookDetailsDialogOpen(true);
+  };
+  
+  // Handle purchase request
+  const handlePurchaseRequest = (book: BookEntity) => {
+    if (!user) {
+      toast({
+        title: 'লগইন প্রয়োজন',
+        description: 'বই কেনার অনুরোধ পাঠাতে লগইন করুন',
+        variant: 'destructive'
+      });
+      navigate('/login');
+      return;
+    }
+    
+    setSelectedBook(book);
+    setShowPurchaseRequest(true);
+    setIsBookDetailsDialogOpen(true);
+  };
+  
+  // Get category label
+  const getCategoryLabel = (category: string) => {
+    return bookCategories.find(c => c.value === category)?.label || category;
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      {/* Header */}
+      <header className="fixed top-16 left-0 right-0 z-40 glass-card border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col space-y-4">
+            <h1 className="text-2xl font-bold gradient-text">বই খুঁজুন</h1>
+            
+            {/* Search Bar */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="বইয়ের নাম বা লেখকের নাম লিখুন..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="glass-button"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                ফিল্টার {showFilters ? 'লুকান' : 'দেখান'}
+              </Button>
+            </div>
+
+            {/* Filters */}
+            {showFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-4 border border-white/20 rounded-lg bg-white/5 backdrop-blur-sm">
+                {/* Category Filter */}
+                <div>
+                  <label className="text-sm font-medium mb-1 block">ক্যাটেগরি</label>
+                  <Select 
+                    value={filters.category || ''} 
+                    onValueChange={(value) => handleFilterChange('category', value || undefined)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="সব ক্যাটেগরি" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">সব ক্যাটেগরি</SelectItem>
+                      {bookCategories.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Condition Filter */}
+                <div>
+                  <label className="text-sm font-medium mb-1 block">অবস্থা</label>
+                  <Select 
+                    value={filters.condition || ''} 
+                    onValueChange={(value) => handleFilterChange('condition', value || undefined)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="সব অবস্থা" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">সব অবস্থা</SelectItem>
+                      {bookConditions.map((condition) => (
+                        <SelectItem key={condition.value} value={condition.value}>
+                          {condition.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Price Range Filter */}
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <label className="text-sm font-medium">মূল্য সীমা</label>
+                    <span className="text-sm">৳{priceRange[0]} - ৳{priceRange[1]}</span>
+                  </div>
+                  <Slider
+                    defaultValue={[0, 5000]}
+                    min={0}
+                    max={5000}
+                    step={100}
+                    value={priceRange}
+                    onValueChange={handlePriceRangeChange}
+                    className="py-4"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="pt-52 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">বই লোড হচ্ছে...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>আবার চেষ্টা করুন</Button>
+          </div>
+        ) : filteredBooks.length > 0 ? (
+          <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {filteredBooks.map((book) => (
+              <Card key={book.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <div className="aspect-[3/4] relative overflow-hidden bg-muted">
+                  {book.cover_image_url ? (
+                    <img 
+                      src={book.cover_image_url} 
+                      alt={book.title} 
+                      className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <BookOpen className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="absolute top-2 right-2">
+                    <Badge variant={book.status === 'sold' ? 'destructive' : 'default'}>
+                      {book.status === 'sold' ? 'বিক্রিত' : 'বিক্রয়যোগ্য'}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg line-clamp-1">{book.title}</h3>
+                  <p className="text-muted-foreground text-sm">{book.author}</p>
+                  
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-lg font-bold text-primary">৳{book.price}</p>
+                    <Badge variant="outline">{getConditionLabel(book.condition)}</Badge>
+                  </div>
+                  
+                  <div className="flex items-center mt-2 text-xs text-muted-foreground">
+                    <p>{getCategoryLabel(book.category)}</p>
+                    {book.location && (
+                      <>
+                        <span className="mx-1">•</span>
+                        <p>{book.location}</p>
+                      </>
+                    )}
+                  </div>
+                  
+                  <div className="flex justify-between items-center mt-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleViewBookDetails(book)}
+                      className="text-xs"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      বিস্তারিত দেখুন
+                    </Button>
+                    
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleContactSeller(book)}
+                        className="text-xs"
+                      >
+                        <MessageCircle className="h-3 w-3 mr-1" />
+                        মেসেজ
+                      </Button>
+                      
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        onClick={() => handlePurchaseRequest(book)}
+                        className="text-xs"
+                        disabled={book.status === 'sold'}
+                      >
+                        কেনার অনুরোধ
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+            
+            {/* Load More Button */}
+            {hasMoreBooks && (
+              <div className="flex justify-center mt-10">
+                <Button 
+                  variant="outline" 
+                  onClick={loadMoreBooks}
+                  disabled={isLoadingMore}
+                  className="glass-button"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      লোড হচ্ছে...
+                    </>
+                  ) : (
+                    'আরও বই দেখুন'
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-16">
+            <div className="glass-card max-w-md mx-auto p-8 rounded-lg">
+              <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <Search className="h-12 w-12 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                কোন বই পাওয়া যায়নি
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                আপনার ফিল্টার বা সার্চ টার্ম পরিবর্তন করে আবার চেষ্টা করুন
+              </p>
+              <Button onClick={() => {
+                setFilters({});
+                setPriceRange([0, 5000]);
+                  setSearchTerm('');
+              }}>
+                সব ফিল্টার মুছুন
+              </Button>
+            </div>
+          </div>
+        )}
+      </main>
+      
+      {/* Book Details Dialog */}
+      <BookDetailsDialog
+        book={selectedBook}
+        open={isBookDetailsDialogOpen}
+        onOpenChange={setIsBookDetailsDialogOpen}
+        showPurchaseRequest={showPurchaseRequest}
+      />
+      
+      {/* Message Dialog */}
+      <MessageDialog
+        book={messageBook}
+        open={isMessageDialogOpen}
+        onOpenChange={setIsMessageDialogOpen}
+      />
+    </div>
+  );
+};
+
+export default BrowseBooksPage;

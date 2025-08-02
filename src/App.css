@@ -1,0 +1,376 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Message page scroll optimization */
+.messages-container [data-radix-scroll-area-viewport] {
+  height: 100% !important;
+  overflow-y: auto !important;
+  contain: layout;
+  will-change: transform;
+  overscroll-behavior: contain;
+}
+
+.messages-container .message-container {
+  contain: content;
+}
+
+/* Message scroll area height fix */
+.messages-scroll-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Extra padding to ensure messages don't hide behind the input box */
+.messages-list-container {
+  padding-bottom: 1rem;
+}
+
+/* Improved message bubble styling */
+.message-item {
+  max-width: 85%;
+  word-break: break-word;
+  transform: translateZ(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* No top radius for consecutive messages */
+.message-container + .message-container .message-item {
+  border-top-right-radius: 0.5rem;
+  border-top-left-radius: 0.5rem;
+}
+
+/* Date separator styling */
+.date-separator {
+  position: relative;
+  margin: 1.5rem 0;
+  text-align: center;
+  z-index: 1;
+}
+
+.date-separator::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: -1;
+}
+
+/* Conversations list styling */
+.conversation-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.conversation-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.conversation-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* Two-column layout fixes */
+@media (min-width: 768px) {
+  .message-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: calc(100vh - 64px);
+  }
+  
+  .conversation-sidebar {
+    border-right: 1px solid var(--border);
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .chat-main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+/* Message typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  column-gap: 0.25rem;
+  padding: 0.5rem 0;
+}
+
+.typing-indicator span {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: currentColor;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: typing-animation 1s infinite ease-in-out alternate;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 200ms;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 400ms;
+}
+
+@keyframes typing-animation {
+  0% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-0.5rem);
+    opacity: 1;
+  }
+}
+
+/* Message list fade in animation */
+.message-appear {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: messageAppear 0.3s forwards;
+}
+
+@keyframes messageAppear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .message-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 50;
+    background-color: var(--background);
+  }
+  
+  .message-input {
+    position: sticky;
+    bottom: 0;
+    background-color: var(--background);
+    border-top: 1px solid var(--border);
+    padding: 0.25rem 0.5rem;
+    z-index: 10;
+    min-height: 38px;
+  }
+  
+  /* Make the input area smaller on mobile */
+  .messages-scroll-area [data-radix-scroll-area-viewport] {
+    padding-bottom: 10px;
+  }
+}
+
+/* Optimize the avatar rendering */
+.avatar-container {
+  contain: strict;
+  height: 32px;
+  width: 32px;
+}
+
+/* Fix input positioning */
+.message-input-container {
+  position: sticky;
+  bottom: 0;
+  background-color: var(--background);
+  border-top: 1px solid var(--border);
+  padding: 0.25rem 0.5rem;
+  z-index: 10;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+  min-height: 38px;
+  max-height: 38px;
+}
+
+/* Enhance scrollbar for messages area */
+.messages-container [data-radix-scroll-area-viewport]::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-container [data-radix-scroll-area-viewport]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messages-container [data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 10px;
+}
+
+/* Improve chat load performance */
+@media (prefers-reduced-motion: no-preference) {
+  .message-container {
+    transition: opacity 0.2s ease;
+  }
+}
+
+/* Make the scroll area work better */
+.smooth-scroll {
+  scroll-behavior: smooth !important;
+  overflow-y: auto !important;
+  height: 100% !important;
+  overscroll-behavior: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Reset any potential transform that might be causing scroll issues */
+[data-radix-scroll-area-viewport] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Message page scroll optimization - updated */
+.messages-container [data-radix-scroll-area-viewport] {
+  height: 100% !important;
+  overflow-y: auto !important;
+  contain: layout;
+  will-change: transform;
+  overscroll-behavior: contain;
+}
+
+/* Messages scroll area */
+.messages-scroll-area {
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-scroll-area [data-radix-scroll-area-viewport] {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
+}
+
+/* Message content container */
+.message-content-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-bottom: 10px;
+}
+
+/* Firefox specific scrolling fix */
+@supports (scrollbar-width: thin) {
+  .smooth-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+}
+
+/* Mobile fixes for proper scrolling */
+@media (max-width: 767px) {
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 180px);
+  }
+}
+
+/* Smaller inputs */
+.messages-container input, 
+.messages-container button {
+  min-height: 32px;
+  height: 32px;
+}
+
+/* More message view space */
+.messages-scroll-area [data-radix-scroll-area-viewport] {
+  padding-bottom: 8px;
+}
+
+/* Increase message container height */
+.messages-container {
+  height: calc(100% - 38px);
+}
+
+/* Request buttons sizing */
+.request-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.request-buttons button {
+  font-size: 0.75rem;
+  height: 28px;
+  padding: 0 0.5rem;
+}
+
+/* Messaging styles */
+.messages-container {
+  contain: content;
+  isolation: isolate;
+}
+
+.message-container {
+  contain: layout;
+  will-change: transform;
+}
+
+/* Disable animations that might cause jank */
+.message-appear {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Improve scrolling performance */
+.messages-scroll-area [data-radix-scroll-area-viewport] {
+  contain: content;
+  will-change: transform;
+  transform: translateZ(0);
+}

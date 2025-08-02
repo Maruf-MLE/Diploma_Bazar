@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background-color: #e8f5e8;
+            border: 1px solid #4caf50;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 React App Test</h1>
+        <div class="status">
+            ✅ If you can see this page, the basic setup is working!
+        </div>
+        <p><strong>Next Steps:</strong></p>
+        <ul>
+            <li>Check browser console for any JavaScript errors</li>
+            <li>Verify all dependencies are installed</li>
+            <li>Make sure React components are loading properly</li>
+        </ul>
+        <p>Your app should be running at: <strong>http://localhost:8080</strong></p>
+        
+        <script>
+            console.log('✅ Test HTML page loaded successfully');
+            console.log('🔍 Now checking if React app is accessible...');
+            
+            // Test if we can reach the React app
+            fetch('/api/test')
+                .then(response => {
+                    console.log('✅ Server is responding');
+                })
+                .catch(error => {
+                    console.log('ℹ️ API test failed (this is expected):', error.message);
+                });
+        </script>
+    </div>
+</body>
+</html>

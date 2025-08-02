@@ -1,0 +1,128 @@
+# Supabase ড্যাশবোর্ড লগইন এবং বই টেবিল ফিক্স করার নির্দেশাবলী
+
+## ১. Supabase ড্যাশবোর্ডে লগইন করুন
+
+1. [Supabase ড্যাশবোর্ড](https://app.supabase.com/) এ যান
+2. আপনার অ্যাকাউন্টে লগইন করুন
+3. `yryerjgidsyfiohmpeoc` প্রজেক্টে ক্লিক করুন
+
+## ২. SQL এডিটর ব্যবহার করে টেবিল ঠিক করুন
+
+1. বাম সাইডবারে "SQL Editor" এ ক্লিক করুন
+2. "New Query" বাটনে ক্লিক করুন
+3. নিচের SQL কোড কপি করে পেস্ট করুন:
+
+```sql
+-- বইয়ের টেবিল পুনরায় তৈরি করি
+DROP TABLE IF EXISTS public.books CASCADE;
+
+CREATE TABLE IF NOT EXISTS public.books (
+  id UUID PRIMARY KEY,
+  title TEXT NOT NULL,
+  author TEXT NOT NULL,
+  description TEXT NOT NULL,
+  price NUMERIC(10, 2) NOT NULL,
+  condition TEXT NOT NULL CHECK (condition IN ('new', 'like_new', 'good', 'acceptable', 'poor')),
+  condition_description TEXT,
+  category TEXT NOT NULL,
+  semester TEXT,
+  department TEXT,
+  institute_name TEXT,
+  cover_image_url TEXT,
+  additional_images TEXT[],
+  seller_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  location TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ,
+  status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'pending', 'sold')),
+  is_negotiable BOOLEAN NOT NULL DEFAULT true
+);
+
+-- বই টেবিলে RLS পলিসি সেট আপ করি
+ALTER TABLE public.books ENABLE ROW LEVEL SECURITY;
+
+-- সবাই available বই দেখতে পারবে
+DROP POLICY IF EXISTS "Anyone can view available books" ON public.books;
+CREATE POLICY "Anyone can view available books" 
+  ON public.books
+  FOR SELECT 
+  USING (status = 'available');
+
+-- শুধুমাত্র নিজের বই আপডেট করতে পারবে ইউজার
+DROP POLICY IF EXISTS "Users can update their own books" ON public.books;
+CREATE POLICY "Users can update their own books" 
+  ON public.books
+  FOR UPDATE
+  USING (auth.uid() = seller_id);
+
+-- শুধুমাত্র নিজের বই ডিলিট করতে পারবে ইউজার
+DROP POLICY IF EXISTS "Users can delete their own books" ON public.books;
+CREATE POLICY "Users can delete their own books" 
+  ON public.books
+  FOR DELETE
+  USING (auth.uid() = seller_id);
+
+-- লগড ইন ইউজার বই পোস্ট করতে পারবে
+DROP POLICY IF EXISTS "Authenticated users can create books" ON public.books;
+CREATE POLICY "Authenticated users can create books" 
+  ON public.books
+  FOR INSERT
+  WITH CHECK (auth.uid() = seller_id);
+
+-- ইউজার যেকোন স্ট্যাটাসের নিজের বই দেখতে পারবে
+DROP POLICY IF EXISTS "Users can view all their own books" ON public.books;
+CREATE POLICY "Users can view all their own books" 
+  ON public.books
+  FOR SELECT
+  USING (auth.uid() = seller_id);
+
+-- বইয়ের জন্য স্টোরেজ বাকেট তৈরি করি
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('books', 'books', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- বইয়ের জন্য স্টোরেজ পলিসি সেট করি
+-- সবাই বইয়ের ইমেজ দেখতে পারবে
+DROP POLICY IF EXISTS "Books images are publicly accessible" ON storage.objects;
+CREATE POLICY "Books images are publicly accessible"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'books');
+
+-- যে কোন অথেনটিকেটেড ইউজার বইয়ের ইমেজ আপলোড করতে পারবে
+DROP POLICY IF EXISTS "Authenticated users can upload book images" ON storage.objects;
+CREATE POLICY "Authenticated users can upload book images"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'books' AND auth.role() = 'authenticated');
+
+-- শুধুমাত্র আপলোডকারী নিজের আপলোড করা বইয়ের ইমেজ আপডেট/ডিলিট করতে পারবে
+DROP POLICY IF EXISTS "Users can update their own book images" ON storage.objects;
+CREATE POLICY "Users can update their own book images"
+ON storage.objects FOR UPDATE
+USING (bucket_id = 'books' AND auth.uid() = owner);
+
+DROP POLICY IF EXISTS "Users can delete their own book images" ON storage.objects;
+CREATE POLICY "Users can delete their own book images"
+ON storage.objects FOR DELETE
+USING (bucket_id = 'books' AND auth.uid() = owner);
+```
+
+4. "Run" বাটনে ক্লিক করুন
+5. কোয়েরি সফলভাবে রান হলে "Success" মেসেজ দেখাবে
+
+## ৩. টেবিল স্ট্রাকচার চেক করুন
+
+1. বাম সাইডবারে "Table Editor" এ ক্লিক করুন
+2. "books" টেবিল সিলেক্ট করুন
+3. নিশ্চিত করুন যে সমস্ত কলাম সঠিকভাবে তৈরি হয়েছে, বিশেষ করে "category" কলাম
+
+## ৪. স্টোরেজ বাকেট চেক করুন
+
+1. বাম সাইডবারে "Storage" এ ক্লিক করুন
+2. "books" নামে একটি বাকেট আছে কিনা চেক করুন
+3. যদি না থাকে, "New Bucket" বাটনে ক্লিক করে একটি নতুন বাকেট তৈরি করুন:
+   - নাম: books
+   - Public bucket: Yes
+
+## ৫. অ্যাপ্লিকেশন রিস্টার্ট করুন
+
+SQL কোয়েরি রান করার পর, আপনার অ্যাপ্লিকেশন রিস্টার্ট করুন এবং আবার বই যোগ করার চেষ্টা করুন। 
