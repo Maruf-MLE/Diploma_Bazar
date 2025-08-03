@@ -143,21 +143,21 @@ const HeroSection = () => {
           </div>
           
           {/* Feature Cards - Modern Design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 mt-16">
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 relative overflow-hidden group">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 md:gap-8 mb-12 mt-16">
+            <div className="bg-white rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-8 relative overflow-hidden group">
               {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-bl-full opacity-50"></div>
+              <div className="absolute top-0 right-0 w-12 h-12 md:w-20 md:h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-bl-full opacity-50"></div>
               
               {/* Icon with glow effect */}
-              <div className="relative mb-6">
+              <div className="relative mb-3 md:mb-6">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg scale-150 group-hover:scale-175 transition-transform duration-500"></div>
-                <div className="relative p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full w-fit">
-                  <Shield className="h-10 w-10 text-primary" />
+                <div className="relative p-2 md:p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full w-fit">
+                  <Shield className="h-6 w-6 md:h-10 md:w-10 text-primary" />
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">ID যাচাইকরণ</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="text-sm md:text-xl font-bold text-gray-900 mb-2 md:mb-3 group-hover:text-primary transition-colors text-center md:text-left">ID যাচাইকরণ</h3>
+              <p className="text-xs md:text-base text-gray-600 leading-relaxed text-center md:text-left">
                 স্টুডেন্ট আইডি স্বয়ংক্রিয় যাচাই করে নিরাপত্তা নিশ্চিত করি
               </p>
               
@@ -165,46 +165,25 @@ const HeroSection = () => {
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </div>
             
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 relative overflow-hidden group">
+            <div className="bg-white rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-8 relative overflow-hidden group">
               {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-100 to-blue-100 rounded-bl-full opacity-50"></div>
+              <div className="absolute top-0 right-0 w-12 h-12 md:w-20 md:h-20 bg-gradient-to-br from-green-100 to-blue-100 rounded-bl-full opacity-50"></div>
               
               {/* Icon with glow effect */}
-              <div className="relative mb-6">
+              <div className="relative mb-3 md:mb-6">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg scale-150 group-hover:scale-175 transition-transform duration-500"></div>
-                <div className="relative p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-full w-fit">
-                  <Users className="h-10 w-10 text-primary" />
+                <div className="relative p-2 md:p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-full w-fit">
+                  <Users className="h-6 w-6 md:h-10 md:w-10 text-primary" />
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">নিরাপদ কমিউনিটি</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="text-sm md:text-xl font-bold text-gray-900 mb-2 md:mb-3 group-hover:text-primary transition-colors text-center md:text-left">নিরাপদ কমিউনিটি</h3>
+              <p className="text-xs md:text-base text-gray-600 leading-relaxed text-center md:text-left">
                 শুধুমাত্র যাচাইকৃত ছাত্রছাত্রীদের মধ্যে বই লেনদেন
               </p>
               
               {/* Bottom accent line */}
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-            </div>
-            
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 relative overflow-hidden group">
-              {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-bl-full opacity-50"></div>
-              
-              {/* Icon with glow effect */}
-              <div className="relative mb-6">
-                <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg scale-150 group-hover:scale-175 transition-transform duration-500"></div>
-                <div className="relative p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-full w-fit">
-                  <Zap className="h-10 w-10 text-primary" />
-                </div>
-              </div>
-              
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">দ্রুত ও সহজ</h3>
-              <p className="text-gray-600 leading-relaxed">
-                মিনিটেই বই খুঁজুন, পোস্ট করুন এবং যোগাযোগ করুন
-              </p>
-              
-              {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </div>
           </div>
         </div>

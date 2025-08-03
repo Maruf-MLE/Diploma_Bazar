@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCall } from '@/contexts/CallContext';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import Navigation from '@/components/Navigation';
+// Navigation component removed from messaging page
 import { 
   getUserConversations, 
   getConversationMessages, 
@@ -1920,13 +1920,11 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
   const currentConversation = conversations.find(conv => conv.id === selectedChat);
 
   return (
-    <div className="min-h-screen bg-[#EFF4FA]">
-      <Navigation />
-      
-      {/* Main Messaging Container */}
-      <div className="pt-16 h-[calc(100vh-2rem)]">
+    <div className="min-h-screen bg-[#EFF4FA] overflow-hidden">
+      {/* Main Messaging Container - Full Height */}
+      <div className="h-screen w-full overflow-hidden">
         {/* Two-column layout with fixed sizes */}
-        <div className="h-full flex relative">
+        <div className="h-full w-full flex relative overflow-hidden">
           {/* Sidebar - Always visible on desktop, toggle on mobile */}
           <div 
             className={`h-full bg-white/95 backdrop-blur-md border-r border-slate-200/60 w-full md:w-80 flex-shrink-0 shadow-sm
@@ -1935,15 +1933,25 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
             <div className="h-full flex flex-col">
               {/* Sidebar Header */}
               <div className="border-b border-slate-200/60 py-4 px-6 flex justify-between items-center bg-white/98 backdrop-blur-sm">
-                <h2 className="font-semibold text-lg text-slate-800 flex items-center gap-3">
-                  <MessageCircle className="h-5 w-5 text-blue-600" />
-                  কথোপকথন
-                  {unreadMessageCount > 0 && (
-                    <Badge variant="destructive" className="ml-2 h-6 text-xs bg-red-500 hover:bg-red-600">
-                      {unreadMessageCount}
-                    </Badge>
-                  )}
-                </h2>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 p-2"
+                    onClick={() => navigate('/browse')}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <h2 className="font-semibold text-lg text-slate-800 flex items-center gap-3">
+                    <MessageCircle className="h-5 w-5 text-blue-600" />
+                    কথোপকথন
+                    {unreadMessageCount > 0 && (
+                      <Badge variant="destructive" className="ml-2 h-6 text-xs bg-red-500 hover:bg-red-600">
+                        {unreadMessageCount}
+                      </Badge>
+                    )}
+                  </h2>
+                </div>
               </div>
               
               {/* Conversations List - Independently Scrollable */}
@@ -2212,7 +2220,8 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="আপনার বার্তা লিখুন..."
-                        className="min-h-[44px] max-h-24 resize-none py-3 pr-16 text-sm bg-white border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-2xl shadow-sm"
+                        className="min-h-[44px] max-h-24 resize-none py-3 pr-16 text-base md:text-sm bg-white border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-2xl shadow-sm touch-manipulation"
+                        style={{ fontSize: '16px' }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();

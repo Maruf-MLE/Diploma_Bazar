@@ -421,13 +421,13 @@ const SellBookPage: React.FC = () => {
             </CardTitle>
             <p className="text-gray-600 mt-2">নিচের সকল তথ্য পূরণ করে আপনার বই বিক্রি করুন</p>
           </CardHeader>
-          <CardContent className="p-8" style={{ backgroundColor: '#ECF2FE' }}>
-            <form onSubmit={handleSubmit} className="space-y-8">
+          <CardContent className="p-4 md:p-8" style={{ backgroundColor: '#ECF2FE' }}>
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-8">
               {/* Basic Information Section */}
-              <div className="space-y-6">
+              <div className="space-y-3 md:space-y-6">
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                  <div className="space-y-1.5">
                     <Label htmlFor="title" className="text-sm font-medium text-gray-700">বইয়ের শিরোনাম *</Label>
                     <Input
                       id="title"
@@ -435,15 +435,15 @@ const SellBookPage: React.FC = () => {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="বইয়ের নাম লিখুন"
-                      className="border-gray-300 focus:border-primary focus:ring-primary"
+                      className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
                       required
                     />
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="publisher" className="text-sm font-medium text-gray-700">প্রকাশনী</Label>
                     <Select value={publisher} onValueChange={setPublisher}>
-                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary">
+                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
                         <SelectValue placeholder="প্রকাশনী নির্বাচন করুন" />
                       </SelectTrigger>
                       <SelectContent>
@@ -454,25 +454,25 @@ const SellBookPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="description" className="text-sm font-medium text-gray-700">বই সমূহ *</Label>
                   <Textarea
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="বই সম্পর্কে বিস্তারিত লিখুন"
-                    rows={4}
-                    className="border-gray-300 focus:border-primary focus:ring-primary"
+                    rows={3}
+                    className="border-gray-300 focus:border-primary focus:ring-primary md:rows-4"
                     required
                   />
                 </div>
               </div>
 
               {/* Pricing & Condition Section */}
-              <div className="space-y-6">
+              <div className="space-y-3 md:space-y-6">
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+                  <div className="space-y-1.5">
                     <Label htmlFor="price" className="text-sm font-medium text-gray-700">মূল্য (টাকা) *</Label>
                     <Input
                       id="price"
@@ -481,15 +481,15 @@ const SellBookPage: React.FC = () => {
                       onChange={(e) => setPrice(e.target.value)}
                       placeholder="0"
                       min="1"
-                      className="border-gray-300 focus:border-primary focus:ring-primary"
+                      className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
                       required
                     />
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="condition" className="text-sm font-medium text-gray-700">অবস্থা *</Label>
                     <Select value={condition} onValueChange={setCondition}>
-                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary">
+                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
                         <SelectValue placeholder="অবস্থা নির্বাচন করুন" />
                       </SelectTrigger>
                       <SelectContent>
@@ -502,7 +502,7 @@ const SellBookPage: React.FC = () => {
                     </Select>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 col-span-2 md:col-span-1">
                     <Label htmlFor="discount" className="text-sm font-medium text-gray-700">ছাড়ের হার (%)</Label>
                     <Input
                       id="discount"
@@ -512,20 +512,20 @@ const SellBookPage: React.FC = () => {
                       placeholder="0-100"
                       min="0"
                       max="100"
-                      className="border-gray-300 focus:border-primary focus:ring-primary"
+                      className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Academic Information Section */}
-              <div className="space-y-6">
+              <div className="space-y-3 md:space-y-6">
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 gap-3 md:gap-6">
+                  <div className="space-y-1.5">
                     <Label htmlFor="semester" className="text-sm font-medium text-gray-700">সেমিস্টার</Label>
                     <Select value={semester} onValueChange={setSemester}>
-                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary">
+                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
                         <SelectValue placeholder="সেমিস্টার নির্বাচন করুন" />
                       </SelectTrigger>
                       <SelectContent>
@@ -541,50 +541,52 @@ const SellBookPage: React.FC = () => {
                     </Select>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="department" className="text-sm font-medium text-gray-700">বিভাগ</Label>
-                    <Input
-                      id="department"
-                      type="text"
-                      value={department}
-                      readOnly
-                      disabled
-                      className="bg-gray-100 cursor-not-allowed border-gray-300"
-                      placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
-                    />
-                    <p className="text-xs text-gray-500">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="institute" className="text-sm font-medium text-gray-700">প্রতিষ্ঠানের নাম</Label>
-                    <Input
-                      id="institute"
-                      type="text"
-                      value={instituteName}
-                      readOnly
-                      disabled
-                      className="bg-gray-100 cursor-not-allowed border-gray-300"
-                      placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
-                    />
-                    <p className="text-xs text-gray-500">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="department" className="text-sm font-medium text-gray-700">বিভাগ</Label>
+                      <Input
+                        id="department"
+                        type="text"
+                        value={department}
+                        readOnly
+                        disabled
+                        className="bg-gray-100 cursor-not-allowed border-gray-300 h-9 md:h-10"
+                        placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
+                      />
+                      <p className="text-xs text-gray-500 hidden md:block">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <Label htmlFor="institute" className="text-sm font-medium text-gray-700">প্রতিষ্ঠানের নাম</Label>
+                      <Input
+                        id="institute"
+                        type="text"
+                        value={instituteName}
+                        readOnly
+                        disabled
+                        className="bg-gray-100 cursor-not-allowed border-gray-300 h-9 md:h-10"
+                        placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
+                      />
+                      <p className="text-xs text-gray-500 hidden md:block">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Images & Location Section */}
-              <div className="space-y-6">
+              {/* Images Section - Collapsible on Mobile */}
+              <div className="space-y-3 md:space-y-6">
                 
-                {/* Cover Image Upload */}
-                <div className="space-y-4">
+                {/* Cover Image Upload - Compact */}
+                <div className="space-y-2 md:space-y-4">
                   <Label className="text-sm font-medium text-gray-700">কভার ইমেজ</Label>
-                  <div className="space-y-4">
-                    {/* File Upload */}
+                  <div className="space-y-2 md:space-y-4">
+                    {/* File Upload - Smaller on mobile */}
                     <div>
                       <Label htmlFor="coverImageFile" className="cursor-pointer">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
-                          <ImageIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600 mb-1">ছবি আপলোড করুন</p>
-                          <p className="text-xs text-gray-500">JPG, PNG, WEBP (সর্বোচ্চ ১০MB)</p>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 md:p-6 text-center hover:border-primary transition-colors">
+                          <ImageIcon className="h-8 w-8 md:h-12 md:w-12 mx-auto text-gray-400 mb-1 md:mb-2" />
+                          <p className="text-xs md:text-sm text-gray-600 mb-1">ছবি আপলোড করুন</p>
+                          <p className="text-xs text-gray-500 hidden md:block">JPG, PNG, WEBP (সর্বোচ্চ ১০MB)</p>
                         </div>
                       </Label>
                       <Input
@@ -596,35 +598,36 @@ const SellBookPage: React.FC = () => {
                       />
                     </div>
                     
-                    {/* Show selected file */}
+                    {/* Show selected file - Compact */}
                     {coverImageFile && (
                       <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
                         <ImageIcon className="h-4 w-4 text-green-600" />
-                        <span className="text-sm text-green-700">{coverImageFile.name}</span>
+                        <span className="text-xs md:text-sm text-green-700 flex-1 truncate">{coverImageFile.name}</span>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => setCoverImageFile(null)}
+                          className="h-6 w-6 p-0 md:h-8 md:w-8"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-3 w-3 md:h-4 md:w-4" />
                         </Button>
                       </div>
                     )}
                   </div>
                 </div>
                 
-                {/* Additional Images Upload */}
-                <div className="space-y-4">
-                  <Label className="text-sm font-medium text-gray-700">অতিরিক্ত ছবি (সর্বোচ্চ ৫টি)</Label>
-                  <div className="space-y-4">
-                    {/* File Upload */}
+                {/* Additional Images Upload - More Compact */}
+                <div className="space-y-2 md:space-y-4">
+                  <Label className="text-sm font-medium text-gray-700">অতিরিক্ত ছবি (ঐচ্ছিক)</Label>
+                  <div className="space-y-2 md:space-y-4">
+                    {/* File Upload - Smaller */}
                     <div>
                       <Label htmlFor="additionalImagesFile" className="cursor-pointer">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary transition-colors">
-                          <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600">একাধিক ছবি নির্বাচন করুন</p>
-                          <p className="text-xs text-gray-500">JPG, PNG, WEBP (প্রতিটি সর্বোচ্চ ১০MB)</p>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 md:p-4 text-center hover:border-primary transition-colors">
+                          <Upload className="h-6 w-6 md:h-8 md:w-8 mx-auto text-gray-400 mb-1 md:mb-2" />
+                          <p className="text-xs md:text-sm text-gray-600">একাধিক ছবি নির্বাচন করুন</p>
+                          <p className="text-xs text-gray-500 hidden md:block">JPG, PNG, WEBP (প্রতিটি সর্বোচ্চ ১০MB)</p>
                         </div>
                       </Label>
                       <Input
@@ -637,21 +640,22 @@ const SellBookPage: React.FC = () => {
                       />
                     </div>
                     
-                    {/* Show selected files */}
+                    {/* Show selected files - Compact */}
                     {additionalImageFiles.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-700">নির্বাচিত ছবি:</p>
+                      <div className="space-y-1 md:space-y-2">
+                        <p className="text-xs md:text-sm font-medium text-gray-700">নির্বাচিত ছবি:</p>
                         {additionalImageFiles.map((file, index) => (
-                          <div key={index} className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
-                            <ImageIcon className="h-4 w-4 text-blue-600" />
-                            <span className="text-sm text-blue-700 flex-1">{file.name}</span>
+                          <div key={index} className="flex items-center gap-2 p-1.5 md:p-2 bg-blue-50 rounded-lg">
+                            <ImageIcon className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
+                            <span className="text-xs md:text-sm text-blue-700 flex-1 truncate">{file.name}</span>
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
                               onClick={() => removeAdditionalImage(index)}
+                              className="h-5 w-5 p-0 md:h-6 md:w-6"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           </div>
                         ))}
@@ -661,22 +665,29 @@ const SellBookPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <div className="flex justify-center pt-8 border-t border-gray-200">
+              {/* Submit Button - Mobile Optimized */}
+              <div className="flex justify-center pt-4 md:pt-8 border-t border-gray-200">
                 <Button 
                   type="submit" 
                   disabled={isSubmitting || isUploadingImages}
-                  className="w-full md:w-auto px-8 py-3 text-lg bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 text-base md:text-lg bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   {isUploadingImages ? (
                     <>
                       <Upload className="h-4 w-4 mr-2 animate-spin" />
-                      ছবি আপলোড হচ্ছে...
+                      <span className="hidden sm:inline">ছবি আপলোড হচ্ছে...</span>
+                      <span className="sm:hidden">আপলোড হচ্ছে...</span>
                     </>
                   ) : isSubmitting ? (
-                    'যোগ করা হচ্ছে...'
+                    <>
+                      <span className="hidden sm:inline">যোগ করা হচ্ছে...</span>
+                      <span className="sm:hidden">যোগ হচ্ছে...</span>
+                    </>
                   ) : (
-                    'বই যোগ করুন'
+                    <>
+                      <span className="hidden sm:inline">বই যোগ করুন</span>
+                      <span className="sm:hidden">যোগ করুন</span>
+                    </>
                   )}
                 </Button>
               </div>

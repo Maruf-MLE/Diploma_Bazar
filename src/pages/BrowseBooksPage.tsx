@@ -146,26 +146,20 @@ const BookCard = ({
         </div>
         <div className="publisher-info-simple">
           <div className="publisher-text-simple">
-            {book.publisher || 'প্রকাশনী উল্লেখ নেই'}
+            {/* Show only 'টেকনিক্যাল' for 'টেকনিক্যাল প্রকাশনী' on mobile, full name on larger screens */}
+            <span className="block md:hidden">
+              {book.publisher === 'টেকনিক্যাল প্রকাশনী' ? 'টেকনিক্যাল' : (book.publisher || 'প্রকাশনী উল্লেখ নেই')}
+            </span>
+            <span className="hidden md:block">
+              {book.publisher || 'প্রকাশনী উল্লেখ নেই'}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Academic Info */}
+      {/* Academic Info - Only Institute like home page */}
       <div className="academic-info">
         <div className="academic-details">
-          <div className="academic-item">
-            <span className="academic-label">বিক্রেতা: </span>
-            <span className="academic-value">
-              {book.seller_name || 'অজানা বিক্রেতা'}
-            </span>
-          </div>
-          <div className="academic-item">
-            <span className="academic-label">বিভাগ: </span>
-            <span className="academic-value">
-              {book.department || 'উল্লেখ নেই'}
-            </span>
-          </div>
           <div className="academic-item">
             <span className="academic-label">প্রতিষ্ঠান: </span>
             <span className="academic-value">
@@ -1185,7 +1179,14 @@ const fetchBooks = async () => {
                         </Button>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {departments.slice(0, window.innerWidth < 768 ? 4 : 6).map((dept, index) => (
+                        {[
+                          { value: 'কম্পিউটার টেকনোলজি', label: 'কম্পিউটার টেকনোলজি', shortLabel: 'কম্পিউটার' },
+                          { value: 'সিভিল টেকনোলজি', label: 'সিভিল টেকনোলজি', shortLabel: 'সিভিল' },
+                          { value: 'ইলেকট্রিক্যাল টেকনোলজি', label: 'ইলেকট্রিক্যাল টেকনোলজি', shortLabel: 'ইলেকট্রিক্যাল' },
+                          { value: 'মেকানিক্যাল টেকনোলজি', label: 'মেকানিক্যাল টেকনোলজি', shortLabel: 'মেকানিক্যাল' },
+                          { value: 'ইলেকট্রনিক্স টেকনোলজি', label: 'ইলেকট্রনিক্স টেকনোলজি', shortLabel: 'ইলেকট্রনিক্স' },
+                          { value: 'ফুড টেকনোলজি', label: 'ফুড টেকনোলজি', shortLabel: 'ফুড' }
+                        ].map((dept, index) => (
                           <Badge 
                             key={index}
                             variant={filters.department === dept.value ? "default" : "outline"}
@@ -1201,7 +1202,9 @@ const fetchBooks = async () => {
                               }));
                             }}
                           >
-                            {dept.label}
+                            {/* Show short label on mobile, full label on larger screens */}
+                            <span className="block md:hidden">{dept.shortLabel}</span>
+                            <span className="hidden md:block">{dept.label}</span>
                           </Badge>
                         ))}
                       </div>
@@ -1242,7 +1245,7 @@ const fetchBooks = async () => {
         </div>
         
         {/* Books Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
         {loading ? (
             renderSkeletons()
         ) : error ? (

@@ -86,21 +86,9 @@ const BookCard = ({
         </div>
       </div>
 
-      {/* Academic Info */}
+      {/* Academic Info - Only Institute */}
       <div className="academic-info">
         <div className="academic-details">
-          <div className="academic-item">
-            <span className="academic-label">বিক্রেতা: </span>
-            <span className="academic-value">
-              {book.seller_name || 'অজানা বিক্রেতা'}
-            </span>
-          </div>
-          <div className="academic-item">
-            <span className="academic-label">বিভাগ: </span>
-            <span className="academic-value">
-              {book.department || 'উল্লেখ নেই'}
-            </span>
-          </div>
           <div className="academic-item">
             <span className="academic-label">প্রতিষ্ঠান: </span>
             <span className="academic-value">
@@ -404,7 +392,7 @@ const handleContactSeller = async (book: BookEntity) => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
             {booksLoading ? (
               // Loading skeleton
               Array.from({ length: 4 }).map((_, index) => (
@@ -466,37 +454,37 @@ const handleContactSeller = async (book: BookEntity) => {
             </div>
 
             {/* Features Grid - Modern Professional Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 md:gap-6 mb-16">
               {features.map((feature, index) => (
                 <div key={index} className="group">
-                  <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col relative overflow-hidden border border-gray-100/50">
+                  <div className="bg-white rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col relative overflow-hidden border border-gray-100/50">
                     
                     {/* Top Gradient Bar */}
-                    <div className="h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                    <div className="h-1 md:h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
                     
                     {/* Icon Section */}
-                    <div className="flex items-center justify-center pt-8 pb-6">
+                    <div className="flex items-center justify-center pt-3 md:pt-6 pb-2 md:pb-4">
                       <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-lg opacity-20 scale-150"></div>
-                        <div className="relative p-4 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100/50">
-                          <feature.icon className={`h-8 w-8 ${feature.color}`} />
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-lg opacity-20 scale-150 group-hover:scale-175 transition-transform duration-500"></div>
+                        <div className="relative p-2 md:p-3 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100/50">
+                          <feature.icon className={`h-4 w-4 md:h-7 md:w-7 ${feature.color}`} />
                         </div>
                       </div>
                     </div>
                     
                     {/* Content Section */}
-                    <div className="px-6 pb-8 flex flex-col flex-grow text-center">
-                      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                    <div className="px-2 md:px-5 pb-3 md:pb-6 flex flex-col flex-grow text-center">
+                      <h3 className="text-xs md:text-lg font-bold text-gray-900 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors leading-tight">
                         {feature.title}
                       </h3>
                       
-                      <p className="text-gray-600 text-sm leading-relaxed flex-grow">
+                      <p className="text-gray-600 text-[10px] md:text-sm leading-relaxed flex-grow">
                         {feature.description}
                       </p>
                     </div>
                     
                     {/* Bottom accent */}
-                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 md:h-px bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
                   </div>
                 </div>
               ))}

@@ -32,7 +32,27 @@ export function AdminRoute({ children }: AdminRouteProps) {
         return
       }
       
-      // RPC ফাংশন দিয়ে এডমিন স্ট্যাটাস চেক করি
+      // First try direct table query
+      try {
+        const { data: adminData, error: tableError } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
+        
+        if (!tableError && adminData) {
+          console.log('AdminRoute: User found in admin_users table:', adminData)
+          setIsAdmin(true)
+          setLoading(false)
+          return
+        }
+        
+        console.log('AdminRoute: User not in admin_users table, trying RPC...')
+      } catch (tableError) {
+        console.log('AdminRoute: Table query failed, trying RPC...', tableError)
+      }
+      
+      // Fallback to RPC ফাংশন দিয়ে এডমিন স্ট্যাটাস চেক করি
       const { data: isAdminUser, error: rpcError } = await supabase.rpc('is_admin', { 
         user_id_param: user.id 
       })

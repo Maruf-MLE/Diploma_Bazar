@@ -517,41 +517,41 @@ const ProfilePage = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 pt-24 pb-12">
-        {/* Redesigned Hero Section - Without blue header */}
-        <div className="relative mb-12 bg-blue-200 p-6 rounded-xl shadow-lg">
+        {/* Redesigned Hero Section for Mobile Responsiveness */}
+        <div className="relative mb-12 bg-blue-200 p-4 shadow-lg rounded-b-lg sm:rounded-xl">
           {/* Profile content container */}
           <div className="mx-auto">
-            <div className="bg-[#EEF4FF] rounded-2xl shadow-xl border border-gray-50 p-6 md:p-8">
-              <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+            <div className="bg-[#EEF4FF] rounded-lg sm:rounded-2xl shadow-xl border border-gray-50 p-4 sm:p-6 md:p-8">
+              <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
                 {/* Avatar section with improved upload button */}
-                <div className="relative">
-                    <Avatar className="h-32 w-32 border-4 border-gray-300 shadow-xl rounded-full">
+                <div className="relative mx-auto">
+                  <Avatar className="h-28 w-28 sm:h-32 sm:w-32 border-4 border-gray-300 shadow-lg rounded-full">
                     <AvatarImage src={userData.avatar_url} alt={userData.name} />
-                    <AvatarFallback className="text-4xl bg-blue-100 text-blue-700 rounded-full font-semibold">
+                    <AvatarFallback className="text-2xl sm:text-3xl bg-blue-100 text-blue-700 rounded-full font-semibold">
                       {userData.name ? userData.name.split(' ').map(n => n[0]).join('') : ''}
                     </AvatarFallback>
                   </Avatar>
-                    <Button
+                  <Button
                     variant="filled"
                     size="icon"
-                    className="absolute bottom-0 right-0 rounded-full h-10 w-10 border-0 bg-blue-600 text-white hover:bg-blue-700"
+                    className="absolute bottom-0 right-0 rounded-full h-8 w-8 sm:h-10 sm:w-10 border-0 bg-blue-600 text-white hover:bg-blue-700"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingAvatar}
                   >
                     {uploadingAvatar ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                     ) : (
-                      <Camera className="h-5 w-5" />
+                      <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
                     )}
                   </Button>
                 </div>
                 
                 {/* User info section */}
                 <div className="flex-1 text-center md:text-left">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
-                      <h1 className="text-2xl md:text-3xl font-bold text-slate-800">{userData.name}</h1>
-                      <div className="flex items-center justify-center md:justify-start mt-3 gap-3">
+                      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">{userData.name}</h1>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start mt-3 gap-2 sm:gap-3">
                         {verificationLoading ? (
                           <Badge className="bg-slate-200 hover:bg-slate-300 text-slate-700 border-0 shadow-sm">
                             <Loader2 className="h-3 w-3 mr-1 animate-spin" /> চেক করা হচ্ছে...
@@ -565,8 +565,8 @@ const ProfilePage = () => {
                             <HelpCircle className="h-3 w-3 mr-1" /> ভেরিফায়েড নয়
                           </Badge>
                         )}
-                        <div className="flex items-center bg-amber-50 rounded-full px-3 py-1.5 border border-amber-200 shadow-sm">
-                          <Star className="h-4 w-4 text-amber-500 fill-amber-400 mr-1" />
+                        <div className="flex items-center bg-amber-50 rounded-full px-3 py-1 border border-amber-200">
+                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-amber-500 fill-amber-400 mr-1" />
                           <span className="text-sm font-semibold text-amber-700">{userData.rating}</span>
                           <span className="text-xs text-amber-600/80 ml-1">({userData.totalReviews} রিভিউ)</span>
                         </div>
@@ -576,40 +576,40 @@ const ProfilePage = () => {
                     {/* Edit profile button - more visible */}
                     <Button
                       onClick={() => setIsEditing(true)}
-                      className="mt-4 md:mt-0 bg-[#2568E4] hover:bg-[#1e56c7] text-white border-0 shadow-md w-full md:w-auto">
+                      className="mt-4 md:mt-0 bg-[#2568E4] hover:bg-[#1e56c7] text-white border-0 shadow-md w-full sm:w-auto">
                       <Edit className="mr-2 h-4 w-4" /> প্রোফাইল এডিট
                     </Button>
                   </div>
                   
                   {/* User details in a grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-sm">
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mt-4 sm:mt-6 text-sm">
+                    <div className="bg-slate-50 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-slate-200/60 shadow-sm">
                       <div className="text-slate-500 mb-1 font-medium">প্রতিষ্ঠান</div>
                       <div className="font-semibold text-slate-800">{userData.institute_name}</div>
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 shadow-sm">
+                    <div className="bg-slate-50 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-slate-200/60 shadow-sm">
                       <div className="text-slate-500 mb-1 font-medium">বিভাগ</div>
                       <div className="font-semibold text-slate-800">{userData.department}</div>
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 shadow-sm">
+                    <div className="bg-slate-50 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-slate-200/60 shadow-sm">
                       <div className="text-slate-500 mb-1 font-medium">সেমিস্টার</div>
                       <div className="font-semibold text-slate-800">{userData.semester}</div>
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 shadow-sm">
+                    <div className="bg-slate-50 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-slate-200/60 shadow-sm">
                       <div className="text-slate-500 mb-1 font-medium">রোল</div>
                       <div className="font-semibold text-slate-800">{userData.roll_number}</div>
                     </div>
                   </div>
                   
                   {/* Email verification status - integrated into hero */}
-                  <div className="flex items-center justify-between mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200/60 shadow-sm">
-                    <div className="flex items-center">
-                      <div className={`w-2 h-2 rounded-full mr-3 ${userData.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                  <div className="flex flex-col sm:flex-row items-center justify-between mt-4 sm:mt-6 p-3 sm:p-4 bg-slate-50 rounded-lg sm:rounded-xl border border-slate-200/60 shadow-sm">
+                    <div className="flex items-center mb-2 sm:mb-0">
+                      <div className={`w-2 h-2 rounded-full mr-2 sm:mr-3 ${userData.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
                       <span className="text-sm text-slate-700">ইমেইল: <span className="font-semibold text-slate-800">{userData.email}</span></span>
                     </div>
                     <div className={userData.isVerified ? 
-                      "bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-full font-medium" : 
-                      "bg-amber-100 text-amber-800 text-xs px-3 py-1.5 rounded-full font-medium"
+                      "bg-emerald-100 text-emerald-800 text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium" : 
+                      "bg-amber-100 text-amber-800 text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium"
                     }>
                       {userData.isVerified ? 'ভেরিফায়েড' : 'ভেরিফাই করুন'}
                     </div>
@@ -671,20 +671,20 @@ const ProfilePage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="bg-[#EEF4FF] backdrop-blur-sm rounded-3xl shadow-xl border-0 p-8">
+        <div className="bg-[#EEF4FF] backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border-0 p-4 sm:p-6 md:p-8">
           <Tabs defaultValue="mybooks" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-8 bg-[#F8FBFF] p-2 rounded-2xl shadow-md border border-slate-200/40">
-              <TabsTrigger value="mybooks" className="data-[state=active]:bg-[#4C4EE7] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 font-semibold rounded-xl transition-all duration-300 hover:scale-105">
-                <BookOpen className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">আমার বই</span>
+            <TabsList className="grid grid-cols-3 mb-6 bg-[#F8FBFF] p-1.5 sm:p-2 rounded-lg sm:rounded-xl shadow-sm border border-slate-200/40">
+              <TabsTrigger value="mybooks" className="data-[state=active]:bg-[#4C4EE7] data-[state=active]:text-white text-slate-600 font-medium rounded-lg py-2 px-3 text-sm transition-all duration-300 hover:bg-slate-100">
+                <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">আমার বই</span>
               </TabsTrigger>
-              <TabsTrigger value="purchases" className="data-[state=active]:bg-[#4C4EE7] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 font-semibold rounded-xl transition-all duration-300 hover:scale-105">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">কেনাকাটা</span>
+              <TabsTrigger value="purchases" className="data-[state=active]:bg-[#4C4EE7] data-[state=active]:text-white text-slate-600 font-medium rounded-lg py-2 px-3 text-sm transition-all duration-300 hover:bg-slate-100">
+                <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">কেনাকাটা</span>
               </TabsTrigger>
-              <TabsTrigger value="reviews" className="data-[state=active]:bg-[#4C4EE7] data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-600 font-semibold rounded-xl transition-all duration-300 hover:scale-105">
-                <Star className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">রিভিউ</span>
+              <TabsTrigger value="reviews" className="data-[state=active]:bg-[#4C4EE7] data-[state=active]:text-white text-slate-600 font-medium rounded-lg py-2 px-3 text-sm transition-all duration-300 hover:bg-slate-100">
+                <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">রিভিউ</span>
               </TabsTrigger>
             </TabsList>
 

@@ -288,29 +288,31 @@ const Navigation = () => {
               </div>
             </div>
 
-            {/* Desktop Menu */}
-            <div className="flex items-center space-x-8">
-              <Link to="/" className={`${isActive('/')} transition-colors duration-200 text-sm hover:text-primary`}>
-                হোম
-              </Link>
-              <Link to="/browse" className={`${isActive('/browse')} transition-colors duration-200 text-sm hover:text-primary`}>
-                বই খুঁজুন
-              </Link>
-              <Link to="/sell-book" className={`${isActive('/sell-book')} transition-colors duration-200 text-sm hover:text-primary`}>
-                বই বিক্রি করুন
-              </Link>
-              <Link to="/messages" className={`${isActive('/messages')} transition-colors duration-200 text-sm hover:text-primary relative`}>
-                মেসেজ
-                {unreadMessageCount > 0 && (
-                  <span className="absolute -top-2 -right-3 h-4 w-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
-                    {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
-                  </span>
-                )}
-              </Link>
-              <Link to="/profile" className={`${isActive('/profile')} transition-colors duration-200 text-sm hover:text-primary`}>
-                প্রোফাইল
-              </Link>
-            </div>
+            {/* Desktop Menu - Hidden on messages page */}
+            {location.pathname !== '/messages' && (
+              <div className="flex items-center space-x-8">
+                <Link to="/" className={`${isActive('/')} transition-colors duration-200 text-sm hover:text-primary`}>
+                  হোম
+                </Link>
+                <Link to="/browse" className={`${isActive('/browse')} transition-colors duration-200 text-sm hover:text-primary`}>
+                  বই খুঁজুন
+                </Link>
+                <Link to="/sell-book" className={`${isActive('/sell-book')} transition-colors duration-200 text-sm hover:text-primary`}>
+                  বই বিক্রি করুন
+                </Link>
+                <Link to="/messages" className={`${isActive('/messages')} transition-colors duration-200 text-sm hover:text-primary relative`}>
+                  মেসেজ
+                  {unreadMessageCount > 0 && (
+                    <span className="absolute -top-2 -right-3 h-4 w-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
+                      {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/profile" className={`${isActive('/profile')} transition-colors duration-200 text-sm hover:text-primary`}>
+                  প্রোফাইল
+                </Link>
+              </div>
+            )}
 
             {/* User Menu / Auth Buttons */}
             <div className="flex items-center space-x-6">
@@ -418,11 +420,11 @@ const Navigation = () => {
               </Link>
               
               <Link to="/browse" className="px-1 mx-1">
-                <span className={`text-sm font-medium ${isMobileActive('/browse')}`}>বই খুঁজুন</span>
+                <span className={`text-sm font-medium ${isMobileActive('/browse')}`}>খুঁজুন</span>
               </Link>
               
               <Link to="/sell-book" className="px-1 mx-1">
-                <span className={`text-sm font-medium ${isMobileActive('/sell-book')}`}>বিক্রি করুন</span>
+                <span className={`text-sm font-medium ${isMobileActive('/sell-book')}`}>বিক্রি</span>
               </Link>
               
             </div>
@@ -449,34 +451,36 @@ const Navigation = () => {
                     <NotificationDropdown />
                   </div>
                   
-                  {/* Profile/Menu - Mobile - Only for logged in users */}
-                  <div className="p-0.5 mx-0.5 relative" onClick={toggleMenu}>
-                    <div className="flex flex-col items-center">
-                      <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm relative">
-                        {user.user_metadata && user.user_metadata.avatar_url ? (
-                          <>
-                            <img 
-                              src={user.user_metadata.avatar_url} 
-                              alt="Profile" 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                console.log('Profile image failed to load');
-                                e.currentTarget.src = '';
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.parentElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
-                              }}
-                            />
-                            <ChevronDown className="h-9 w-9 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
-                          </>
-                        ) : (
-                          <>
-                            <User className="h-4 w-4 text-gray-600" />
-                            <ChevronDown className="h-6 w-6 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
-                          </>
-                        )}
+                  {/* Profile/Menu - Mobile - Only for logged in users - Hidden on messages page */}
+                  {location.pathname !== '/messages' && (
+                    <div className="p-0.5 mx-0.5 relative" onClick={toggleMenu}>
+                      <div className="flex flex-col items-center">
+                        <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm relative">
+                          {user.user_metadata && user.user_metadata.avatar_url ? (
+                            <>
+                              <img 
+                                src={user.user_metadata.avatar_url} 
+                                alt="Profile" 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  console.log('Profile image failed to load');
+                                  e.currentTarget.src = '';
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.parentElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+                                }}
+                              />
+                              <ChevronDown className="h-9 w-9 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
+                            </>
+                          ) : (
+                            <>
+                              <User className="h-4 w-4 text-gray-600" />
+                              <ChevronDown className="h-6 w-6 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </>
               )}
               

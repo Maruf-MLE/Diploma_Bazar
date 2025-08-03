@@ -55,7 +55,7 @@ const HowItWorksSection = () => {
         </div>
 
         {/* Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {steps.map((step, index) => (
             <div 
               key={index} 
@@ -67,7 +67,7 @@ const HowItWorksSection = () => {
               )}
               
               {/* Card */}
-              <div className="glass-card-modern backdrop-blur-sm bg-white/80 rounded-xl p-6 border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-500 h-full flex flex-col relative z-10 group-hover:border-primary/30 overflow-hidden">
+              <div className="glass-card-modern backdrop-blur-sm bg-white/80 rounded-xl p-3 md:p-6 border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-500 h-full flex flex-col relative z-10 group-hover:border-primary/30 overflow-hidden">
                 {/* Background gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-10 group-hover:opacity-20 transition-opacity duration-500`}></div>
                 
@@ -79,16 +79,16 @@ const HowItWorksSection = () => {
                 </div>
                 
                 {/* Icon */}
-                <div className={`p-3 rounded-full bg-gradient-to-br ${step.color} mb-5 w-14 h-14 flex items-center justify-center`}>
-                  <step.icon className={`h-7 w-7 ${step.iconColor}`} />
+                <div className={`p-2 md:p-3 rounded-full bg-gradient-to-br ${step.color} mb-3 md:mb-5 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center`}>
+                  <step.icon className={`h-5 w-5 md:h-7 md:w-7 ${step.iconColor}`} />
                 </div>
                 
                 {/* Content */}
-                <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+                <h3 className="text-sm md:text-xl font-bold mb-2 md:mb-3 group-hover:text-primary transition-colors text-center md:text-left">
                   {step.title}
                 </h3>
                 
-                <p className="text-gray-600 text-sm flex-grow">
+                <p className="text-gray-600 text-xs md:text-sm flex-grow text-center md:text-left">
                   {step.description}
                 </p>
               </div>
