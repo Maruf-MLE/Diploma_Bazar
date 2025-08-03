@@ -42,7 +42,11 @@
     "test:password-reset": "node test-password-reset.js",
     "check:auth-config": "node check-auth-config.js",
     "fix:book-insert": "node fix_book_insert_issue.cjs",
-    "fix:books-table": "node fix_books_table.cjs"
+    "fix:books-table": "node fix_books_table.cjs",
+    "fix:verification-function": "node run_fix_verification_function_v2.js",
+    "fix:verification-function-drop": "node drop_and_recreate_verification_function.js",
+    "fix:verification-function-simple": "node create_simple_verification_function.js",
+    "create:sample-verification": "node create_sample_verification_data.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

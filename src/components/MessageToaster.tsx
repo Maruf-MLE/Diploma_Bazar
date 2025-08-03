@@ -4,6 +4,7 @@ import { playNotificationSound } from '@/lib/playNotificationSound';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Global toaster for incoming chat messages.

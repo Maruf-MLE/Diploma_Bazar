@@ -1,5 +1,61 @@
 import { supabase } from './supabase';
 
+// Push notification configuration
+const PUSH_SERVER_URL = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
+
+/**
+ * Send push notification to user's device
+ */
+async function sendPushNotification({ userId, title, body, url }: {
+  userId: string;
+  title: string;
+  body: string;
+  url: string;
+}) {
+  try {
+    console.log('Sending push notification:', { userId, title, body, url });
+    
+    const response = await fetch(`${PUSH_SERVER_URL}/notify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        title,
+        body,
+        url
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Push server error: ${response.status}`);
+    }
+    
+    console.log('Push notification sent successfully');
+  } catch (error) {
+    console.error('Error sending push notification:', error);
+  }
+}
+
+/**
+ * Get notification title based on type
+ */
+function getNotificationTitle(type: NotificationType): string {
+  const titles = {
+    purchase_request: 'কেনার অনুরোধ',
+    request_accepted: 'অনুরোধ গৃহীত',
+    request_rejected: 'অনুরোধ প্রত্যাখ্যাত',
+    book_sold: 'বই বিক্রি হয়েছে',
+    book_available: 'বই উপলব্ধ',
+    payment_received: 'পেমেন্ট পাওয়া গেছে',
+    payment_sent: 'পেমেন্ট পাঠানো হয়েছে',
+    message: 'নতুন বার্তা',
+    verification_approved: 'যাচাই অনুমোদিত',
+    verification_rejected: 'যাচাই প্রত্যাখ্যাত',
+    book_added: 'নতুন বই যোগ হয়েছে'
+  };
+  return titles[type] || 'নোটিফিকেশন';
+}
+
 export type NotificationType = 
   | 'purchase_request'  // বই কেনার অনুরোধ
   | 'request_accepted'  // অনুরোধ গৃহীত
@@ -29,7 +85,7 @@ export interface Notification {
 }
 
 /**
- * Creates a new notification
+ * Creates a new notification and sends push notification
  * 
  * @param notification The notification data
  * @returns The created notification or error
@@ -46,6 +102,14 @@ export async function createNotification(notification: Omit<Notification, 'id' |
       .single();
       
     if (error) throw error;
+    
+    // Send push notification to the user's device
+    await sendPushNotification({
+      userId: notification.user_id,
+      title: getNotificationTitle(notification.type),
+      body: notification.message,
+      url: notification.action_url || '/messages'
+    });
     
     return { data, error: null };
   } catch (error) {

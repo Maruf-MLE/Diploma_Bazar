@@ -1,0 +1,80 @@
+import React, { useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { createNotification } from '@/lib/NotificationService';
+
+const PushNotificationDebug: React.FC = () => {
+  const { user } = useAuth();
+  const { subscribed } = usePushNotifications(user?.id);
+
+  useEffect(() => {
+    console.log('🔍 Debug Component mounted');
+    console.log('User:', user?.id);
+    console.log('Subscribed:', subscribed);
+  }, [user, subscribed]);
+
+  const testNotification = async () => {
+    if (!user) {
+      alert('Please login first');
+      return;
+    }
+
+    try {
+      console.log('🧪 Testing notification creation...');
+      const result = await createNotification({
+        user_id: user.id,
+        message: 'This is a test notification from debug component',
+        type: 'message',
+        sender_id: user.id,
+        action_url: '/messages'
+      });
+      
+      console.log('✅ Notification created:', result);
+      alert('Test notification sent! Check your device.');
+    } catch (error) {
+      console.error('❌ Error creating notification:', error);
+      alert('Error: ' + error);
+    }
+  };
+
+  const testPushServer = async () => {
+    try {
+      console.log('🧪 Testing push server...');
+      const response = await fetch('http://localhost:4000/subscriptions');
+      const data = await response.json();
+      console.log('Push server response:', data);
+      alert(`Push server has ${data.count} subscriptions`);
+    } catch (error) {
+      console.error('❌ Push server error:', error);
+      alert('Push server error: ' + error);
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: '10px',
+      right: '10px',
+      background: 'white',
+      border: '2px solid red',
+      padding: '10px',
+      borderRadius: '5px',
+      zIndex: 9999,
+      fontSize: '12px'
+    }}>
+      <h4>🔔 Push Notification Debug</h4>
+      <p>User: {user?.email}</p>
+      <p>Subscribed: {subscribed ? '✅' : '❌'}</p>
+      <button onClick={testNotification} style={{ margin: '5px', padding: '5px' }}>
+        Test Notification
+      </button>
+      <button onClick={testPushServer} style={{ margin: '5px', padding: '5px' }}>
+        Check Push Server
+      </button>
+    </div>
+  );
+};
+
+export default PushNotificationDebug;

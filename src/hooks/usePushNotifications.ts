@@ -22,35 +22,105 @@ export function usePushNotifications(userId?: string) {
 
   useEffect(() => {
     async function subscribe() {
-      if (!('Notification' in window) || Notification.permission === 'denied') return;
-
-      const registration = await registerServiceWorker();
-      if (!registration) return;
-
-      let subscription = await registration.pushManager.getSubscription();
-
-      if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
-        });
+      console.log('🔔 Push notification setup starting...');
+      console.log('User ID:', userId);
+      console.log('PUBLIC_KEY:', PUBLIC_KEY ? 'Found' : 'Missing');
+      console.log('Notification support:', 'Notification' in window);
+      console.log('Current permission:', Notification.permission);
+      
+      if (!userId) {
+        console.log('❌ No userId provided, skipping subscription');
+        return;
+      }
+      
+      if (!('Notification' in window)) {
+        console.log('❌ Notifications not supported');
+        return;
+      }
+      
+      if (Notification.permission === 'denied') {
+        console.log('❌ Notification permission denied');
+        return;
+      }
+      
+      if (!PUBLIC_KEY) {
+        console.error('❌ VAPID public key not found in environment variables');
+        console.log('Available env vars:', Object.keys(import.meta.env));
+        return;
       }
 
-      // Send subscription to backend
-      await fetch(import.meta.env.VITE_PUSH_SERVER_URL + '/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...subscription, userId })
-      });
-      setSubscribed(true);
+      try {
+        console.log('📋 Registering service worker...');
+        const registration = await registerServiceWorker();
+        if (!registration) {
+          console.log('❌ Service worker registration failed');
+          return;
+        }
+        console.log('✅ Service worker registered successfully');
+
+        let subscription = await registration.pushManager.getSubscription();
+        console.log('Existing subscription:', !!subscription);
+
+        if (!subscription) {
+          try {
+            console.log('🔔 Creating new push subscription...');
+            subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
+            });
+            console.log('✅ New subscription created successfully');
+          } catch (error) {
+            console.error('❌ Failed to create subscription:', error);
+            return;
+          }
+        }
+
+        // Send subscription to backend
+        try {
+          const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
+          console.log('📤 Sending subscription to server:', serverUrl);
+          
+          const response = await fetch(serverUrl + '/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              userId,
+              endpoint: subscription.endpoint,
+              keys: subscription.keys
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Subscribe failed: ${response.status} ${response.statusText}`);
+          }
+          
+          const result = await response.json();
+          console.log('✅ Subscription sent to server successfully:', result);
+          setSubscribed(true);
+        } catch (error) {
+          console.error('❌ Failed to send subscription to server:', error);
+        }
+      } catch (error) {
+        console.error('❌ Unexpected error in subscription process:', error);
+      }
     }
 
     if (Notification.permission === 'default') {
+      console.log('🔔 Requesting notification permission...');
       Notification.requestPermission().then((perm) => {
-        if (perm === 'granted') subscribe();
+        console.log('Permission result:', perm);
+        if (perm === 'granted') {
+          console.log('✅ Permission granted, starting subscription...');
+          subscribe();
+        } else {
+          console.log('❌ Permission denied or dismissed');
+        }
       });
     } else if (Notification.permission === 'granted') {
+      console.log('✅ Permission already granted, starting subscription...');
       subscribe();
+    } else {
+      console.log('❌ Notification permission not granted:', Notification.permission);
     }
   }, [userId]);
 
