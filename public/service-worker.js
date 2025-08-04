@@ -2,11 +2,14 @@
 console.log('📝 Service worker loaded at:', new Date().toISOString());
 
 // Cache name for versioning
-const CACHE_NAME = 'book-exchange-v1';
+// ⚠️ Increment the cache version on each deploy to avoid stale HTML/JS mismatch
+const CACHE_NAME = 'book-exchange-v2';
 
 // Files to cache for offline access
+// Cache only static assets that rarely change. We purposely skip '/' so that the
+// latest index.html is always fetched from the network and contains the correct
+// hashed JS chunk names.
 const urlsToCache = [
-  '/',
   '/manifest.json',
   '/favicon.ico'
 ];
