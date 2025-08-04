@@ -81,20 +81,29 @@ export function usePushNotifications(userId?: string) {
         try {
           const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
           console.log('📤 Sending subscription to server:', serverUrl);
+          console.log('🔑 Subscription details:');
+          console.log('  - Endpoint:', subscription.endpoint);
+          console.log('  - Keys:', subscription.keys);
+          console.log('  - Keys.auth:', subscription.keys?.auth);
+          console.log('  - Keys.p256dh:', subscription.keys?.p256dh);
           
           // Check if server URL is accessible
           if (serverUrl.includes('localhost') && window.location.protocol === 'https:') {
             console.warn('⚠️ Using localhost server URL on HTTPS site. This may not work in production.');
           }
           
+          const subscriptionData = { 
+            userId,
+            endpoint: subscription.endpoint,
+            keys: subscription.keys
+          };
+          
+          console.log('📦 Subscription payload:', JSON.stringify(subscriptionData, null, 2));
+          
           const response = await fetch(serverUrl + '/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              userId,
-              endpoint: subscription.endpoint,
-              keys: subscription.keys
-            })
+            body: JSON.stringify(subscriptionData)
           });
           
           if (!response.ok) {
