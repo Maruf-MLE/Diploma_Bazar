@@ -72,12 +72,15 @@ export function usePushNotifications(userId?: string) {
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
         });
-        
+
+        // Standardise into JSON format so that `keys` property is always present
+        const subscriptionJSON: PushSubscriptionJSON = subscription.toJSON();
+
         console.log('✅ New subscription created successfully');
-        console.log('🔍 Subscription has keys:', !!subscription.keys);
-        
-        if (!subscription.keys) {
-          console.error('❌ Subscription still has no keys! Browser may not support push notifications properly.');
+        console.log('🔍 Subscription has keys:', !!subscriptionJSON.keys);
+
+        if (!subscriptionJSON.keys || !subscriptionJSON.keys.auth || !subscriptionJSON.keys.p256dh) {
+          console.error('❌ Subscription missing auth / p256dh keys!');
           return;
         }
 
@@ -85,13 +88,13 @@ export function usePushNotifications(userId?: string) {
         try {
           const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
           console.log('📤 Sending subscription to server:', serverUrl);
-          
-          const subscriptionData = { 
+
+          const subscriptionData = {
             userId,
-            endpoint: subscription.endpoint,
+            endpoint: subscriptionJSON.endpoint,
             keys: {
-              auth: subscription.keys.auth,
-              p256dh: subscription.keys.p256dh
+              auth: subscriptionJSON.keys.auth,
+              p256dh: subscriptionJSON.keys.p256dh
             }
           };
           
