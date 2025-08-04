@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:dev": "vite build --mode development",
+    "build:prod": "tsc && vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "generate-vapid": "node generateVapid.js",
@@ -46,7 +47,12 @@
     "fix:verification-function": "node run_fix_verification_function_v2.js",
     "fix:verification-function-drop": "node drop_and_recreate_verification_function.js",
     "fix:verification-function-simple": "node create_simple_verification_function.js",
-    "create:sample-verification": "node create_sample_verification_data.js"
+    "create:sample-verification": "node create_sample_verification_data.js",
+    "fix:push-notifications": "node fix-push-notifications.js",
+    "fix:push-notifications:prod": "node fix-push-notifications.js --production",
+    "deploy:push-server": "cd push-server && vercel --prod",
+    "deploy:frontend": "npm run build:prod && vercel --prod",
+    "deploy:all": "npm run deploy:push-server && npm run deploy:frontend"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

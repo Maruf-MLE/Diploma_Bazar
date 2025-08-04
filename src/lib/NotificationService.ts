@@ -3,6 +3,19 @@ import { supabase } from './supabase';
 // Push notification configuration
 const PUSH_SERVER_URL = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
 
+// Check if push server URL is valid for current environment
+function isValidPushServerUrl(): boolean {
+  if (!PUSH_SERVER_URL) return false;
+  
+  // In production (HTTPS), don't allow localhost URLs
+  if (window.location.protocol === 'https:' && PUSH_SERVER_URL.includes('localhost')) {
+    console.error('❌ Cannot use localhost push server URL on HTTPS site');
+    return false;
+  }
+  
+  return true;
+}
+
 /**
  * Send push notification to user's device
  */

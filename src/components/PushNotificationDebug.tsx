@@ -40,7 +40,10 @@ const PushNotificationDebug: React.FC = () => {
   const testPushServer = async () => {
     try {
       console.log('🧪 Testing push server...');
-      const response = await fetch('http://localhost:4000/subscriptions');
+      const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
+      console.log('Using server URL:', serverUrl);
+      
+      const response = await fetch(serverUrl + '/subscriptions');
       const data = await response.json();
       console.log('Push server response:', data);
       alert(`Push server has ${data.count} subscriptions`);

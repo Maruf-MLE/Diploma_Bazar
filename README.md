@@ -153,3 +153,45 @@ To enable file attachments in messaging, you must create a storage bucket in Sup
    ```
 
 Once these steps are completed, the file attachment feature will work properly.
+
+## Push Notifications Setup
+
+The app includes a comprehensive push notification system. However, for production deployment, additional setup is required:
+
+### Quick Fix for Development
+
+```bash
+# Fix push notifications for localhost development
+npm run fix:push-notifications
+
+# Start push server
+npm run push-server
+
+# In another terminal, start dev server
+npm run dev
+```
+
+### Production Setup
+
+1. **Deploy Push Server**: Your push server needs to be deployed to a cloud platform (Railway, Render, Vercel, etc.)
+
+2. **Update Environment Variables**: 
+   ```bash
+   # Setup production environment
+   npm run fix:push-notifications:prod
+   ```
+
+3. **Configure Production URL**: Update `.env.production` with your deployed push server URL
+
+4. **Build for Production**:
+   ```bash
+   npm run build:prod
+   ```
+
+### Common Issues
+
+- **"Subscribe not working on HTTPS"**: This happens when using localhost push server URL on HTTPS sites
+- **CORS errors**: Update push server CORS configuration with your production domain
+- **Service worker not registering**: Ensure your site is served over HTTPS in production
+
+For detailed instructions, see `PUSH_SERVER_DEPLOYMENT.md`

@@ -27,6 +27,8 @@ export function usePushNotifications(userId?: string) {
       console.log('PUBLIC_KEY:', PUBLIC_KEY ? 'Found' : 'Missing');
       console.log('Notification support:', 'Notification' in window);
       console.log('Current permission:', Notification.permission);
+      console.log('Location protocol:', window.location.protocol);
+      console.log('Is secure context:', window.isSecureContext);
       
       if (!userId) {
         console.log('❌ No userId provided, skipping subscription');
@@ -79,6 +81,11 @@ export function usePushNotifications(userId?: string) {
         try {
           const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
           console.log('📤 Sending subscription to server:', serverUrl);
+          
+          // Check if server URL is accessible
+          if (serverUrl.includes('localhost') && window.location.protocol === 'https:') {
+            console.warn('⚠️ Using localhost server URL on HTTPS site. This may not work in production.');
+          }
           
           const response = await fetch(serverUrl + '/subscribe', {
             method: 'POST',

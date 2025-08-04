@@ -7,7 +7,23 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// CORS configuration for production
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',  // Vite dev server
+    'http://localhost:3000',  // Alternative dev server
+    'http://localhost:8080',  // Production dev server
+    // Add your production domains here
+    'https://your-production-domain.com',
+    'https://your-site.netlify.app',
+    'https://your-site.vercel.app'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Configure VAPID keys
