@@ -77,23 +77,33 @@ export function usePushNotifications(userId?: string) {
           }
         }
         
-        // Detailed subscription debugging
-        console.log('🔍 DETAILED SUBSCRIPTION DEBUG:');
-        console.log('  - Subscription object:', subscription);
-        console.log('  - Endpoint:', subscription.endpoint);
-        console.log('  - Keys object:', subscription.keys);
-        
-        if (subscription.keys) {
-          console.log('  - Auth key present:', !!subscription.keys.auth);
-          console.log('  - P256dh key present:', !!subscription.keys.p256dh);
-          console.log('  - Auth key length:', subscription.keys.auth?.length);
-          console.log('  - P256dh key length:', subscription.keys.p256dh?.length);
-          console.log('  - Auth key type:', typeof subscription.keys.auth);
-          console.log('  - P256dh key type:', typeof subscription.keys.p256dh);
-        } else {
+        // Check subscription keys
+        if (!subscription.keys) {
           console.error('❌ No keys object found in subscription!');
-          return;
+          console.log('Subscription object:', subscription);
+          
+          // Try to get a fresh subscription
+          try {
+            await subscription.unsubscribe();
+            console.log('🔄 Unsubscribed old subscription, creating new one...');
+            
+            subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
+            });
+            
+            console.log('✅ New subscription created with keys:', !!subscription.keys);
+          } catch (error) {
+            console.error('❌ Failed to create new subscription:', error);
+            return;
+          }
         }
+        
+        console.log('🔍 Subscription debug:');
+        console.log('  - Endpoint:', subscription.endpoint);
+        console.log('  - Keys present:', !!subscription.keys);
+        console.log('  - Auth present:', !!subscription.keys?.auth);
+        console.log('  - P256dh present:', !!subscription.keys?.p256dh);
 
         // Send subscription to backend
         try {
