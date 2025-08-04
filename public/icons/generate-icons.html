@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+    <h1>Icon Generator</h1>
+    <p>এই পেজটি ব্রাউজারে খুলে নিচের বাটনে ক্লিক করুন</p>
+    
+    <!-- SVG Icon -->
+    <svg id="icon-svg" width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <rect width="192" height="192" fill="#2F5DEA"/>
+        <text x="96" y="96" font-family="Arial, sans-serif" font-size="48" fill="white" text-anchor="middle" dominant-baseline="middle">📚</text>
+    </svg>
+    
+    <canvas id="canvas-192" width="192" height="192"></canvas>
+    <canvas id="canvas-512" width="512" height="512"></canvas>
+    
+    <br><br>
+    <button onclick="generateIcons()">Generate Icons</button>
+    <br><br>
+    <a id="download-192" download="icon-192.png">Download 192x192</a>
+    <br><br>
+    <a id="download-512" download="icon-512.png">Download 512x512</a>
+    
+    <script>
+        function generateIcons() {
+            // 192x192 icon
+            const canvas192 = document.getElementById('canvas-192');
+            const ctx192 = canvas192.getContext('2d');
+            
+            // Background
+            ctx192.fillStyle = '#2F5DEA';
+            ctx192.fillRect(0, 0, 192, 192);
+            
+            // Text (Book emoji)
+            ctx192.font = '96px Arial';
+            ctx192.textAlign = 'center';
+            ctx192.textBaseline = 'middle';
+            ctx192.fillStyle = 'white';
+            ctx192.fillText('📚', 96, 96);
+            
+            // Download link for 192x192
+            canvas192.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                document.getElementById('download-192').href = url;
+            });
+            
+            // 512x512 icon
+            const canvas512 = document.getElementById('canvas-512');
+            const ctx512 = canvas512.getContext('2d');
+            
+            // Background
+            ctx512.fillStyle = '#2F5DEA';
+            ctx512.fillRect(0, 0, 512, 512);
+            
+            // Text (Book emoji)
+            ctx512.font = '256px Arial';
+            ctx512.textAlign = 'center';
+            ctx512.textBaseline = 'middle';
+            ctx512.fillStyle = 'white';
+            ctx512.fillText('📚', 256, 256);
+            
+            // Download link for 512x512
+            canvas512.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                document.getElementById('download-512').href = url;
+            });
+        }
+        
+        // Auto-generate on load
+        window.onload = generateIcons;
+    </script>
+</body>
+</html>

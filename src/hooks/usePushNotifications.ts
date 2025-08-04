@@ -81,9 +81,9 @@ export function usePushNotifications(userId?: string) {
           return;
         }
 
-        // Send subscription to backend - force localhost for development
+        // Send subscription to backend
         try {
-          const serverUrl = 'http://localhost:4000'; // Force localhost
+          const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
           console.log('📤 Sending subscription to server:', serverUrl);
           
           const subscriptionData = { 
