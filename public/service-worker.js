@@ -16,30 +16,10 @@ self.addEventListener('push', event => {
   
   let data = {};
   try {
-    if (event.data) {
-      const rawData = event.data.text();
-      console.log('📄 Raw push data:', rawData);
-      
-      // Try to parse as JSON, fallback to simple text
-      try {
-        data = JSON.parse(rawData);
-        console.log('📊 Parsed JSON data:', data);
-      } catch (jsonError) {
-        console.log('📝 Data is not JSON, treating as text:', rawData);
-        data = {
-          title: 'Notification',
-          body: rawData
-        };
-      }
-    } else {
-      console.log('📭 No data in push event');
-    }
+    data = event.data ? event.data.json() : {};
+    console.log('📊 Push data:', data);
   } catch (error) {
-    console.error('❌ Error processing push data:', error);
-    data = {
-      title: 'Notification',
-      body: 'You have a new notification'
-    };
+    console.error('❌ Error parsing push data:', error);
   }
   
   const {
