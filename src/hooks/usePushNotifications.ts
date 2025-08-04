@@ -106,28 +106,113 @@ export function usePushNotifications(userId?: string) {
           }
         }
 
+        // Multiple attempts to create subscription with keys
+        let subscription = null;
+        let attempts = 0;
+        const maxAttempts = 3;
+        
         console.log('🔔 Creating fresh push subscription...');
         console.log('Using VAPID key:', PUBLIC_KEY.substring(0, 20) + '...');
         
         const applicationServerKey = urlBase64ToUint8Array(PUBLIC_KEY);
         console.log('Converted server key length:', applicationServerKey.length);
         
-        const subscription = await readyRegistration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: applicationServerKey
-        });
+        // Validate VAPID key before proceeding
+        if (applicationServerKey.length !== 65) {
+          console.error('❌ Invalid VAPID key length. Expected 65 bytes, got:', applicationServerKey.length);
+          return;
+        }
         
-        console.log('✅ New subscription created successfully');
-        console.log('🔍 Subscription endpoint:', subscription.endpoint);
-        console.log('🔍 Subscription has keys:', !!subscription.keys);
+        while (attempts < maxAttempts && !subscription?.keys) {
+          attempts++;
+          console.log(`🧪 Subscription attempt ${attempts}/${maxAttempts}...`);
+          
+          try {
+            // Clear any existing subscription before each attempt
+            let existingSub = await readyRegistration.pushManager.getSubscription();
+            if (existingSub) {
+              console.log('🧹 Clearing existing subscription before retry...');
+              await existingSub.unsubscribe();
+            }
+            
+            // Wait a bit between attempts
+            if (attempts > 1) {
+              console.log('⏳ Waiting before retry...');
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+            }
+            
+            // Create subscription with timeout
+            const subscriptionPromise = readyRegistration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: applicationServerKey
+            });
+            
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('Subscription timeout')), 15000);
+            });
+            
+            subscription = await Promise.race([subscriptionPromise, timeoutPromise]);
+            
+            console.log(`✅ Subscription attempt ${attempts} created`);
+            console.log('🔍 Subscription endpoint:', subscription.endpoint);
+            console.log('🔍 Subscription has keys:', !!subscription.keys);
+            
+            if (subscription.keys) {
+              console.log('🔍 Auth key present:', !!subscription.keys.auth);
+              console.log('🔍 P256dh key present:', !!subscription.keys.p256dh);
+              console.log('🔍 Auth key length:', subscription.keys.auth ? subscription.keys.auth.byteLength : 0);
+              console.log('🔍 P256dh key length:', subscription.keys.p256dh ? subscription.keys.p256dh.byteLength : 0);
+              
+              if (subscription.keys.auth && subscription.keys.p256dh) {
+                console.log('🎉 Subscription keys successfully generated!');
+                break;
+              } else {
+                console.log(`⚠️ Attempt ${attempts}: Subscription created but keys are incomplete`);
+                subscription = null;
+              }
+            } else {
+              console.log(`⚠️ Attempt ${attempts}: Subscription created but no keys object`);
+              subscription = null;
+            }
+            
+          } catch (error) {
+            console.error(`❌ Subscription attempt ${attempts} failed:`, error);
+            subscription = null;
+            
+            if (error.name === 'NotSupportedError') {
+              console.log('❌ Push notifications not supported by this browser');
+              break;
+            }
+            
+            if (error.name === 'NotAllowedError') {
+              console.log('❌ Push notifications blocked by user or policy');
+              break;
+            }
+            
+            if (attempts === maxAttempts) {
+              console.log('❌ All subscription attempts failed');
+            }
+          }
+        }
         
-        if (!subscription.keys) {
-          console.error('❌ Subscription still has no keys! Browser may not support push notifications properly.');
-          console.log('❌ This might be due to:');
-          console.log('  - Browser doesn\'t support push notifications');
-          console.log('  - Invalid VAPID keys');
-          console.log('  - Network issues');
-          console.log('  - Browser security settings');
+        if (!subscription || !subscription.keys) {
+          console.error('❌ Failed to create subscription with keys after all attempts!');
+          console.log('🔍 Browser information:');
+          console.log('  - User Agent:', navigator.userAgent);
+          console.log('  - Platform:', navigator.platform);
+          console.log('  - Language:', navigator.language);
+          console.log('  - Online:', navigator.onLine);
+          console.log('  - Secure Context:', window.isSecureContext);
+          console.log('  - Location:', window.location.href);
+          
+          console.log('💡 Possible solutions:');
+          console.log('  - Try in Chrome browser (best support)');
+          console.log('  - Disable browser extensions temporarily');
+          console.log('  - Clear browser cache and cookies');
+          console.log('  - Check if notifications are blocked in browser settings');
+          console.log('  - Try in incognito/private mode');
+          console.log('  - Ensure stable internet connection');
+          
           return;
         }
         
