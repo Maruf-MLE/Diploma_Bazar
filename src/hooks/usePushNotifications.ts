@@ -75,13 +75,21 @@ export function usePushNotifications(userId?: string) {
       }
 
       try {
-        console.log('📋 Registering service worker...');
-        const registration = await registerServiceWorker();
-        if (!registration) {
-          console.log('❌ Service worker registration failed');
+        // Only register service worker when actually needed for push notifications
+        console.log('📋 Registering service worker for push notifications...');
+        let registration;
+        try {
+          registration = await registerServiceWorker();
+          if (!registration) {
+            console.log('❌ Service worker registration failed');
+            return;
+          }
+          console.log('✅ Service worker registered successfully');
+        } catch (swError) {
+          console.error('❌ Service worker registration error:', swError);
+          console.log('⚠️ Push notifications will not work without service worker');
           return;
         }
-        console.log('✅ Service worker registered successfully');
 
         // Wait for service worker to be ready
         const readyRegistration = await navigator.serviceWorker.ready;
