@@ -26,26 +26,61 @@ async function sendPushNotification({ userId, title, body, url }: {
   url: string;
 }) {
   try {
-    console.log('Sending push notification:', { userId, title, body, url });
+    console.log('📤 Attempting to send push notification:', { userId, title, body, url });
+    console.log('🌐 Push server URL:', PUSH_SERVER_URL);
+    
+    // Check if push server URL is valid
+    if (!isValidPushServerUrl()) {
+      throw new Error('Invalid push server URL for current environment');
+    }
+    
+    const requestBody = {
+      userId,
+      title,
+      body,
+      url
+    };
+    
+    console.log('📦 Request payload:', requestBody);
     
     const response = await fetch(`${PUSH_SERVER_URL}/notify`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        title,
-        body,
-        url
-      })
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     });
     
+    console.log('📶 Push server response status:', response.status);
+    console.log('📶 Push server response headers:', Object.fromEntries(response.headers.entries()));
+    
+    const responseText = await response.text();
+    console.log('📶 Push server response body:', responseText);
+    
     if (!response.ok) {
-      throw new Error(`Push server error: ${response.status}`);
+      throw new Error(`Push server error: ${response.status} ${response.statusText} - ${responseText}`);
     }
     
-    console.log('Push notification sent successfully');
+    // Try to parse JSON response
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+      console.log('✅ Push server JSON response:', responseData);
+    } catch (parseError) {
+      console.warn('⚠️ Could not parse response as JSON:', parseError);
+    }
+    
+    console.log('✅ Push notification sent successfully to user:', userId);
+    return { success: true, response: responseData };
   } catch (error) {
-    console.error('Error sending push notification:', error);
+    console.error('❌ Error sending push notification:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
+    throw error; // Re-throw to let caller handle it
   }
 }
 
@@ -105,28 +140,72 @@ export interface Notification {
  */
 export async function createNotification(notification: Omit<Notification, 'id' | 'created_at' | 'updated_at' | 'is_read'>) {
   try {
+    console.log('🔔 Creating notification for user:', notification.user_id);
+    console.log('📊 Notification data:', notification);
+    
+    // Validate required fields
+    if (!notification.user_id) {
+      throw new Error('user_id is required');
+    }
+    
+    if (!notification.message) {
+      throw new Error('message is required');
+    }
+    
+    if (!notification.type) {
+      throw new Error('type is required');
+    }
+    
+    // Prepare notification data for database
+    const notificationData = {
+      user_id: notification.user_id,
+      message: notification.message,
+      type: notification.type,
+      is_read: false,
+      sender_id: notification.sender_id || null,
+      related_id: notification.related_id || null,
+      action_url: notification.action_url || '/messages'
+    };
+    
+    console.log('💾 Inserting notification to database:', notificationData);
+    
     const { data, error } = await supabase
       .from('notifications')
-      .insert({
-        ...notification,
-        is_read: false
-      })
+      .insert(notificationData)
       .select()
       .single();
       
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Database error:', error);
+      throw error;
+    }
+    
+    console.log('✅ Notification saved to database:', data);
     
     // Send push notification to the user's device
-    await sendPushNotification({
-      userId: notification.user_id,
-      title: getNotificationTitle(notification.type),
-      body: notification.message,
-      url: notification.action_url || '/messages'
-    });
+    try {
+      console.log('📤 Sending push notification...');
+      await sendPushNotification({
+        userId: notification.user_id,
+        title: getNotificationTitle(notification.type),
+        body: notification.message,
+        url: notification.action_url || '/messages'
+      });
+      console.log('✅ Push notification sent successfully');
+    } catch (pushError) {
+      console.warn('⚠️ Push notification failed, but database notification was saved:', pushError);
+      // Don't fail the entire operation if push notification fails
+    }
     
     return { data, error: null };
   } catch (error) {
-    console.error('Error creating notification:', error);
+    console.error('❌ Error creating notification:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    });
     return { data: null, error };
   }
 }
