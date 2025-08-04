@@ -68,17 +68,63 @@ export function usePushNotifications(userId?: string) {
         }
 
         console.log('🔔 Creating fresh push subscription...');
+        console.log('🔑 Using VAPID public key:', PUBLIC_KEY);
+        console.log('🔑 Converted key length:', urlBase64ToUint8Array(PUBLIC_KEY).length);
+        
+        // Add a small delay to ensure service worker is fully ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
         });
         
         console.log('✅ New subscription created successfully');
-        console.log('🔍 Subscription has keys:', !!subscription.keys);
+        console.log('📊 Full subscription object:', JSON.stringify(subscription.toJSON(), null, 2));
         
-        if (!subscription.keys) {
-          console.error('❌ Subscription still has no keys! Browser may not support push notifications properly.');
-          return;
+        // Get subscription JSON which includes keys
+        const subscriptionJSON = subscription.toJSON();
+        console.log('🔍 Subscription has endpoint:', !!subscriptionJSON.endpoint);
+        console.log('🔍 Subscription has keys:', !!subscriptionJSON.keys);
+        console.log('🔍 Keys object:', subscriptionJSON.keys);
+        
+        if (!subscriptionJSON.keys || !subscriptionJSON.keys.p256dh || !subscriptionJSON.keys.auth) {
+          console.error('❌ Subscription missing required keys!');
+          console.error('Expected keys: p256dh and auth');
+          console.error('Actual keys:', subscriptionJSON.keys);
+          
+          // Try alternative method to get keys
+          try {
+            const arrayBufferToBase64 = (buffer) => {
+              const bytes = new Uint8Array(buffer);
+              let binary = '';
+              for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+              return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            };
+            
+            if (subscription.getKey) {
+              const p256dhKey = subscription.getKey('p256dh');
+              const authKey = subscription.getKey('auth');
+              
+              if (p256dhKey && authKey) {
+                console.log('✅ Retrieved keys using getKey method');
+                subscriptionJSON.keys = {
+                  p256dh: arrayBufferToBase64(p256dhKey),
+                  auth: arrayBufferToBase64(authKey)
+                };
+              }
+            }
+          } catch (keyError) {
+            console.error('❌ Failed to retrieve keys:', keyError);
+          }
+          
+          // Final check
+          if (!subscriptionJSON.keys || !subscriptionJSON.keys.p256dh || !subscriptionJSON.keys.auth) {
+            console.error('❌ Unable to get subscription keys. Push notifications may not work.');
+            return;
+          }
         }
 
         // Send subscription to backend
@@ -88,10 +134,10 @@ export function usePushNotifications(userId?: string) {
           
           const subscriptionData = { 
             userId,
-            endpoint: subscription.endpoint,
+            endpoint: subscriptionJSON.endpoint,
             keys: {
-              auth: subscription.keys.auth,
-              p256dh: subscription.keys.p256dh
+              auth: subscriptionJSON.keys.auth,
+              p256dh: subscriptionJSON.keys.p256dh
             }
           };
           
