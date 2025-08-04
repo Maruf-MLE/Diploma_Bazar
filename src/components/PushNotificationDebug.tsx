@@ -21,19 +21,36 @@ const PushNotificationDebug: React.FC = () => {
 
     try {
       console.log('🧪 Testing notification creation...');
-      const result = await createNotification({
+      console.log('🔍 User ID:', user.id);
+      
+      const notificationPayload = {
         user_id: user.id,
         message: 'This is a test notification from debug component',
-        type: 'message',
+        type: 'message' as const,
         sender_id: user.id,
         action_url: '/messages'
-      });
+      };
       
-      console.log('✅ Notification created:', result);
+      console.log('📦 Notification payload:', notificationPayload);
+      
+      const result = await createNotification(notificationPayload);
+      
+      console.log('✅ Notification result:', result);
+      
+      if (result.error) {
+        throw result.error;
+      }
+      
       alert('Test notification sent! Check your device.');
     } catch (error) {
       console.error('❌ Error creating notification:', error);
-      alert('Error: ' + error);
+      console.error('❌ Error details:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint
+      });
+      alert('Error: ' + (error?.message || error));
     }
   };
 

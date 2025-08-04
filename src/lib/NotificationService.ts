@@ -156,9 +156,14 @@ export async function createNotification(notification: Omit<Notification, 'id' |
       throw new Error('type is required');
     }
     
+    // Get the title based on notification type
+    const notificationTitle = getNotificationTitle(notification.type);
+    console.log('📝 Generated title for type "' + notification.type + '":', notificationTitle);
+    
     // Prepare notification data for database
     const notificationData = {
       user_id: notification.user_id,
+      title: notificationTitle, // Add title field
       message: notification.message,
       type: notification.type,
       is_read: false,
@@ -167,7 +172,12 @@ export async function createNotification(notification: Omit<Notification, 'id' |
       action_url: notification.action_url || '/messages'
     };
     
-    console.log('💾 Inserting notification to database:', notificationData);
+    console.log('💾 Final notification data to insert:', JSON.stringify(notificationData, null, 2));
+    
+    // Validate that title is not null or empty
+    if (!notificationData.title) {
+      throw new Error('Title cannot be null or empty. Generated title: ' + notificationTitle + ', type: ' + notification.type);
+    }
     
     const { data, error } = await supabase
       .from('notifications')
