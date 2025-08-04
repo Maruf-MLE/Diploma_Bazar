@@ -76,6 +76,24 @@ export function usePushNotifications(userId?: string) {
             return;
           }
         }
+        
+        // Detailed subscription debugging
+        console.log('🔍 DETAILED SUBSCRIPTION DEBUG:');
+        console.log('  - Subscription object:', subscription);
+        console.log('  - Endpoint:', subscription.endpoint);
+        console.log('  - Keys object:', subscription.keys);
+        
+        if (subscription.keys) {
+          console.log('  - Auth key present:', !!subscription.keys.auth);
+          console.log('  - P256dh key present:', !!subscription.keys.p256dh);
+          console.log('  - Auth key length:', subscription.keys.auth?.length);
+          console.log('  - P256dh key length:', subscription.keys.p256dh?.length);
+          console.log('  - Auth key type:', typeof subscription.keys.auth);
+          console.log('  - P256dh key type:', typeof subscription.keys.p256dh);
+        } else {
+          console.error('❌ No keys object found in subscription!');
+          return;
+        }
 
         // Send subscription to backend
         try {
