@@ -53,8 +53,9 @@ self.addEventListener('push', event => {
 
   const notificationOptions = {
     body,
-    icon,
-    badge,
+    // Don't include icon if it might be missing
+    // icon,
+    // badge,
     tag,
     data: { url },
     requireInteraction: true,

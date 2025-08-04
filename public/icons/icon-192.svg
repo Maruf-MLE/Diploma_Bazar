@@ -1,0 +1,18 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="192" height="192" fill="#4F46E5"/>
+  
+  <!-- Book shape -->
+  <rect x="48" y="64" width="96" height="64" fill="#FFFFFF" rx="4"/>
+  
+  <!-- Book spine -->
+  <rect x="48" y="64" width="8" height="64" fill="#E5E7EB" rx="2"/>
+  
+  <!-- Text "B" -->
+  <text x="96" y="110" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#1F2937" text-anchor="middle">B</text>
+  
+  <!-- Small book lines -->
+  <rect x="60" y="76" width="72" height="2" fill="#F3F4F6"/>
+  <rect x="60" y="84" width="60" height="2" fill="#F3F4F6"/>
+  <rect x="60" y="92" width="68" height="2" fill="#F3F4F6"/>
+</svg>

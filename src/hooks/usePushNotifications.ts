@@ -60,73 +60,44 @@ export function usePushNotifications(userId?: string) {
         }
         console.log('✅ Service worker registered successfully');
 
-        let subscription = await registration.pushManager.getSubscription();
-        console.log('Existing subscription:', !!subscription);
-
-        if (!subscription) {
-          try {
-            console.log('🔔 Creating new push subscription...');
-            subscription = await registration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
-            });
-            console.log('✅ New subscription created successfully');
-          } catch (error) {
-            console.error('❌ Failed to create subscription:', error);
-            return;
-          }
+        // Always unsubscribe first and create fresh subscription
+        let existingSubscription = await registration.pushManager.getSubscription();
+        if (existingSubscription) {
+          console.log('🔄 Removing existing subscription...');
+          await existingSubscription.unsubscribe();
         }
+
+        console.log('🔔 Creating fresh push subscription...');
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
+        });
         
-        // Check subscription keys
+        console.log('✅ New subscription created successfully');
+        console.log('🔍 Subscription has keys:', !!subscription.keys);
+        
         if (!subscription.keys) {
-          console.error('❌ No keys object found in subscription!');
-          console.log('Subscription object:', subscription);
-          
-          // Try to get a fresh subscription
-          try {
-            await subscription.unsubscribe();
-            console.log('🔄 Unsubscribed old subscription, creating new one...');
-            
-            subscription = await registration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
-            });
-            
-            console.log('✅ New subscription created with keys:', !!subscription.keys);
-          } catch (error) {
-            console.error('❌ Failed to create new subscription:', error);
-            return;
-          }
+          console.error('❌ Subscription still has no keys! Browser may not support push notifications properly.');
+          return;
         }
-        
-        console.log('🔍 Subscription debug:');
-        console.log('  - Endpoint:', subscription.endpoint);
-        console.log('  - Keys present:', !!subscription.keys);
-        console.log('  - Auth present:', !!subscription.keys?.auth);
-        console.log('  - P256dh present:', !!subscription.keys?.p256dh);
 
-        // Send subscription to backend
+        // Send subscription to backend - force localhost for development
         try {
-          const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
+          const serverUrl = 'http://localhost:4000'; // Force localhost
           console.log('📤 Sending subscription to server:', serverUrl);
-          console.log('🔑 Subscription details:');
-          console.log('  - Endpoint:', subscription.endpoint);
-          console.log('  - Keys:', subscription.keys);
-          console.log('  - Keys.auth:', subscription.keys?.auth);
-          console.log('  - Keys.p256dh:', subscription.keys?.p256dh);
-          
-          // Check if server URL is accessible
-          if (serverUrl.includes('localhost') && window.location.protocol === 'https:') {
-            console.warn('⚠️ Using localhost server URL on HTTPS site. This may not work in production.');
-          }
           
           const subscriptionData = { 
             userId,
             endpoint: subscription.endpoint,
-            keys: subscription.keys
+            keys: {
+              auth: subscription.keys.auth,
+              p256dh: subscription.keys.p256dh
+            }
           };
           
-          console.log('📦 Subscription payload:', JSON.stringify(subscriptionData, null, 2));
+          console.log('📦 Subscription payload keys check:');
+          console.log('  - Auth key:', !!subscriptionData.keys.auth);
+          console.log('  - P256dh key:', !!subscriptionData.keys.p256dh);
           
           const response = await fetch(serverUrl + '/subscribe', {
             method: 'POST',
@@ -135,7 +106,9 @@ export function usePushNotifications(userId?: string) {
           });
           
           if (!response.ok) {
-            throw new Error(`Subscribe failed: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('❌ Subscribe failed:', response.status, errorText);
+            throw new Error(`Subscribe failed: ${response.status} - ${errorText}`);
           }
           
           const result = await response.json();
