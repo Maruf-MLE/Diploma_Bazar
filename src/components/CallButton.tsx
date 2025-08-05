@@ -86,7 +86,8 @@ const CallButton: React.FC<CallButtonProps> = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+<DropdownMenuTrigger asChild>
+        <div onClick={(e) => e.stopPropagation()}>
         <Button 
           variant={variant} 
           className={`${buttonSize.button} ${buttonStyle}`}
@@ -106,6 +107,7 @@ const CallButton: React.FC<CallButtonProps> = ({
             <span className="absolute top-0 right-0 h-2 w-2 bg-blue-600 rounded-full animate-ping"></span>
           )}
         </Button>
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => handleCallInitiate('audio')} className="hover:bg-blue-100 cursor-pointer">

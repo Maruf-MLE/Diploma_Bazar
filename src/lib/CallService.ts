@@ -50,6 +50,17 @@ const getSocket = () => {
     console.warn('Socket URL not set. Please define NEXT_PUBLIC_SOCKET_URL in env.');
   }
   socket = io(url, { transports: ['websocket'] });
+
+  // Verbose logging – added once per session for easier debugging
+  if (!(socket as any)._loggingAdded) {
+    (socket as any)._loggingAdded = true;
+    socket.on('connect', () => console.log('[Socket] connected', socket.id));
+    socket.on('connect_error', (err) => console.error('[Socket] connect_error:', err.message, err));
+    socket.on('disconnect', (reason) => console.warn('[Socket] disconnected:', reason));
+    socket.on('reconnect_attempt', () => console.log('[Socket] reconnect_attempt'));
+    socket.on('reconnect_failed', () => console.error('[Socket] reconnect_failed'));
+  }
+
   return socket;
 };
 
