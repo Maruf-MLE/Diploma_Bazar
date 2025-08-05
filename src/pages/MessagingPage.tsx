@@ -31,6 +31,7 @@ import {
 } from '@/lib/MessageService';
 import { BookEntity } from '@/lib/BookEntity';
 import { Skeleton } from '@/components/ui/skeleton';
+import CallButton from '@/components/CallButton';
 import { Separator } from '@/components/ui/separator';
 import AvailableBooksDialog from '@/components/AvailableBooksDialog';
 import BookRequestButton from '@/components/BookRequestButton';
@@ -2068,7 +2069,19 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                           className="font-semibold text-lg text-slate-800 cursor-pointer hover:text-blue-600 transition-colors"
                           onClick={() => navigate(`/profile/${currentConversation.user.id}`)}
                         >
-                          {currentConversation.user.name.split(' ')[0]}
+{currentConversation.user.name.split(' ')[0]}
+                        {/* Call buttons */}
+                        {selectedReceiverId && (
+                          <div className="flex items-center space-x-2 ml-3">
+                            <CallButton 
+                              receiverId={selectedReceiverId}
+                              onCallInitiated={() => {}}
+                              size="sm"
+                              variant="ghost"
+                              iconOnly
+                            />
+                          </div>
+                        )}
                         </h2>
                         {renderVerifiedBadge(currentConversation)}
                       </div>
