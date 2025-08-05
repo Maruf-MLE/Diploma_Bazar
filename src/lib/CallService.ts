@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { io, Socket } from 'socket.io-client';
 import { User } from '@supabase/supabase-js';
 
 // Call types and interfaces (kept for compatibility)
@@ -39,6 +40,19 @@ export interface CallHistoryItem {
   durationSeconds?: number;
 }
 
+// Create (or reuse) a singleton Socket.IO client
+let socket: Socket | null = null;
+
+const getSocket = () => {
+  if (socket) return socket;
+  const url = (import.meta as any).env?.VITE_SOCKET_URL || (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_SOCKET_URL || process.env.VITE_SOCKET_URL) : '');
+  if (!url) {
+    console.warn('Socket URL not set. Please define NEXT_PUBLIC_SOCKET_URL in env.');
+  }
+  socket = io(url, { transports: ['websocket'] });
+  return socket;
+};
+
 // Call events
 export type CallEventTypes =
   | 'incoming_call'
@@ -51,16 +65,41 @@ export type CallEventTypes =
  * Initialize call service - simplified version
  */
 export const initCallService = async (user: User) => {
-  console.log('Call service disabled - using Supabase Realtime only');
-  return true;
+  try {
+    const s = getSocket();
+    // authenticate or join personal room if needed
+    s.emit('init', { userId: user.id, name: user.email });
+    return true;
+  } catch (e) {
+    console.error('CallService init error', e);
+    return false;
+  }
 };
 
 /**
  * Create a new call - disabled
  */
 export const initiateCall = async (receiverId: string, callType: CallType): Promise<Call | null> => {
-  console.log('Call feature disabled');
-  return null;
+  try {
+    const callerId = (await supabase.auth.getUser()).data.user?.id;
+    if (!callerId) throw new Error('Not authenticated');
+
+    const newCall: Call = {
+      id: Math.random().toString(36).substring(2),
+      callerId,
+      receiverId,
+      status: 'initiated',
+      callType,
+      startTime: new Date()
+    };
+
+    const s = getSocket();
+    s.emit('start-call', { ...newCall });
+    return newCall;
+  } catch (e) {
+    console.error('initiateCall error', e);
+    return null;
+  }
 };
 
 /**
