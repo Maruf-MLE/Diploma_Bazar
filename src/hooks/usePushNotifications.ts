@@ -30,8 +30,9 @@ export function usePushNotifications(userId?: string) {
       console.log('Location protocol:', window.location.protocol);
       console.log('Is secure context:', window.isSecureContext);
       
+      // If the user is not logged in yet, do nothing. When userId becomes
+      // available this effect will run again automatically.
       if (!userId) {
-        console.log('❌ No userId provided, skipping subscription');
         return;
       }
       
