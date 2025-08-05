@@ -2070,20 +2070,22 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                           onClick={() => navigate(`/profile/${currentConversation.user.id}`)}
                         >
 {currentConversation.user.name.split(' ')[0]}
-                        {/* Call buttons */}
-                        {selectedReceiverId && (
-                          <div className="flex items-center space-x-2 ml-3">
-                            <CallButton 
-                              receiverId={selectedReceiverId}
-                              onCallInitiated={() => {}}
-                              size="sm"
-                              variant="ghost"
-                              iconOnly
-                            />
-                          </div>
-                        )}
-                        </h2>
+</h2>
                         {renderVerifiedBadge(currentConversation)}
+                      </div>
+                      {/* Call buttons placed outside name clickable area */}
+                      {selectedReceiverId && (
+                        <div className="flex items-center ml-4">
+                          <CallButton
+                            receiverId={selectedReceiverId}
+                            onCallInitiated={() => {}}
+                            size="sm"
+                            variant="ghost"
+                            iconOnly
+                            className="hover:bg-blue-50"
+                          />
+                        </div>
+                      )}
                       </div>
                       <p className="text-sm text-slate-500 -mt-0.5">
                         {bookDetails?.location || 'অনলাইন'}
