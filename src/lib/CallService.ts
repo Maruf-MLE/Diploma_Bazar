@@ -52,7 +52,7 @@ const getSocket = () => {
   // Allow both polling and websocket so that the client can fall back if direct
   // websocket upgrade fails (common on some PaaS like Render)
   socket = io(url, {
-    transports: ['polling', 'websocket'],
+    transports: ['websocket'], // disable HTTP polling to avoid xhr poll error
     withCredentials: true
   });
 
@@ -122,6 +122,15 @@ export const initiateCall = async (receiverId: string, callType: CallType): Prom
  * Accept an incoming call - disabled
  */
 export const acceptCall = async (callId: string, callerId: string, callType: CallType): Promise<boolean> => {
+  try {
+    const s = getSocket();
+    s.emit('accept-call', { callId, callerId, callType });
+    return true;
+  } catch (e) {
+    console.error('acceptCall error', e);
+    return false;
+  }
+};
   console.log('Call feature disabled');
   return false;
 };
@@ -130,13 +139,27 @@ export const acceptCall = async (callId: string, callerId: string, callType: Cal
  * Reject an incoming call - disabled
  */
 export const rejectCall = (callId: string, reason?: string): void => {
+  try {
+    const s = getSocket();
+    s.emit('reject-call', { callId, reason });
+  } catch (e) {
+    console.error('rejectCall error', e);
+  }
+};
   console.log('Call feature disabled');
 };
 
 /**
  * End the current call - disabled
  */
-export const endCall = (): void => {
+export const endCall = (callId: string, otherPartyId: string): void => {
+  try {
+    const s = getSocket();
+    s.emit('end-call', { callId, otherPartyId });
+  } catch (e) {
+    console.error('endCall error', e);
+  }
+};
   console.log('Call feature disabled');
 };
 
@@ -165,6 +188,9 @@ export const getCurrentCall = (): Call | null => {
  * Add an event listener - disabled
  */
 export const addCallEventListener = (event: CallEventTypes, callback: (data: any) => void): void => {
+  const s = getSocket();
+  s.on(event, callback);
+};
   console.log('Call feature disabled');
 };
 
@@ -172,6 +198,9 @@ export const addCallEventListener = (event: CallEventTypes, callback: (data: any
  * Remove an event listener - disabled
  */
 export const removeCallEventListener = (event: CallEventTypes, callback: (data: any) => void): void => {
+  const s = getSocket();
+  s.off(event, callback);
+};
   console.log('Call feature disabled');
 };
 
