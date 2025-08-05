@@ -49,7 +49,12 @@ const getSocket = () => {
   if (!url) {
     console.warn('Socket URL not set. Please define NEXT_PUBLIC_SOCKET_URL in env.');
   }
-  socket = io(url, { transports: ['websocket'] });
+  // Allow both polling and websocket so that the client can fall back if direct
+  // websocket upgrade fails (common on some PaaS like Render)
+  socket = io(url, {
+    transports: ['polling', 'websocket'],
+    withCredentials: true
+  });
 
   // Verbose logging – added once per session for easier debugging
   if (!(socket as any)._loggingAdded) {
