@@ -131,9 +131,6 @@ export const acceptCall = async (callId: string, callerId: string, callType: Cal
     return false;
   }
 };
-  console.log('Call feature disabled');
-  return false;
-};
 
 /**
  * Reject an incoming call - disabled
@@ -146,8 +143,6 @@ export const rejectCall = (callId: string, reason?: string): void => {
     console.error('rejectCall error', e);
   }
 };
-  console.log('Call feature disabled');
-};
 
 /**
  * End the current call - disabled
@@ -159,8 +154,6 @@ export const endCall = (callId: string, otherPartyId: string): void => {
   } catch (e) {
     console.error('endCall error', e);
   }
-};
-  console.log('Call feature disabled');
 };
 
 /**
@@ -191,8 +184,6 @@ export const addCallEventListener = (event: CallEventTypes, callback: (data: any
   const s = getSocket();
   s.on(event, callback);
 };
-  console.log('Call feature disabled');
-};
 
 /**
  * Remove an event listener - disabled
@@ -200,8 +191,6 @@ export const addCallEventListener = (event: CallEventTypes, callback: (data: any
 export const removeCallEventListener = (event: CallEventTypes, callback: (data: any) => void): void => {
   const s = getSocket();
   s.off(event, callback);
-};
-  console.log('Call feature disabled');
 };
 
 /**
