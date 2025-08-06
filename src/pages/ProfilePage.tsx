@@ -317,11 +317,20 @@ const ProfilePage = () => {
       
       console.log('Reviews with profiles:', reviewsWithProfiles);
       setReviews(reviewsWithProfiles);
+
+      // Calculate average rating
+      const averageRating =
+        reviewsWithProfiles.length > 0
+          ?
+            reviewsWithProfiles.reduce((sum, r) => sum + (r.rating ?? 0), 0) /
+              reviewsWithProfiles.length
+          : 0;
       
-      // Update totalReviews count
+      // Update review stats in userData
       setUserData(prevData => ({
         ...prevData,
-        totalReviews: reviewsWithProfiles.length
+        totalReviews: reviewsWithProfiles.length,
+        rating: Number(averageRating.toFixed(1))
       }));
       
     } catch (error) {

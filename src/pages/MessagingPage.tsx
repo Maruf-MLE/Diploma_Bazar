@@ -2176,12 +2176,12 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                                   </div>
                                 ) : (
                                   <div className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
-                                    <div className={`message-bubble px-4 py-3 rounded-2xl max-w-[75%] shadow-sm ${
+<div className={`message-bubble px-4 py-3 rounded-2xl max-w-[85%] sm:max-w-[75%] shadow-sm ${
                                       message.isOwn
                                         ? 'bg-blue-600 text-white'
                                         : 'bg-white text-slate-800 border border-slate-200/50'
                                     }`}>
-                                      <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+<p className="text-sm whitespace-pre-wrap break-all leading-relaxed">{message.content}</p>
                                       {renderFileAttachment(message)}
                                       <p className={`text-xs mt-2 ${
                                         message.isOwn ? 'text-blue-100' : 'text-slate-500'
@@ -2233,7 +2233,7 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="আপনার বার্তা লিখুন..."
-                        className="min-h-[44px] max-h-24 resize-none py-3 pr-16 text-base md:text-sm bg-white border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-2xl shadow-sm touch-manipulation"
+className="min-h-[44px] max-h-24 resize-none py-3 pr-14 text-sm md:text-base bg-white border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-2xl shadow-sm touch-manipulation"
                         style={{ fontSize: '16px' }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {

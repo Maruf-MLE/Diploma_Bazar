@@ -284,6 +284,7 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="username"
                 placeholder="আপনার ইমেইল"
                 value={formData.email}
                 onChange={handleChange}
@@ -296,6 +297,7 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="আপনার পাসওয়ার্ড"
                 value={formData.password}
                 onChange={handleChange}
@@ -349,6 +351,7 @@ export default function LoginPage() {
               <Input
                 id="forgot-email"
                 type="email"
+                autoComplete="username"
                 placeholder="আপনার ইমেইল ঠিকানা"
                 value={forgotPasswordEmail}
                 onChange={(e) => setForgotPasswordEmail(e.target.value)}
