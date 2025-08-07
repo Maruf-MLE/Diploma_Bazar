@@ -944,7 +944,7 @@ export const subscribeToMessages = (userId: string, otherUserId: string, callbac
     console.log(`   - Channel: ${channelName}`);
     console.log(`   - Users: ${userId} <-> ${otherUserId}`);
     console.log(`   - Supabase URL: ${supabaseUrl}`);
-    console.log(`   - Local CLIENT_URL: http://localhost:8080`);
+    console.log(`   - Client URL: ${window.location.origin}`);
     console.log(`   - Signaling Server Port: 3001`);
     
     // Track processed message IDs to prevent duplicates

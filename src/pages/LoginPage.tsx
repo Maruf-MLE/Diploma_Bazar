@@ -104,13 +104,8 @@ export default function LoginPage() {
     try {
       // Get the correct redirect URL based on current environment
       let redirectUrl;
-      if (window.location.hostname === 'localhost') {
-        // For development, use port 8080 as configured in vite.config.ts
-        redirectUrl = `http://localhost:8080/reset-password`;
-      } else {
-        // For production, use the current origin
-        redirectUrl = `${window.location.origin}/reset-password`;
-      }
+      // For all environments, use the current origin
+      redirectUrl = `${window.location.origin}/reset-password`;
       
       console.log('Sending password reset email with redirect URL:', redirectUrl);
       

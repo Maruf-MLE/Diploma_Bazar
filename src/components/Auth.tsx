@@ -9,7 +9,7 @@ export function Auth() {
         supabaseClient={supabase}
         appearance={{ theme: ThemeSupa }}
         providers={['google', 'github']}
-        redirectTo="http://localhost:8080/auth/callback"
+        redirectTo={`${window.location.origin}/auth/callback`}
         theme="dark"
         showLinks={true}
         view="magic_link"

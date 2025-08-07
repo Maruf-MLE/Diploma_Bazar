@@ -274,7 +274,7 @@ export default function VerifyEmailPage() {
     console.log("VerifyEmailPage mounted or URL params changed");
     
     // সার্ভার কানেকশন চেক করি
-    fetch('http://localhost:8080/health')
+    fetch(`${window.location.origin}/health`)
       .then(response => {
         console.log("Server health check response:", response.ok);
       })

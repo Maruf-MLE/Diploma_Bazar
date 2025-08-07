@@ -264,11 +264,7 @@ export default function ResetPasswordPage() {
     try {
       // Get the correct redirect URL based on current environment
       let redirectUrl
-      if (window.location.hostname === 'localhost') {
-        redirectUrl = `http://localhost:8080/reset-password`
-      } else {
-        redirectUrl = `${window.location.origin}/reset-password`
-      }
+      redirectUrl = `${window.location.origin}/reset-password`
 
       console.log('🔄 Requesting new password reset link for:', newLinkEmail)
       console.log('🔗 Redirect URL:', redirectUrl)

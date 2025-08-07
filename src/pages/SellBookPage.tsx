@@ -240,7 +240,7 @@ const SellBookPage: React.FC = () => {
             </div>
             <h2 className="text-xl font-semibold mb-2">যাচাইকরণ প্রয়োজন</h2>
             <p className="text-gray-600 mb-4">বই বিক্রি করতে হলে আপনাকে প্রথমে যাচাইকরণ সম্পন্ন করতে হবে।</p>
-            <Button onClick={() => window.location.href = 'http://localhost:8080/verification'} className="w-full">
+            <Button onClick={() => navigate('/verification')} className="w-full">
               যাচাইকরণ করুন
             </Button>
           </CardContent>
