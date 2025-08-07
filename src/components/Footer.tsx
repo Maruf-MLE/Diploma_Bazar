@@ -47,7 +47,7 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/sell" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
+                  <Link to="/sell-book" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
                     <ChevronRight className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                     <span>বই বিক্রি করুন</span>
                   </Link>
@@ -59,10 +59,10 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
+                  <Link to="/help" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
                     <ChevronRight className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                     <span>সাহায্য কেন্দ্র</span>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -72,19 +72,19 @@ const Footer = () => {
               <h3 className="text-sm md:text-lg font-semibold mb-3 md:mb-4 text-foreground">বিভাগ</h3>
               <ul className="space-y-2 md:space-y-3">
                 <li>
-                  <Link to="http://localhost:8080/browse?department=%E0%A6%95%E0%A6%AE%E0%A7%8D%E0%A6%AA%E0%A6%BF%E0%A6%89%E0%A6%9F%E0%A6%BE%E0%A6%B0+%E0%A6%87%E0%A6%9E%E0%A7%8D%E0%A6%9C%E0%A6%BF%E0%A6%A8%E0%A6%BF%E0%A6%AF%E0%A6%BC%E0%A6%BE%E0%A6%B0%E0%A6%BF%E0%A6%82" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
+                <Link to="/browse?department=কম্পিউটার ইঞ্জিনিয়ারিং" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
                     <ChevronRight className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                     <span>কম্পিউটার</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="http://localhost:8080/browse?department=%E0%A6%B8%E0%A6%BF%E0%A6%AD%E0%A6%BF%E0%A6%B2+%E0%A6%87%E0%A6%9E%E0%A7%8D%E0%A6%9C%E0%A6%BF%E0%A6%A8%E0%A6%BF%E0%A6%AF%E0%A6%BC%E0%A6%BE%E0%A6%B0%E0%A6%BF%E0%A6%82" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
+                  <Link to="/browse?department=সিভিল ইঞ্জিনিয়ারিং" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
                     <ChevronRight className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                     <span>সিভিল</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="http://localhost:8080/browse?department=%E0%A6%87%E0%A6%B2%E0%A7%87%E0%A6%95%E0%A6%9F%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%95%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%B2+%E0%A6%87%E0%A6%9E%E0%A7%8D%E0%A6%9C%E0%A6%BF%E0%A6%A8%E0%A6%BF%E0%A6%AF%E0%A6%BC%E0%A6%BE%E0%A6%B0%E0%A6%BF%E0%A6%82" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
+                  <Link to="/browse?department=ইলেকট্রিক্যাল ইঞ্জিনিয়ারিং" className="text-gray-600 hover:text-primary transition-colors flex items-center text-xs md:text-sm">
                     <ChevronRight className="h-2 w-2 md:h-3 md:w-3 mr-1" />
                     <span>ইলেকট্রিক্যাল</span>
                   </Link>
