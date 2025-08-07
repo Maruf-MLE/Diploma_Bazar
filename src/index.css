@@ -1,3 +1,6 @@
+/* ensure message bubbles don't overflow small mobile screens */
+.message-bubble{word-break:break-word;}
+
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@100..900&display=swap');
 @tailwind base;
 @tailwind components;
