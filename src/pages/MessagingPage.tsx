@@ -422,8 +422,8 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
     // Update the current path ref
     currentPathRef.current = location.pathname;
     
-    // If we're coming back to the messages page, ensure sidebar is shown on mobile
-    if (location.pathname === '/messages' && window.innerWidth < 768) {
+    // If we're coming back to the messages page, ensure sidebar is shown
+    if (location.pathname === '/messages') {
       setShowMobileSidebar(true);
     }
   }, [location.pathname]);
@@ -508,8 +508,9 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
         return;
       }
       
-      // On desktop, select the first conversation
-      handleSelectConversation(conversations[0]);
+      // On desktop, always show sidebar and don't auto-select conversation
+      // Let user manually select a conversation
+      setShowMobileSidebar(true);
     }
   }, [conversations, selectedChat, loadingConversations]);
 
@@ -595,12 +596,12 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
           }
         }
         
-        // On desktop, when a conversation is selected via URL, show the message section
-        setShowMobileSidebar(false);
+        // On desktop, always show sidebar
+        setShowMobileSidebar(true);
       } else {
         console.log('MessagingPage - No seller ID in URL params');
         
-        // Always show the sidebar when no conversation is selected
+        // Always show the sidebar
         setShowMobileSidebar(true);
       }
     }
@@ -1653,8 +1654,13 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
     setSelectedReceiverId(conversation.user.id);
     setSelectedBookId(conversation.book.id || null);
     
-    // Hide the sidebar on mobile when a conversation is selected
-    setShowMobileSidebar(false);
+    // Hide the sidebar on mobile only when a conversation is selected
+    if (window.innerWidth < 768) {
+      setShowMobileSidebar(false);
+    } else {
+      // On desktop, keep sidebar visible
+      setShowMobileSidebar(true);
+    }
     
     // Clear existing messages to avoid showing old messages while loading
     setMessages([]);
@@ -1890,11 +1896,8 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
       
       setConversations(data || []);
       
-      // যদি কনভারসেশন থাকে কিন্তু কোনো সিলেক্টেড চ্যাট না থাকে, তাহলে প্রথম কনভারসেশনটি সিলেক্ট করা
-      if ((data && data.length > 0) && !selectedChat) {
-        const firstConversation = data[0];
-        handleSelectConversation(firstConversation);
-      }
+      // On desktop, don't auto-select conversations - let user choose
+      // This ensures the sidebar stays visible on desktop
     } catch (error) {
       console.error('Error fetching conversations:', error);
       toast({
@@ -1921,15 +1924,15 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
   const currentConversation = conversations.find(conv => conv.id === selectedChat);
 
   return (
-    <div className="min-h-screen bg-[#EFF4FA] overflow-hidden">
-      {/* Main Messaging Container - Full Height */}
-      <div className="h-screen w-full overflow-hidden">
-        {/* Two-column layout with fixed sizes */}
-        <div className="h-full w-full flex relative overflow-hidden">
+    <div className="min-h-screen bg-[#EFF4FA] w-full">
+      {/* Main Messaging Container - Full Height with proper mobile handling */}
+      <div className="h-screen w-full max-w-full overflow-hidden">
+        {/* Two-column layout with responsive sizes */}
+        <div className="h-full w-full max-w-full flex relative overflow-hidden">
           {/* Sidebar - Always visible on desktop, toggle on mobile */}
           <div 
-            className={`h-full bg-white/95 backdrop-blur-md border-r border-slate-200/60 w-full md:w-80 flex-shrink-0 shadow-sm
-              ${showMobileSidebar ? 'block' : 'hidden md:block'}`}
+            className={`h-full bg-white/95 backdrop-blur-md border-r border-slate-200/60 flex-shrink-0 shadow-sm transition-all duration-300 ease-in-out
+              ${showMobileSidebar ? 'block w-full md:w-80' : 'hidden md:block md:w-80'}`}
           >
             <div className="h-full flex flex-col">
               {/* Sidebar Header */}
@@ -2044,72 +2047,96 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
             <Separator orientation="vertical" className="h-full bg-slate-200/70 shadow-sm" />
           </div>
           
-          {/* Main Chat Panel - Independently Scrollable */}
-          <div className={`flex-1 h-full flex flex-col bg-white/90 backdrop-blur-sm ${showMobileSidebar ? 'hidden md:flex' : 'flex'}`}>
+          {/* Main Chat Panel - Independently Scrollable with proper mobile width */}
+          <div className={`flex-1 h-full max-w-full flex flex-col bg-white/90 backdrop-blur-sm overflow-hidden md:flex
+            ${showMobileSidebar ? 'hidden md:flex' : 'flex'}`}
+            style={{
+              minWidth: 0, // Important for flex child to shrink properly
+              maxWidth: '100%' // Ensure it doesn't exceed viewport width
+            }}>
             {selectedChat && currentConversation ? (
               <>
-                {/* Chat Header - Fixed */}
-                <div className="border-b border-slate-200/70 shadow-sm py-3 px-6 bg-white/95 backdrop-blur-md flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                {/* Chat Header - Fixed with mobile responsive layout */}
+                <div className="border-b border-slate-200/70 shadow-sm py-2 sm:py-3 px-3 sm:px-6 bg-white/95 backdrop-blur-md flex items-center justify-between min-w-0 w-full overflow-hidden">
+                  {/* Left section with user info - takes available space but allows compression */}
+                  <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 mr-1 sm:mr-2 overflow-hidden">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="md:hidden h-8 w-8 p-0 hover:bg-slate-100"
+                      className="md:hidden h-8 w-8 p-0 hover:bg-slate-100 flex-shrink-0"
                       onClick={() => setShowMobileSidebar(true)}
                     >
                       <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <Avatar className="h-9 w-9 border-2 border-slate-200/60 shadow-sm">
+                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border-2 border-slate-200/60 shadow-sm flex-shrink-0">
                       <AvatarImage src={currentConversation.user.avatar_url} />
-                      <AvatarFallback className="bg-blue-100 text-blue-700 font-medium text-sm">{currentConversation.user.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback className="bg-blue-100 text-blue-700 font-medium text-xs sm:text-sm">{currentConversation.user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <div className="flex items-center space-x-2">
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 overflow-hidden">
                         <h2 
-                          className="font-semibold text-lg text-slate-800 cursor-pointer hover:text-blue-600 transition-colors"
+                          className="font-semibold text-sm sm:text-lg text-slate-800 cursor-pointer hover:text-blue-600 transition-colors truncate flex-shrink"
                           onClick={() => navigate(`/profile/${currentConversation.user.id}`)}
+                          style={{ minWidth: '60px', maxWidth: '120px' }}
                         >
-{currentConversation.user.name.split(' ')[0]}
-</h2>
-{renderVerifiedBadge(currentConversation)}
-{selectedReceiverId && (
-  <div className="ml-3">
-    <CallButton
-      receiverId={selectedReceiverId}
-      onCallInitiated={() => {}}
-      size="sm"
-      variant="ghost"
-      iconOnly
-      className="hover:bg-blue-50"
-    />
-  </div>
-)}
-</div>
-                      <p className="text-sm text-slate-500 -mt-0.5">
+                          {currentConversation.user.name.split(' ')[0]}
+                        </h2>
+                        <div className="flex-shrink-0">
+                          {renderVerifiedBadge(currentConversation)}
+                        </div>
+                        {/* Move call button to the right section on mobile */}
+                        {selectedReceiverId && (
+                          <div className="hidden sm:block ml-2 flex-shrink-0">
+                            <CallButton
+                              receiverId={selectedReceiverId}
+                              onCallInitiated={() => {}}
+                              size="sm"
+                              variant="ghost"
+                              iconOnly
+                              className="hover:bg-blue-50"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-500 -mt-0.5 truncate hidden sm:block">
                         {bookDetails?.location || 'অনলাইন'}
                       </p>
                     </div>
                   </div>
                   
-                  {/* Book request buttons - Always show these buttons regardless of message state */}
-                  <div className="flex items-center gap-2">
+                  {/* Right section with action buttons - flex-shrink-0 to prevent compression */}
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 overflow-hidden">
+                    {/* Show call button on mobile */}
+                    {selectedReceiverId && (
+                      <div className="sm:hidden flex-shrink-0">
+                        <CallButton
+                          receiverId={selectedReceiverId}
+                          onCallInitiated={() => {}}
+                          size="sm"
+                          variant="ghost"
+                          iconOnly
+                          className="hover:bg-blue-50 h-8 w-8 p-0"
+                        />
+                      </div>
+                    )}
+                    
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="sm" 
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-2 h-9 w-9 rounded-full shadow-sm"
+                      className="bg-white border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-300 p-1.5 sm:p-2 h-8 w-8 sm:h-9 sm:w-9 rounded-full shadow-sm flex-shrink-0 transition-all duration-200"
                       onClick={handleReloadMessages}
                       disabled={loadingMessages}
                       title="রিফ্রেশ করুন"
                       aria-label="রিফ্রেশ করুন"
                     >
                       {loadingMessages ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-blue-600" />
                       ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" className="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                           <path d="M21 3v5h-5" />
                           <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                          <path d="M8 16H3v5" />
+                          <path d="M3 21v-5h5" />
                         </svg>
                       )}
                     </Button>
@@ -2117,10 +2144,11 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                     <Button 
                       variant="default" 
                       size="sm" 
-                      className="text-sm h-9 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full px-4 shadow-sm"
+                      className="text-xs sm:text-sm h-8 sm:h-9 flex items-center gap-1 sm:gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full px-3 sm:px-4 shadow-sm flex-shrink-0 whitespace-nowrap min-w-0"
                       onClick={() => setIsBookSelectionOpen(true)}
+                      style={{ minWidth: 'fit-content' }}
                     >
-                      বই কেনার অনুরোধ
+                      <span className="truncate">বই কেনার অনুরোধ</span>
                     </Button>
                   </div>
                 </div>
@@ -2176,12 +2204,12 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                                   </div>
                                 ) : (
                                   <div className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
-<div className={`message-bubble px-4 py-3 rounded-2xl max-w-[85%] sm:max-w-[75%] shadow-sm ${
+<div className={`message-bubble px-3 py-2 rounded-2xl max-w-[280px] sm:max-w-[320px] md:max-w-[75%] shadow-sm overflow-hidden ${
                                       message.isOwn
                                         ? 'bg-blue-600 text-white'
                                         : 'bg-white text-slate-800 border border-slate-200/50'
                                     }`}>
-<p className="text-sm whitespace-pre-wrap break-all leading-relaxed">{message.content}</p>
+<p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                                       {renderFileAttachment(message)}
                                       <p className={`text-xs mt-2 ${
                                         message.isOwn ? 'text-blue-100' : 'text-slate-500'
@@ -2214,9 +2242,9 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                   </ScrollArea>
                 </div>
                 
-                {/* Message Input Area - Fixed */}
-                <div className="p-4 border-t border-slate-200/70 bg-white/95 backdrop-blur-md">
-                  <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-end gap-3">
+                {/* Message Input Area - Fixed with proper mobile width */}
+                <div className="p-3 sm:p-4 border-t border-slate-200/70 bg-white/95 backdrop-blur-md">
+                  <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-end gap-2 sm:gap-3 w-full max-w-full">
                     <Button
                       type="button"
                       variant="ghost"
@@ -2228,13 +2256,13 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                       <ArrowDown className="h-4 w-4" />
                     </Button>
                     
-                    <div className="flex-1 relative">
+                    <div className="flex-1 relative min-w-0 max-w-full">
                       <Textarea
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="আপনার বার্তা লিখুন..."
-className="min-h-[44px] max-h-24 resize-none py-3 pr-14 text-sm md:text-base bg-white border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-2xl shadow-sm touch-manipulation"
-                        style={{ fontSize: '16px' }}
+className="min-h-[44px] max-h-24 resize-none py-3 pr-12 sm:pr-14 text-sm md:text-base bg-white border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-2xl shadow-sm touch-manipulation w-full"
+                        style={{ fontSize: '16px', maxWidth: '100%' }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
@@ -2242,30 +2270,30 @@ className="min-h-[44px] max-h-24 resize-none py-3 pr-14 text-sm md:text-base bg-
                           }
                         }}
                       />
-                      <div className="absolute bottom-2 right-2 flex gap-1">
-                        <label className="cursor-pointer p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" title="ছবি পাঠান">
+                      <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 flex gap-0.5 sm:gap-1">
+                        <label className="cursor-pointer p-1.5 sm:p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" title="ছবি পাঠান">
                           <input 
                             type="file" 
                             className="hidden" 
                             accept="image/*"
                             onChange={(e) => handleFileSelect(e, 'image')}
                           />
-                          <Image className="h-4 w-4" />
+                          <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </label>
-                        <label className="cursor-pointer p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" title="ফাইল পাঠান">
+                        <label className="cursor-pointer p-1.5 sm:p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-full hover:bg-blue-50" title="ফাইল পাঠান">
                           <input 
                             type="file" 
                             className="hidden"
                             onChange={(e) => handleFileSelect(e, 'document')}
                           />
-                          <Paperclip className="h-4 w-4" />
+                          <Paperclip className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </label>
                       </div>
                     </div>
                     <Button 
                       type="submit" 
                       size="sm" 
-                      className="h-10 w-10 rounded-full p-0 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                      className="h-10 w-10 rounded-full p-0 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex-shrink-0"
                       disabled={(!newMessage.trim() && !selectedFile) || sendingMessage || fileUploading}
                     >
                       {sendingMessage || fileUploading ? (
