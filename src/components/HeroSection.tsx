@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Users, Shield, Zap, Play, CheckCircle, Star, Clock, ArrowRight, Sparkles, TrendingUp } from 'lucide-react';
+import { BookOpen, Users, Shield, Zap, Play, CheckCircle, Star, Clock, ArrowRight, Sparkles, TrendingUp, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Link } from 'react-router-dom';
@@ -108,13 +108,13 @@ const HeroSection = () => {
                     <span className="text-xs md:text-sm font-semibold text-gray-800 whitespace-nowrap">নিরাপদ পেমেন্ট</span>
                   </div>
                   
-                  {/* Rating system badge - Desktop only */}
+                  {/* Instant message badge - Desktop only */}
                   <div className="hidden md:flex items-center gap-1 md:gap-1.5 bg-white/95 backdrop-blur-sm rounded-full px-2 py-1.5 md:px-3 md:py-2 shadow-md md:shadow-lg border border-primary/20 hover:shadow-lg md:hover:shadow-xl hover:scale-105 transition-all duration-300 hover:bg-white group flex-shrink-0">
                     <div className="relative">
-                      <Star className="h-3.5 w-3.5 md:h-4 md:w-4 text-yellow-500 group-hover:scale-110 transition-transform" />
-                      <Sparkles className="h-1.5 w-1.5 md:h-2 md:w-2 text-yellow-400 absolute -top-0.5 -right-0.5 animate-pulse" />
+                      <MessageCircle className="h-3.5 w-3.5 md:h-4 md:w-4 text-blue-500 group-hover:scale-110 transition-transform" />
+                      <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full animate-pulse"></div>
                     </div>
-                    <span className="text-xs md:text-sm font-semibold text-gray-800 whitespace-nowrap">রেটিং সিস্টেম</span>
+                    <span className="text-xs md:text-sm font-semibold text-gray-800 whitespace-nowrap">Instant Message</span>
                   </div>
                 </div>
               </div>

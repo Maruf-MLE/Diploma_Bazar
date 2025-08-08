@@ -269,46 +269,39 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex justify-between items-center h-16 py-0">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-3">
               <BookOpen className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold gradient-text">
                 বুক এক্সচেঞ্জ
               </span>
             </Link>
 
-            {/* Search Bar - Desktop */}
-            <div className="flex items-center max-w-xs w-full mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="বই খুঁজুন..." 
-                  className="w-full h-10 pl-10 pr-4 rounded-full border border-gray-200 bg-gray-50/80 focus:bg-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all duration-200"
-                />
-              </div>
-            </div>
-
-            {/* Desktop Menu - Hidden on messages page */}
+            {/* Desktop Menu - Modern Layout */}
             {location.pathname !== '/messages' && (
-              <div className="flex items-center space-x-8">
-                <Link to="/" className={`${isActive('/')} transition-colors duration-200 text-sm hover:text-primary`}>
+              <div className="flex items-center space-x-1">
+                <Link to="/" className={`${isActive('/')} transition-all duration-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/10`}>
+                  <Home className="h-4 w-4 inline mr-2" />
                   হোম
                 </Link>
-                <Link to="/browse" className={`${isActive('/browse')} transition-colors duration-200 text-sm hover:text-primary`}>
+                <Link to="/browse" className={`${isActive('/browse')} transition-all duration-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/10`}>
+                  <Search className="h-4 w-4 inline mr-2" />
                   বই খুঁজুন
                 </Link>
-                <Link to="/sell-book" className={`${isActive('/sell-book')} transition-colors duration-200 text-sm hover:text-primary`}>
+                <Link to="/sell-book" className={`${isActive('/sell-book')} transition-all duration-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/10`}>
+                  <PenLine className="h-4 w-4 inline mr-2" />
                   বই বিক্রি করুন
                 </Link>
-                <Link to="/messages" className={`${isActive('/messages')} transition-colors duration-200 text-sm hover:text-primary relative`}>
+                <Link to="/messages" className={`${isActive('/messages')} transition-all duration-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/10 relative`}>
+                  <MessageCircle className="h-4 w-4 inline mr-2" />
                   মেসেজ
                   {unreadMessageCount > 0 && (
-                    <span className="absolute -top-2 -right-3 h-4 w-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-primary text-white text-xs rounded-full flex items-center justify-center shadow-lg">
                       {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
                     </span>
                   )}
                 </Link>
-                <Link to="/profile" className={`${isActive('/profile')} transition-colors duration-200 text-sm hover:text-primary`}>
+                <Link to="/profile" className={`${isActive('/profile')} transition-all duration-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/10`}>
+                  <User className="h-4 w-4 inline mr-2" />
                   প্রোফাইল
                 </Link>
               </div>
