@@ -389,13 +389,10 @@ const BookDetailPage = () => {
                       {book.discount_rate && book.discount_rate > 0 && (
                         <div className="bg-green-50 text-green-700 px-2 py-1 rounded-md text-sm font-medium flex items-center">
                           <Percent className="h-3 w-3 mr-1" />
-                          {book.discount_rate}% ছাড়
+                          {book.discount_rate}% ছাড
                         </div>
                       )}
                     </div>
-                    {book.is_negotiable && (
-                      <Badge variant="outline" className="text-xs">দর কষাকষি যোগ্য</Badge>
-                    )}
                   </div>
                   
                   <Separator className="my-6" />

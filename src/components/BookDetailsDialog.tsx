@@ -146,9 +146,6 @@ const BookDetailsDialog = ({ book, open, onOpenChange, showPurchaseRequest = fal
                 
                 <div className="mt-4 flex items-center justify-between">
                   <p className="text-2xl font-bold text-primary">৳{book.price}</p>
-                  {book.is_negotiable && (
-                    <Badge variant="outline" className="text-xs">দর কষাকষি যোগ্য</Badge>
-                  )}
                 </div>
               </div>
             </div>

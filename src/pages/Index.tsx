@@ -2,6 +2,7 @@
 import React from 'react';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
+import SellBookSection from '@/components/SellBookSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import Footer from '@/components/Footer';
@@ -12,6 +13,7 @@ const Index = () => {
       <Navigation />
       <main className="pt-16">
         <HeroSection />
+        <SellBookSection />
         <HowItWorksSection />
         <FeaturesSection />
       </main>

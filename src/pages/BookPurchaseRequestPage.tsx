@@ -190,9 +190,6 @@ const BookPurchaseRequestPage = () => {
                   
                   <div className="mt-6 flex items-center justify-between">
                     <p className="text-3xl font-bold text-primary">৳{book.price}</p>
-                    {book.is_negotiable && (
-                      <Badge variant="outline" className="text-xs">দর কষাকষি যোগ্য</Badge>
-                    )}
                   </div>
                   
                   <Separator className="my-6" />
