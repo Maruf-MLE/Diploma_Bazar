@@ -15,6 +15,19 @@ import MessageDialog from '@/components/MessageDialog';
 import PurchaseRequestDialog from '@/components/PurchaseRequestDialog';
 import { useProfile } from '@/hooks/useProfile';
 import { useVerificationCheck } from '@/lib/verification';
+
+// 🛡️ Security imports
+import { 
+  sanitizeText, 
+  validateAndSanitizeInput,
+  logSecurityEvent 
+} from '@/lib/securityUtils';
+
+// Safe Text component
+const SafeText = ({ children }: { children: string }) => {
+  const safeText = sanitizeText(children || '');
+  return <span>{safeText}</span>;
+};
 import {
   Dialog,
   DialogContent,
@@ -349,7 +362,7 @@ const BookDetailPage = () => {
                 <div className="p-6 md:w-2/3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h1 className="text-2xl font-bold text-foreground mb-1">{book.title}</h1>
+                      <h1 className="text-2xl font-bold text-foreground mb-1"><SafeText>{book.title}</SafeText></h1>
                     </div>
                     
                     {/* Wishlist button */}
@@ -407,7 +420,7 @@ const BookDetailPage = () => {
                         <BookOpen className="h-4 w-4 text-primary/70" />
                         <div>
                           <span className="text-sm font-medium">বইয়ের নাম *</span>
-                          <p className="text-base">{book.title}</p>
+                          <p className="text-base"><SafeText>{book.title}</SafeText></p>
                         </div>
                       </div>
                       
@@ -415,7 +428,7 @@ const BookDetailPage = () => {
                         <BookText className="h-4 w-4 text-primary/70" />
                         <div>
                           <span className="text-sm font-medium">প্রকাশনী *</span>
-                          <p className="text-base">{book.publisher || 'উল্লেখ নেই'}</p>
+                          <p className="text-base"><SafeText>{book.publisher || 'উল্লেখ নেই'}</SafeText></p>
                         </div>
                       </div>
                       
@@ -455,7 +468,7 @@ const BookDetailPage = () => {
                           <GraduationCap className="h-4 w-4 text-primary/70" />
                           <div>
                             <span className="text-sm font-medium">বিভাগ</span>
-                            <p className="text-base">{book.department}</p>
+                            <p className="text-base"><SafeText>{book.department}</SafeText></p>
                           </div>
                         </div>
                       )}
@@ -465,7 +478,7 @@ const BookDetailPage = () => {
                           <Calendar className="h-4 w-4 text-primary/70" />
                           <div>
                             <span className="text-sm font-medium">সেমিস্টার</span>
-                            <p className="text-base">{book.semester}</p>
+                            <p className="text-base"><SafeText>{book.semester}</SafeText></p>
                           </div>
                         </div>
                       )}
@@ -543,7 +556,7 @@ const BookDetailPage = () => {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{book.seller_name || 'অজানা বিক্রেতা'}</p>
+                        <p className="font-medium"><SafeText>{book.seller_name || 'অজানা বিক্রেতা'}</SafeText></p>
                         <p className="text-xs text-muted-foreground">বিক্রেতা</p>
                       </div>
                     </div>

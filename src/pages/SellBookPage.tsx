@@ -13,6 +13,7 @@ import { BookOpen, Camera, MapPin, Tag, User, GraduationCap, Building, DollarSig
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { navigateToRoute } from '@/lib/urlHelper';
+import { validateImageForBookCover, quickImageCheck } from '@/lib/lightweightImageScanner';
 
 const SellBookPage: React.FC = () => {
   const { user } = useAuth();
@@ -92,33 +93,51 @@ const SellBookPage: React.FC = () => {
     fetchUserData();
   }, [user?.id]);
 
-  // File upload function
+  // Simple and fast image upload function
   const uploadImageToSupabase = async (file: File, folder: string = 'covers'): Promise<string | null> => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      console.log('📸 Starting image upload:', file.name);
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('books')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+      // Quick validation using lightweight scanner
+      const validation = validateImageForBookCover(file);
+      if (!validation.isValid || !validation.allowUpload) {
+        console.error('Image validation failed:', validation.error);
+        throw new Error(validation.error || 'Image validation failed');
       }
-
+      
+      // Generate secure file path
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const fileName = `${folder}_${timestamp}_${randomId}.${fileExt}`;
+      const filePath = `${user?.id}/${folder}/${fileName}`;
+      
+      console.log('📁 Uploading to:', filePath);
+      
+      // Upload directly to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('books')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (error) {
+        console.error('❌ Upload error:', error);
+        throw error;
+      }
+      
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('books')
-        .getPublicUrl(fileName);
-
+        .getPublicUrl(filePath);
+      
+      console.log('✅ Upload successful:', publicUrl);
       return publicUrl;
+      
     } catch (error) {
-      console.error('Error uploading image:', error);
-      return null;
+      console.error('❌ Image upload failed:', error);
+      throw error;
     }
   };
 

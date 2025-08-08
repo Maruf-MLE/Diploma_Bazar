@@ -40,6 +40,7 @@ import BookPurchaseRequestCard from '@/components/BookPurchaseRequestCard';
 import { useVerificationCheck } from '@/lib/verification';
 import ImageViewer from '@/components/ImageViewer';
 import { Textarea } from '@/components/ui/textarea';
+import { secureImageUpload, secureDocumentUpload, validateFileBeforeUpload } from '@/lib/secureFileUpload';
 
 // Message status component
 const MessageStatus = ({ status }: { status?: string }) => {
@@ -1418,18 +1419,28 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
     }
   };
 
-  // Add function to handle file selection
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, fileType: 'image' | 'document') => {
+  // Add function to handle file selection with enhanced security
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, fileType: 'image' | 'document') => {
     const files = event.target.files;
     if (files && files.length > 0) {
       const selectedFile = files[0];
       
-      // Validate file size (max 10MB)
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-      if (selectedFile.size > MAX_FILE_SIZE) {
+      console.log('🔒 Starting secure file selection with malware scanning');
+      
+      // Quick validation first
+      const maxSize = fileType === 'image' ? 10 * 1024 * 1024 : 50 * 1024 * 1024; // 10MB for images, 50MB for docs
+      const allowedTypes = fileType === 'image' 
+        ? ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+        : ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+           'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+           'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+      
+      const validation = validateFileBeforeUpload(selectedFile, maxSize, allowedTypes);
+      
+      if (!validation.valid) {
         toast({
-          title: "ফাইল সাইজ বেশি",
-          description: `ফাইল সাইজ 10MB এর বেশি হতে পারবে না। আপনার ফাইল সাইজ: ${(selectedFile.size / (1024 * 1024)).toFixed(2)}MB`,
+          title: "ফাইল নিরাপত্তা সমস্যা",
+          description: validation.error,
           variant: "destructive"
         });
         
@@ -1442,43 +1453,16 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
         return;
       }
       
-      // Validate file type
-      if (fileType === 'image' && !selectedFile.type.startsWith('image/')) {
-        toast({
-          title: "অবৈধ ফাইল টাইপ",
-          description: "দয়া করে একটি ছবি ফাইল সিলেক্ট করুন (JPG, PNG, GIF)",
-          variant: "destructive"
-        });
-        
-        // Clear the input
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return;
-      }
-      
-      if (fileType === 'document' && !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-        'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
-        'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'].includes(selectedFile.type)) {
-        toast({
-          title: "অবৈধ ফাইল টাইপ",
-          description: "দয়া করে একটি সমর্থিত ডকুমেন্ট ফাইল সিলেক্ট করুন (PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX)",
-          variant: "destructive"
-        });
-        
-        // Clear the input
-        if (documentInputRef.current) documentInputRef.current.value = '';
-        return;
-      }
-      
       // Set the selected file
       setSelectedFile(selectedFile);
       
-      // Show loading toast
+      // Show enhanced loading toast
       toast({
-        title: fileType === 'image' ? "ছবি আপলোড হচ্ছে..." : "ডকুমেন্ট আপলোড হচ্ছে...",
-        description: "দয়া করে অপেক্ষা করুন...",
+        title: fileType === 'image' ? "🔒 ছবি স্ক্যান ও আপলোড হচ্ছে..." : "🔒 ডকুমেন্ট স্ক্যান ও আপলোড হচ্ছে...",
+        description: "নিরাপত্তা যাচাই ও আপলোড প্রক্রিয়া চলছে...",
       });
       
-      // Auto upload the file
+      // Auto upload the file with security scanning
       handleSendFileMessage(selectedFile, fileType);
       
       // Clear the input
