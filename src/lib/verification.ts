@@ -2,6 +2,7 @@ import { getUserVerificationStatus } from './supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { navigateToRoute } from './urlHelper';
 import React, { useEffect } from 'react';
 
 // ভেরিফিকেশন স্টেটাস চেক করার ফাংশন
@@ -88,7 +89,8 @@ export const useVerificationCheck = () => {
       
       // ভেরিফিকেশন পেজে রিডাইরেক্ট করি
       setTimeout(() => {
-        navigate('/verification');
+        // Use URL helper for consistent navigation
+        navigateToRoute('/verification');
       }, 1000);
       
       return false;

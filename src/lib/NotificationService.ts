@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { navigateToRoute } from './urlHelper';
 
 // Push notification configuration
 const PUSH_SERVER_URL = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
@@ -498,20 +499,20 @@ export async function handleNotificationClick(
     // Handle different notification types
     switch (notification.type) {
       case 'verification_approved':
-        // Navigate to verification approved page
+        // Navigate to verification approved page using URL helper
         if (notification.related_id) {
-          navigate(`/verification/approved/${notification.related_id}`);
+          navigateToRoute(`/verification/approved/${notification.related_id}`);
         } else {
-          navigate('/verification');
+          navigateToRoute('/verification');
         }
         break;
         
       case 'verification_rejected':
-        // Navigate to verification details page with rejected status
+        // Navigate to verification details page with rejected status using URL helper
         if (notification.related_id) {
-          navigate(`/verification/details/${notification.related_id}?status=rejected`);
+          navigateToRoute(`/verification/details/${notification.related_id}?status=rejected`);
         } else {
-          navigate('/verification');
+          navigateToRoute('/verification');
         }
         break;
         
