@@ -19,9 +19,7 @@ import { useVerificationCheck } from '@/lib/verification';
 const predefinedMessages = [
   'আসসালামু আলাইকুম, বইটি কি এখনও পাওয়া যাবে?',
   'বইটির অবস্থা কেমন?',
-  'দামটা কি চূড়ান্ত নাকি আলোচনা করা যাবে?',
-  'কোথায় বই হস্তান্তর করা যাবে?',
-  'বইটিতে কোন পৃষ্ঠা ছেঁড়া বা ক্ষতিগ্রস্ত আছে কি?'
+  'দামটা কি চূড়ান্ত নাকি আলোচনা করা যাবে?'
 ];
 
 // প্রোফাইলের জন্য প্রিডিফাইন্ড মেসেজ
@@ -427,18 +425,18 @@ const MessageDialog: React.FC<MessageDialogProps> = ({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3 mt-3">
             {/* Predefined messages */}
-            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pb-1">
+            <div className="flex flex-col gap-2 max-h-32 overflow-y-auto pb-1">
               {messagesToShow.map((msg, index) => (
                 <Button
                   key={index}
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="text-[10px] sm:text-xs py-1 px-2 h-auto min-h-[24px] whitespace-normal"
+                  className="text-xs py-2 px-3 h-auto min-h-[32px] whitespace-normal text-left justify-start"
                   onClick={() => handleSelectPredefinedMessage(msg)}
                   disabled={sending || messageSent}
                 >
-                  {msg.length > 15 ? msg.substring(0, 15) + '...' : msg}
+                  {msg}
                 </Button>
               ))}
             </div>
