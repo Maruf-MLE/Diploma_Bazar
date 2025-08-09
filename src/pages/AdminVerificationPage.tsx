@@ -168,17 +168,75 @@ const AdminVerificationPage = () => {
     try {
       setLoading(true);
       
-      // জয়েন কুয়েরি - verification_data এবং face_verification টেবিল
-      const { data, error } = await supabase
+      console.log('Fetching verification data...');
+      
+      // প্রথমে combined function দিয়ে চেষ্টা করি
+      let { data, error } = await supabase
         .rpc('get_combined_verification_data');
       
-      if (error) {
-        throw error;
+      // যদি main function কাজ না করে, তাহলে simple function চেষ্টা করি
+      if (error || !data) {
+        console.log('Main function failed, trying simple function...', error);
+        
+        // Simple function চেষ্টা করি
+        const { data: simpleData, error: simpleError } = await supabase
+          .rpc('get_verification_data_simple');
+        
+        if (!simpleError && simpleData) {
+          console.log(`Simple function successful! Found ${simpleData.length} records`);
+          setVerificationData(simpleData);
+          return;
+        }
+        
+        console.log('Simple function also failed, trying direct query...', simpleError);
+        
+        // Direct query করি verification_data থেকে (last resort)
+        const { data: directData, error: directError } = await supabase
+          .from('verification_data')
+          .select(`
+            id,
+            user_id,
+            name,
+            roll_no,
+            reg_no,
+            document_url,
+            is_verified,
+            created_at,
+            updated_at,
+            status
+          `)
+          .order('created_at', { ascending: false });
+        
+        if (directError) {
+          console.error('Direct query also failed:', directError);
+          throw new Error('সমস্ত ডেটা লোডিং পদ্ধতি ব্যর্থ হয়েছে');
+        }
+        
+        // Direct query ডেটা format করি - শুধু existing columns ব্যবহার
+        const formattedData = directData?.map(item => ({
+          id: item.id,
+          user_id: item.user_id,
+          email: '', // খালি রাখি
+          name: item.name || 'অজানা',
+          roll_no: item.roll_no || '',
+          reg_no: item.reg_no || '',
+          document_url: item.document_url || '',
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          photo_url: '', // খালি রাখি  
+          status: item.status || 'pending', // existing column থেকে নেই
+          is_verified: item.is_verified || false,
+          institute_name: '' // খালি রাখি
+        })) || [];
+        
+        console.log(`Direct query successful! Found ${formattedData.length} records`);
+        setVerificationData(formattedData);
+        return;
       }
       
-      if (data) {
-        setVerificationData(data);
-      }
+      console.log(`Main function successful! Found ${data?.length || 0} records`);
+      setVerificationData(data || []);
+      
     } catch (error) {
       console.error('Error fetching verification data:', error);
       toast({
@@ -227,10 +285,38 @@ const AdminVerificationPage = () => {
             <h1 className="text-2xl font-bold text-gray-900">ভেরিফিকেশন ম্যানেজমেন্ট</h1>
             <p className="text-gray-600">ব্যবহারকারীদের ভেরিফিকেশন তথ্য দেখুন এবং অনুমোদন/বাতিল করুন</p>
           </div>
-          <Badge className="bg-blue-100 text-blue-800">
-            মোট: {verificationData.length}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-blue-100 text-blue-800">
+              মোট: {verificationData.length}
+            </Badge>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={fetchVerificationData}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'রিফ্রেশ'}
+            </Button>
+          </div>
         </div>
+        
+        {/* Debug info - show if no data found */}
+        {verificationData.length === 0 && !loading && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h3 className="text-yellow-800 font-medium mb-2">📋 কোন ভেরিফিকেশন ডেটা পাওয়া যায়নি</h3>
+            <p className="text-yellow-700 text-sm mb-3">
+              এর কারণ হতে পারে:
+            </p>
+            <ul className="text-yellow-700 text-sm list-disc list-inside space-y-1">
+              <li>এখনও কোন ইউজার ভেরিফিকেশন রিকোয়েস্ট পাঠায়নি</li>
+              <li>Database RPC function কাজ করছে না</li>
+              <li>Row Level Security (RLS) policy সমস্যা</li>
+            </ul>
+            <p className="text-yellow-700 text-sm mt-3">
+              <strong>সমাধান:</strong> প্রথমে নিশ্চিত করুন যে ইউজাররা ভেরিফিকেশন পেজে গিয়ে তাদের তথ্য submit করেছে।
+            </p>
+          </div>
+        )}
         
         {/* সার্চ বার */}
         <div className="mb-6 flex w-full max-w-sm items-center space-x-2">
