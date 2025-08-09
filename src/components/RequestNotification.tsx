@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { useNavigate } from 'react-router-dom';
 import { countUnreadMessages } from '@/lib/MessageService';
 import { createNotification } from '@/lib/NotificationService';
+import { createSafeNotification, logNotificationEvent } from '@/lib/notificationUtils';
 
 interface PurchaseRequest {
   id: string;

@@ -44,6 +44,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import React, { useEffect } from "react";
 import { useBanStatusListener } from "./hooks/useBanStatusListener";
 import { usePushNotifications } from "./hooks/usePushNotifications";
+import FallbackNotification from "@/components/FallbackNotification";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -158,6 +159,8 @@ const AppContent = () => {
       <NotificationToaster />
       {/* Toast for incoming chat messages */}
       <MessageToaster />
+      {/* Fallback notification for unsupported browsers */}
+      <FallbackNotification show={!!user} />
       <BannedUserCheck>
         <Routes>
           <Route path="/" element={<Index />} />

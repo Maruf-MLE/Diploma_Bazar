@@ -1,6 +1,11 @@
 // src/hooks/usePushNotifications.ts
 import { useEffect, useState } from 'react';
 import { registerServiceWorker } from '../registerServiceWorker';
+import { 
+  isPushNotificationSupported, 
+  requestNotificationPermission,
+  logNotificationEvent,
+} from '@/lib/notificationUtils';
 
 const PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -21,128 +26,100 @@ export function usePushNotifications(userId?: string) {
   const [subscribed, setSubscribed] = useState(false);
 
   useEffect(() => {
-    async function subscribe() {
-      console.log('🔔 Push notification setup starting...');
-      console.log('User ID:', userId);
-      console.log('PUBLIC_KEY:', PUBLIC_KEY ? 'Found' : 'Missing');
-      console.log('Notification support:', 'Notification' in window);
-      console.log('Current permission:', Notification.permission);
-      console.log('Location protocol:', window.location.protocol);
-      console.log('Is secure context:', window.isSecureContext);
+    async function setupPushNotifications() {
+      // 1. Check for support
+      if (!isPushNotificationSupported()) {
+        logNotificationEvent('Push notifications not supported');
+        return;
+      }
       
-      // If the user is not logged in yet, do nothing. When userId becomes
-      // available this effect will run again automatically.
+      // 2. Check for user
       if (!userId) {
+        logNotificationEvent('User not logged in, skipping push setup');
         return;
       }
+
+      // 3. Request permission
+      const permission = await requestNotificationPermission();
       
-      if (!('Notification' in window)) {
-        console.log('❌ Notifications not supported');
+      if (permission !== 'granted') {
+        logNotificationEvent('Permission not granted', { permission });
         return;
       }
-      
-      if (Notification.permission === 'denied') {
-        console.log('❌ Notification permission denied');
+      logNotificationEvent('Permission granted');
+
+      // 4. Register Service Worker
+      logNotificationEvent('Registering service worker...');
+      const registration = await registerServiceWorker();
+      if (!registration) {
+        logNotificationEvent('Service worker registration failed');
         return;
       }
-      
-      if (!PUBLIC_KEY) {
-        console.error('❌ VAPID public key not found in environment variables');
-        console.log('Available env vars:', Object.keys(import.meta.env));
-        return;
-      }
+      logNotificationEvent('Service worker registered successfully');
 
       try {
-        console.log('📋 Registering service worker...');
-        const registration = await registerServiceWorker();
-        if (!registration) {
-          console.log('❌ Service worker registration failed');
-          return;
-        }
-        console.log('✅ Service worker registered successfully');
-
-        // Always unsubscribe first and create fresh subscription
+        // 5. Unsubscribe from any existing subscription
         let existingSubscription = await registration.pushManager.getSubscription();
         if (existingSubscription) {
-          console.log('🔄 Removing existing subscription...');
+          logNotificationEvent('Removing existing subscription...');
           await existingSubscription.unsubscribe();
         }
 
-        console.log('🔔 Creating fresh push subscription...');
+        // 6. Create a new subscription
+        logNotificationEvent('Creating fresh push subscription...');
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY)
+          applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY),
         });
+        
+        const subscriptionJSON = subscription.toJSON();
+        logNotificationEvent('New subscription created', { endpoint: subscriptionJSON.endpoint });
 
-        // Standardise into JSON format so that `keys` property is always present
-        const subscriptionJSON: PushSubscriptionJSON = subscription.toJSON();
-
-        console.log('✅ New subscription created successfully');
-        console.log('🔍 Subscription has keys:', !!subscriptionJSON.keys);
-
-        if (!subscriptionJSON.keys || !subscriptionJSON.keys.auth || !subscriptionJSON.keys.p256dh) {
-          console.error('❌ Subscription missing auth / p256dh keys!');
+        if (!subscriptionJSON.keys?.auth || !subscriptionJSON.keys?.p256dh) {
+          logNotificationEvent('Subscription missing keys!');
           return;
         }
 
-        // Send subscription to backend
-        try {
-          const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
-          console.log('📤 Sending subscription to server:', serverUrl);
+        // 7. Send to backend server
+        const serverUrl = import.meta.env.VITE_PUSH_SERVER_URL || 'http://localhost:4000';
+        logNotificationEvent('Sending subscription to server', { serverUrl });
 
-          const subscriptionData = {
-            userId,
-            endpoint: subscriptionJSON.endpoint,
-            keys: {
-              auth: subscriptionJSON.keys.auth,
-              p256dh: subscriptionJSON.keys.p256dh
-            }
-          };
-          
-          console.log('📦 Subscription payload keys check:');
-          console.log('  - Auth key:', !!subscriptionData.keys.auth);
-          console.log('  - P256dh key:', !!subscriptionData.keys.p256dh);
-          
-          const response = await fetch(serverUrl + '/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(subscriptionData)
-          });
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Subscribe failed:', response.status, errorText);
-            throw new Error(`Subscribe failed: ${response.status} - ${errorText}`);
-          }
-          
-          const result = await response.json();
-          console.log('✅ Subscription sent to server successfully:', result);
-          setSubscribed(true);
-        } catch (error) {
-          console.error('❌ Failed to send subscription to server:', error);
+        const subscriptionData = {
+          userId,
+          endpoint: subscriptionJSON.endpoint,
+          keys: {
+            auth: subscriptionJSON.keys.auth,
+            p256dh: subscriptionJSON.keys.p256dh,
+          },
+        };
+
+        const response = await fetch(`${serverUrl}/subscribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscriptionData),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Subscribe failed: ${response.status} - ${errorText}`);
         }
+
+        const result = await response.json();
+        logNotificationEvent('Subscription sent to server successfully', result);
+        setSubscribed(true);
+
       } catch (error) {
-        console.error('❌ Unexpected error in subscription process:', error);
+        logNotificationEvent('Error during subscription process', { error });
       }
     }
-
-    if (Notification.permission === 'default') {
-      console.log('🔔 Requesting notification permission...');
-      Notification.requestPermission().then((perm) => {
-        console.log('Permission result:', perm);
-        if (perm === 'granted') {
-          console.log('✅ Permission granted, starting subscription...');
-          subscribe();
-        } else {
-          console.log('❌ Permission denied or dismissed');
-        }
-      });
-    } else if (Notification.permission === 'granted') {
-      console.log('✅ Permission already granted, starting subscription...');
-      subscribe();
-    } else {
-      console.log('❌ Notification permission not granted:', Notification.permission);
+    
+    // Check for VAPID key
+    if (!PUBLIC_KEY) {
+      console.error('❌ VAPID public key not found in environment variables');
+      return;
     }
+
+    setupPushNotifications();
   }, [userId]);
 
   return { subscribed };

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Compatibility Test - বই চাপা বাজার</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-item { margin: 15px 0; padding: 10px; border-left: 4px solid #ddd; }
+        .pass { border-color: #4CAF50; background: #f1f8e9; }
+        .fail { border-color: #f44336; background: #ffebee; }
+        .warning { border-color: #ff9800; background: #fff8e1; }
+        .btn { background: #2196F3; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; }
+        .btn:hover { background: #1976D2; }
+        .result { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 5px; }
+        .code-block { background: #263238; color: #fff; padding: 15px; border-radius: 5px; font-family: 'Courier New', monospace; margin: 10px 0; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Browser Compatibility Test</h1>
+        <p>আপনার ব্রাউজার বই-চাপা-বাজার সাইটের জন্য কতটা উপযুক্ত সেটা check করুন:</p>
+        
+        <button class="btn" onclick="runAllTests()">🧪 সব Tests চালান</button>
+        <button class="btn" onclick="simulateOldBrowser()">📱 পুরানো Browser Simulate করুন</button>
+        <button class="btn" onclick="resetSimulation()">🔄 Reset করুন</button>
+
+        <div id="testResults"></div>
+
+        <h2>📋 Manual Testing Guide</h2>
+        
+        <h3>1. Chrome DevTools দিয়ে:</h3>
+        <div class="code-block">
+// Console এ এই code গুলো type করুন:
+
+// Notification API disable করুন
+delete window.Notification;
+console.log('Notification API disabled');
+
+// Service Worker disable করুন
+delete navigator.serviceWorker;
+console.log('Service Worker disabled');
+
+// Push Manager disable করুন
+if (navigator.serviceWorker) {
+    delete navigator.serviceWorker.pushManager;
+}
+
+// তারপর page reload করুন
+location.reload();
+        </div>
+
+        <h3>2. Firefox Testing:</h3>
+        <div class="code-block">
+// about:config এ যান এবং এই settings গুলো false করুন:
+// - dom.webnotifications.enabled = false
+// - dom.serviceWorkers.enabled = false
+// - dom.push.enabled = false
+        </div>
+
+        <h3>3. Different Browser Testing:</h3>
+        <div class="result">
+            <strong>IE Mode (Edge):</strong> Edge browser এ IE mode enable করুন<br>
+            <strong>Old Chrome:</strong> Browserling.com ব্যবহার করুন<br>
+            <strong>Mobile Testing:</strong> Chrome DevTools এর device emulation ব্যবহার করুন
+        </div>
+
+        <h3>4. Real Device Testing:</h3>
+        <div class="result">
+            <ul>
+                <li>Android 4.1-4.4 (Old Chrome/WebView)</li>
+                <li>iOS Safari 10-15</li>
+                <li>Samsung Internet 4-6</li>
+                <li>UC Browser</li>
+                <li>Opera Mini</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function checkFeatureSupport() {
+            const results = [];
+            
+            // Check Notification API
+            const hasNotification = 'Notification' in window && typeof Notification !== 'undefined';
+            results.push({
+                name: 'Notification API',
+                supported: hasNotification,
+                message: hasNotification ? 'Web Notifications সাপোর্ট করে' : 'Web Notifications সাপোর্ট করে না'
+            });
+
+            // Check Service Worker
+            const hasServiceWorker = 'serviceWorker' in navigator;
+            results.push({
+                name: 'Service Worker',
+                supported: hasServiceWorker,
+                message: hasServiceWorker ? 'Service Worker সাপোর্ট করে' : 'Service Worker সাপোর্ট করে না'
+            });
+
+            // Check Push Manager
+            const hasPushManager = hasServiceWorker && 'PushManager' in window;
+            results.push({
+                name: 'Push Manager',
+                supported: hasPushManager,
+                message: hasPushManager ? 'Push Notifications সাপোর্ট করে' : 'Push Notifications সাপোর্ট করে না'
+            });
+
+            // Check Fetch API
+            const hasFetch = 'fetch' in window;
+            results.push({
+                name: 'Fetch API',
+                supported: hasFetch,
+                message: hasFetch ? 'Modern HTTP requests সাপোর্ট করে' : 'XMLHttpRequest fallback ব্যবহার হবে'
+            });
+
+            // Check ES6 Features
+            let hasES6 = false;
+            try {
+                eval('const test = () => {}; hasES6 = true;');
+            } catch(e) {
+                hasES6 = false;
+            }
+            results.push({
+                name: 'ES6 Support',
+                supported: hasES6,
+                message: hasES6 ? 'Modern JavaScript সাপোর্ট করে' : 'ES5 fallback প্রয়োজন'
+            });
+
+            // Check WebSocket
+            const hasWebSocket = 'WebSocket' in window;
+            results.push({
+                name: 'WebSocket',
+                supported: hasWebSocket,
+                message: hasWebSocket ? 'Real-time updates সাপোর্ট করে' : 'Polling fallback ব্যবহার হবে'
+            });
+
+            // Check CSS Grid
+            const hasGrid = CSS.supports('display', 'grid');
+            results.push({
+                name: 'CSS Grid',
+                supported: hasGrid,
+                message: hasGrid ? 'Modern layouts সাপোর্ট করে' : 'Flexbox fallback ব্যবহার হবে'
+            });
+
+            return results;
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('testResults');
+            let html = '<h2>🧪 Test Results:</h2>';
+
+            let passCount = 0;
+            let totalCount = results.length;
+
+            results.forEach(result => {
+                const cssClass = result.supported ? 'pass' : 'fail';
+                const icon = result.supported ? '✅' : '❌';
+                if (result.supported) passCount++;
+
+                html += `
+                    <div class="test-item ${cssClass}">
+                        <strong>${icon} ${result.name}</strong><br>
+                        ${result.message}
+                    </div>
+                `;
+            });
+
+            const compatibility = Math.round((passCount / totalCount) * 100);
+            let compatibilityClass = 'pass';
+            if (compatibility < 70) compatibilityClass = 'fail';
+            else if (compatibility < 90) compatibilityClass = 'warning';
+
+            html += `
+                <div class="test-item ${compatibilityClass}">
+                    <strong>📊 Overall Compatibility: ${compatibility}%</strong><br>
+                    ${compatibility >= 90 ? 'সব ফিচার কাজ করবে' : 
+                      compatibility >= 70 ? 'বেশিরভাগ ফিচার কাজ করবে, কিছু fallback ব্যবহার হবে' : 
+                      'Limited functionality, বেসিক ফিচার কাজ করবে'}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function runAllTests() {
+            const results = checkFeatureSupport();
+            displayResults(results);
+        }
+
+        function simulateOldBrowser() {
+            // Temporarily disable modern APIs
+            if (window.Notification) {
+                window._originalNotification = window.Notification;
+                delete window.Notification;
+            }
+            
+            if (navigator.serviceWorker) {
+                navigator._originalServiceWorker = navigator.serviceWorker;
+                delete navigator.serviceWorker;
+            }
+
+            if (window.fetch) {
+                window._originalFetch = window.fetch;
+                delete window.fetch;
+            }
+
+            alert('পুরানো browser mode activated! এখন test করুন।');
+            runAllTests();
+        }
+
+        function resetSimulation() {
+            // Restore original APIs
+            if (window._originalNotification) {
+                window.Notification = window._originalNotification;
+                delete window._originalNotification;
+            }
+            
+            if (navigator._originalServiceWorker) {
+                navigator.serviceWorker = navigator._originalServiceWorker;
+                delete navigator._originalServiceWorker;
+            }
+
+            if (window._originalFetch) {
+                window.fetch = window._originalFetch;
+                delete window._originalFetch;
+            }
+
+            alert('Browser features restored!');
+            runAllTests();
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            runAllTests();
+            
+            // Display browser info
+            const info = `
+                Browser: ${navigator.userAgent}
+                Platform: ${navigator.platform}
+                Language: ${navigator.language}
+                Cookies: ${navigator.cookieEnabled ? 'Enabled' : 'Disabled'}
+                Online: ${navigator.onLine ? 'Yes' : 'No'}
+            `;
+            
+            console.log('Browser Information:', info);
+        };
+    </script>
+</body>
+</html>
