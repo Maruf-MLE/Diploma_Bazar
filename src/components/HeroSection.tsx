@@ -52,40 +52,18 @@ const HeroSection = () => {
                   </Button>
                 </Link>
                 
-                <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" className="glass-button text-base px-8 py-6 rounded-full border border-primary/20 hover:border-primary/40 hover:shadow-lg transition-all duration-300">
-                      <Play className="mr-2 h-5 w-5" />
-                      <span className="hidden sm:inline">ডেমো ভিডিও দেখুন</span>
-                      <span className="sm:hidden">ডেমো ভিডিও</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl w-full p-0">
-                    <DialogHeader className="p-6 pb-0">
-                      <DialogTitle className="text-xl font-semibold text-center">
-                        বই চাপা বাজার - Demo Video
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="p-6 pt-4">
-                      <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
-                        {/* আপনি এখানে আপনার video URL দিতে পারেন */}
-                        <iframe
-                          src="https://www.youtube.com/embed/dQw4w9WgXcQ" // এই URL আপনার actual video URL দিয়ে replace করুন
-                          title="বই চাপা বাজার Demo Video"
-                          className="w-full h-full"
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
-                      </div>
-                      <div className="mt-4 text-center">
-                        <p className="text-sm text-muted-foreground">
-                          এই ভিডিওতে দেখুন কিভাবে আমাদের প্ল্যাটফর্মে সহজেই বই কিনতে ও বিক্রি করতে পারবেন
-                        </p>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  variant="ghost" 
+                  className="glass-button text-base px-8 py-6 rounded-full border border-primary/20 hover:border-primary/40 hover:shadow-lg transition-all duration-300"
+                  onClick={() => {
+                    // Button is clickable but does nothing
+                    console.log('Demo video button clicked - but no action taken');
+                  }}
+                >
+                  <Play className="mr-2 h-5 w-5" />
+                  <span className="hidden sm:inline">ডেমো ভিডিও দেখুন</span>
+                  <span className="sm:hidden">ডেমো ভিডিও</span>
+                </Button>
               </div>
               
               {/* Modern Feature Highlights - Better Positioned */}
