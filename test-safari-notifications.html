@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safari Notification Test - ১০১ সাইট</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-card { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 10px 0; 
+            background: #f9f9f9;
+        }
+        .success { border-color: #4CAF50; background: #f1f8e9; }
+        .error { border-color: #f44336; background: #ffebee; }
+        .warning { border-color: #ff9800; background: #fff3e0; }
+        .info { border-color: #2196F3; background: #e3f2fd; }
+        button { 
+            background: #007AFF; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #0056CC; }
+        .result { 
+            margin-top: 15px; 
+            padding: 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            background: #f5f5f5;
+        }
+        pre { background: #f0f0f0; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .safari-icon { font-size: 2em; }
+        h1 { color: #1d1d1f; }
+        .status-good { color: #4CAF50; font-weight: bold; }
+        .status-bad { color: #f44336; font-weight: bold; }
+        .status-warning { color: #ff9800; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="safari-icon">🍎</div>
+    <h1>Safari Notification Compatibility Test</h1>
+    <p><strong>১০১ সাইটের জন্য Safari Notification সাপোর্ট চেক করুন</strong></p>
+
+    <div class="test-card info">
+        <h3>🔍 ব্রাউজার তথ্য</h3>
+        <div id="browser-info">চেক করা হচ্ছে...</div>
+    </div>
+
+    <div class="test-card">
+        <h3>⚡ Quick Tests</h3>
+        <button onclick="runBasicTest()">Basic Notification Test</button>
+        <button onclick="runSafariTest()">Safari-Specific Test</button>
+        <button onclick="runPermissionTest()">Permission Test</button>
+        <button onclick="testNotificationCreation()">Create Test Notification</button>
+        <div id="quick-results" class="result"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>🧪 Complete Diagnostic</h3>
+        <button onclick="runCompleteDiagnostic()">Run Full Safari Diagnostic</button>
+        <div id="diagnostic-results" class="result"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>🔧 Safari Fix Test</h3>
+        <button onclick="testSafariFix()">Test Safari Fix Implementation</button>
+        <div id="safari-fix-results" class="result"></div>
+    </div>
+
+    <script>
+        // Copy the Safari notification fix functions here for testing
+        const isSafariBrowser = () => {
+            try {
+                if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+                    return false;
+                }
+                
+                const userAgent = navigator.userAgent.toLowerCase();
+                const isSafari = userAgent.includes('safari') && !userAgent.includes('chrome') && !userAgent.includes('firefox');
+                const isWebKit = userAgent.includes('webkit');
+                const isAppleDevice = userAgent.includes('iphone') || userAgent.includes('ipad') || userAgent.includes('mac');
+                
+                return isSafari || (isWebKit && isAppleDevice);
+            } catch (error) {
+                console.warn('Safari detection failed:', error);
+                return false;
+            }
+        };
+
+        const checkSafariNotificationAPI = () => {
+            try {
+                if (!isSafariBrowser()) {
+                    return { available: true }; // Not Safari, assume OK
+                }
+
+                // Check if Notification is actually defined and functional in Safari
+                if (typeof window.Notification === 'undefined') {
+                    return {
+                        available: false,
+                        reason: 'Notification API not available in this Safari version'
+                    };
+                }
+
+                if (typeof window.Notification !== 'function') {
+                    return {
+                        available: false,
+                        reason: 'Notification is not a constructor in Safari'
+                    };
+                }
+
+                // Try to access Notification.permission
+                try {
+                    const permission = window.Notification.permission;
+                    if (typeof permission !== 'string') {
+                        return {
+                            available: false,
+                            reason: 'Notification.permission is not accessible in Safari'
+                        };
+                    }
+                } catch (permissionError) {
+                    return {
+                        available: false,
+                        reason: 'Cannot access Notification.permission in Safari'
+                    };
+                }
+
+                // Check if requestPermission exists
+                if (typeof window.Notification.requestPermission !== 'function') {
+                    return {
+                        available: false,
+                        reason: 'Notification.requestPermission not available in Safari'
+                    };
+                }
+
+                return { available: true };
+            } catch (error) {
+                return {
+                    available: false,
+                    reason: `Safari notification check failed: ${error.message}`
+                };
+            }
+        };
+
+        const initSafariNotificationFix = () => {
+            try {
+                if (!isSafariBrowser()) {
+                    return { fixed: false, reason: 'Not Safari, no fix needed' };
+                }
+
+                const safariCheck = checkSafariNotificationAPI();
+                
+                if (!safariCheck.available) {
+                    console.warn(`🍎 Safari Notification Issue: ${safariCheck.reason}`);
+                    
+                    // Create safe fallback objects to prevent ReferenceError
+                    if (typeof window.Notification === 'undefined') {
+                        // Create a minimal Notification stub to prevent crashes
+                        window.Notification = {
+                            permission: 'unsupported',
+                            requestPermission: () => Promise.resolve('unsupported')
+                        };
+                        
+                        console.log('🍎 Safari: Created Notification fallback to prevent errors');
+                        return { fixed: true, reason: 'Created fallback Notification object' };
+                    }
+                } else {
+                    console.log('🍎 Safari: Notification API is properly available');
+                    return { fixed: false, reason: 'No fix needed, Safari notifications work' };
+                }
+            } catch (error) {
+                console.error('Safari notification fix initialization failed:', error);
+                
+                // Last resort fallback
+                if (typeof window.Notification === 'undefined') {
+                    window.Notification = {
+                        permission: 'unsupported',
+                        requestPermission: () => Promise.resolve('unsupported')
+                    };
+                    return { fixed: true, reason: 'Emergency fallback applied' };
+                }
+            }
+            
+            return { fixed: false, reason: 'Unknown state' };
+        };
+
+        // Test functions
+        function updateBrowserInfo() {
+            const info = {
+                userAgent: navigator.userAgent,
+                isSafari: isSafariBrowser(),
+                hasNotification: 'Notification' in window,
+                notificationDefined: typeof window.Notification !== 'undefined',
+                isSecure: window.location.protocol === 'https:' || window.location.hostname === 'localhost'
+            };
+
+            const infoDiv = document.getElementById('browser-info');
+            infoDiv.innerHTML = `
+                <strong>Browser:</strong> ${info.isSafari ? '🍎 Safari' : 'Not Safari'}<br>
+                <strong>User Agent:</strong> ${info.userAgent}<br>
+                <strong>Has Notification:</strong> <span class="${info.hasNotification ? 'status-good' : 'status-bad'}">${info.hasNotification ? 'Yes' : 'No'}</span><br>
+                <strong>Notification Defined:</strong> <span class="${info.notificationDefined ? 'status-good' : 'status-bad'}">${info.notificationDefined ? 'Yes' : 'No'}</span><br>
+                <strong>Secure Context:</strong> <span class="${info.isSecure ? 'status-good' : 'status-warning'}">${info.isSecure ? 'Yes (HTTPS/localhost)' : 'No (HTTP)'}</span>
+            `;
+        }
+
+        function runBasicTest() {
+            const results = document.getElementById('quick-results');
+            const tests = [];
+
+            // Test 1: Notification in window
+            tests.push({
+                name: 'Notification in window',
+                result: 'Notification' in window,
+                details: typeof window.Notification
+            });
+
+            // Test 2: Notification is function
+            tests.push({
+                name: 'Notification is constructor',
+                result: typeof window.Notification === 'function',
+                details: `typeof: ${typeof window.Notification}`
+            });
+
+            // Test 3: Permission accessible
+            let permissionTest = false;
+            let permissionValue = 'unknown';
+            try {
+                permissionValue = window.Notification ? window.Notification.permission : 'undefined';
+                permissionTest = typeof permissionValue === 'string';
+            } catch (e) {
+                permissionValue = `Error: ${e.message}`;
+            }
+
+            tests.push({
+                name: 'Permission accessible',
+                result: permissionTest,
+                details: permissionValue
+            });
+
+            // Display results
+            let html = '<h4>Basic Test Results:</h4>';
+            tests.forEach(test => {
+                const status = test.result ? 'status-good' : 'status-bad';
+                html += `<div>
+                    <span class="${status}">✓</span> ${test.name}: 
+                    <span class="${status}">${test.result ? 'PASS' : 'FAIL'}</span>
+                    <small>(${test.details})</small>
+                </div>`;
+            });
+
+            results.innerHTML = html;
+        }
+
+        function runSafariTest() {
+            const results = document.getElementById('quick-results');
+            const isSafari = isSafariBrowser();
+            const safariCheck = checkSafariNotificationAPI();
+
+            let html = `<h4>Safari-Specific Test Results:</h4>`;
+            html += `<div><strong>Is Safari:</strong> <span class="${isSafari ? 'status-good' : 'status-warning'}">${isSafari ? 'Yes 🍎' : 'No'}</span></div>`;
+            
+            if (isSafari) {
+                html += `<div><strong>API Available:</strong> <span class="${safariCheck.available ? 'status-good' : 'status-bad'}">${safariCheck.available ? 'Yes' : 'No'}</span></div>`;
+                if (!safariCheck.available) {
+                    html += `<div><strong>Reason:</strong> <span class="status-bad">${safariCheck.reason}</span></div>`;
+                }
+            }
+
+            results.innerHTML = html;
+        }
+
+        async function runPermissionTest() {
+            const results = document.getElementById('quick-results');
+            
+            try {
+                if (!window.Notification) {
+                    results.innerHTML = '<div class="status-bad">❌ Notification API not available</div>';
+                    return;
+                }
+
+                const currentPermission = window.Notification.permission;
+                results.innerHTML = `<div>Current Permission: <strong>${currentPermission}</strong></div>`;
+
+                if (currentPermission === 'default') {
+                    const newPermission = await window.Notification.requestPermission();
+                    results.innerHTML += `<div>After Request: <strong>${newPermission}</strong></div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="status-bad">❌ Permission test failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testNotificationCreation() {
+            const results = document.getElementById('quick-results');
+            
+            try {
+                if (!window.Notification) {
+                    results.innerHTML = '<div class="status-bad">❌ Notification API not available</div>';
+                    return;
+                }
+
+                if (window.Notification.permission !== 'granted') {
+                    results.innerHTML = '<div class="status-warning">⚠️ Permission not granted. Please grant permission first.</div>';
+                    return;
+                }
+
+                const notification = new window.Notification('Safari Test', {
+                    body: '১০১ সাইট থেকে টেস্ট নোটিফিকেশন',
+                    icon: '/favicon.ico'
+                });
+
+                setTimeout(() => notification.close(), 3000);
+                results.innerHTML = '<div class="status-good">✅ Test notification created successfully!</div>';
+            } catch (error) {
+                results.innerHTML = `<div class="status-bad">❌ Failed to create notification: ${error.message}</div>`;
+            }
+        }
+
+        function runCompleteDiagnostic() {
+            const results = document.getElementById('diagnostic-results');
+            const diagnostic = {
+                browser: navigator.userAgent,
+                isSafari: isSafariBrowser(),
+                windowNotification: 'Notification' in window,
+                notificationConstructor: typeof window.Notification,
+                permission: null,
+                permissionError: null,
+                requestPermissionExists: false,
+                secureContext: window.isSecureContext || window.location.protocol === 'https:' || window.location.hostname === 'localhost',
+                serviceWorker: 'serviceWorker' in navigator,
+                pushManager: 'PushManager' in window
+            };
+
+            // Test permission access
+            try {
+                diagnostic.permission = window.Notification ? window.Notification.permission : 'not-available';
+                diagnostic.requestPermissionExists = !!(window.Notification && window.Notification.requestPermission);
+            } catch (e) {
+                diagnostic.permissionError = e.message;
+            }
+
+            // Safari-specific tests
+            if (diagnostic.isSafari) {
+                diagnostic.safariApiCheck = checkSafariNotificationAPI();
+            }
+
+            results.innerHTML = `<pre>${JSON.stringify(diagnostic, null, 2)}</pre>`;
+        }
+
+        function testSafariFix() {
+            const results = document.getElementById('safari-fix-results');
+            
+            // Store original state
+            const originalNotification = window.Notification;
+            
+            // Test the fix
+            const fixResult = initSafariNotificationFix();
+            
+            const testResults = {
+                originalNotificationExists: !!originalNotification,
+                fixApplied: fixResult.fixed,
+                fixReason: fixResult.reason,
+                notificationAfterFix: !!window.Notification,
+                notificationTypeAfterFix: typeof window.Notification,
+                permissionAfterFix: window.Notification ? window.Notification.permission : 'not-available'
+            };
+
+            results.innerHTML = `<h4>Safari Fix Test Results:</h4><pre>${JSON.stringify(testResults, null, 2)}</pre>`;
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            updateBrowserInfo();
+            
+            // Auto-run safari fix if it's Safari
+            if (isSafariBrowser()) {
+                setTimeout(() => {
+                    const fixResult = initSafariNotificationFix();
+                    console.log('Auto-applied Safari fix:', fixResult);
+                }, 1000);
+            }
+        };
+    </script>
+</body>
+</html>

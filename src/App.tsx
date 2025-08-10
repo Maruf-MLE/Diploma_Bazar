@@ -45,6 +45,7 @@ import React, { useEffect } from "react";
 import { useBanStatusListener } from "./hooks/useBanStatusListener";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 import FallbackNotification from "@/components/FallbackNotification";
+import { initSafariNotificationFix } from "@/lib/safariNotificationFix";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -135,6 +136,12 @@ const BannedUserCheck = ({ children }: { children: React.ReactNode }) => {
 // AppContent component to use hooks inside the Routes
 const AppContent = () => {
   const { user, isBanned, loading } = useAuth();
+  
+  // Initialize Safari notification fix on app startup
+  useEffect(() => {
+    initSafariNotificationFix();
+  }, []);
+  
   // Initialize push notifications when user logs in
   usePushNotifications(user?.id);
   

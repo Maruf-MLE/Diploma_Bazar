@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { checkNotificationEnvironment, getNotificationErrorMessage } from '@/lib/notificationUtils';
+import { isSafariBrowser, getSafariNotificationInfo } from '@/lib/safariNotificationFix';
 
 interface FallbackNotificationProps {
   show?: boolean;
@@ -20,12 +21,36 @@ const FallbackNotification: React.FC<FallbackNotificationProps> = ({ show = true
 
     const checkAndShowNotification = () => {
       const environment = checkNotificationEnvironment();
+      const safari = isSafariBrowser();
+      const safariInfo = safari ? getSafariNotificationInfo() : null;
       
-      // যদি notification সাপোর্ট না করে
+      // Safari-specific handling
+      if (safari && safariInfo && !safariInfo.notificationSupported) {
+        const safariMessage = safariInfo.issues.length > 0 
+          ? `Safari সমস্যা: ${safariInfo.issues[0]}` 
+          : "Safari এ নোটিফিকেশন সাপোর্ট নেই";
+          
+        const safariSuggestion = safariInfo.suggestions.length > 0
+          ? safariInfo.suggestions[0]
+          : "Safari এর নতুন version ব্যবহার করুন";
+      
+        toast({
+          title: "🍎 Safari নোটিফিকেশন সমস্যা",
+          description: `${safariMessage}। ${safariSuggestion}। এখনের মতো manual refresh করুন।`,
+          duration: 8000,
+        });
+        
+        setHasShownWarning(true);
+        onClose?.();
+        return;
+      }
+      
+      // যদি notification সাপোর্ট না করে (non-Safari browsers)
       if (!environment.supported) {
+        const browserName = safari ? 'Safari' : 'এই ব্রাউজারে';
         toast({
           title: "নোটিফিকেশন সাপোর্ট নেই",
-          description: "আপনার ব্রাউজার/ফোনে নোটিফিকেশন সাপোর্ট নেই। নতুন মেসেজের জন্য পেজ রিফ্রেশ করুন।",
+          description: `${browserName} নোটিফিকেশন সাপোর্ট নেই। নতুন মেসেজের জন্য পেজ রিফ্রেশ করুন।`,
           duration: 5000,
         });
         

@@ -4,24 +4,51 @@
  * পুরানো ব্রাউজার বা ডিভাইসে compatibility issue এড়াতে
  */
 
-// Browser notification support check
+// Browser notification support check with Safari compatibility
 export const isNotificationSupported = (): boolean => {
   try {
-    // Check if Notification exists in window object
-    return 'Notification' in window && typeof Notification !== 'undefined';
+    // Safari-specific check: Safari might have Notification in window but it could be undefined
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    
+    // Check multiple conditions to ensure full Safari compatibility
+    const hasNotificationAPI = 'Notification' in window;
+    const notificationIsFunction = typeof window.Notification === 'function';
+    const notificationConstructor = !!window.Notification;
+    
+    // For Safari, we need to ensure Notification is actually callable
+    if (hasNotificationAPI && notificationIsFunction && notificationConstructor) {
+      // Additional Safari-specific test - try to access permission property
+      try {
+        const permission = window.Notification.permission;
+        return typeof permission === 'string';
+      } catch (safariError) {
+        console.warn('Safari Notification permission check failed:', safariError);
+        return false;
+      }
+    }
+    
+    return false;
   } catch (error) {
     console.warn('Notification support check failed:', error);
     return false;
   }
 };
 
-// Safe permission check
+// Safe permission check with Safari compatibility
 export const getNotificationPermission = (): string => {
   try {
     if (!isNotificationSupported()) {
       return 'unsupported';
     }
-    return Notification.permission;
+    
+    // Safari-safe permission access
+    if (window.Notification && typeof window.Notification.permission === 'string') {
+      return window.Notification.permission;
+    }
+    
+    return 'unsupported';
   } catch (error) {
     console.warn('Permission check failed:', error);
     return 'unsupported';
@@ -47,8 +74,13 @@ export const requestNotificationPermission = async (): Promise<string> => {
       return 'denied';
     }
 
-    // Request permission
-    const permission = await Notification.requestPermission();
+    // Safari-safe permission request
+    if (!window.Notification || typeof window.Notification.requestPermission !== 'function') {
+      console.warn('Notification.requestPermission is not available');
+      return 'unsupported';
+    }
+    
+    const permission = await window.Notification.requestPermission();
     console.log('নোটিফিকেশন permission:', permission);
     return permission;
   } catch (error) {
@@ -78,7 +110,12 @@ export const createSafeNotification = (title: string, options?: NotificationOpti
       ...options
     };
 
-    const notification = new Notification(title, safeOptions);
+    // Safari-safe notification creation
+    if (!window.Notification) {
+      throw new Error('Notification constructor not available');
+    }
+    
+    const notification = new window.Notification(title, safeOptions);
     
     // Add default event handlers
     notification.onclick = function(event) {
@@ -94,14 +131,30 @@ export const createSafeNotification = (title: string, options?: NotificationOpti
   }
 };
 
-// Check if device/browser has push notification support
+// Check if device/browser has push notification support with Safari compatibility
 export const isPushNotificationSupported = (): boolean => {
   try {
-    return (
-      'serviceWorker' in navigator &&
-      'PushManager' in window &&
-      isNotificationSupported()
-    );
+    // Check basic requirements
+    const hasServiceWorker = 'serviceWorker' in navigator;
+    const hasPushManager = 'PushManager' in window;
+    const hasNotifications = isNotificationSupported();
+    
+    // Safari-specific checks
+    if (hasServiceWorker && hasPushManager && hasNotifications) {
+      // Additional Safari validation
+      try {
+        // Check if PushManager is actually functional
+        const pushManagerConstructor = window.PushManager;
+        const serviceWorkerRegistration = navigator.serviceWorker;
+        
+        return !!(pushManagerConstructor && serviceWorkerRegistration);
+      } catch (safariError) {
+        console.warn('Safari push notification validation failed:', safariError);
+        return false;
+      }
+    }
+    
+    return false;
   } catch (error) {
     console.warn('Push notification support check failed:', error);
     return false;
