@@ -179,23 +179,32 @@ const ProfilePage = () => {
     fetchUserProfile();
   }, [toast]);
 
-  // Fetch verification status
+  // Fetch verification status using RLS-safe function
   const fetchVerificationStatus = async (userId: string) => {
     try {
       setVerificationLoading(true);
-      const { isVerified, error } = await getUserVerificationStatus(userId);
+      console.log('🔍 ProfilePage: Checking verification status for user:', userId);
       
-      if (error) {
-        console.error('Error fetching verification status:', error);
+      // Use the RLS-safe function instead of direct table access
+      const { data: verificationResult, error: verificationError } = await supabase
+        .rpc('check_user_verification_status', {
+          user_uuid: userId
+        });
+        
+      if (verificationError) {
+        console.error('❌ ProfilePage: Error checking verification:', verificationError);
         return;
       }
       
+      const isUserVerified = verificationResult === true;
+      console.log('✅ ProfilePage: Verification status:', isUserVerified);
+      
       setUserData(prevData => ({
         ...prevData,
-        isVerified
+        isVerified: isUserVerified
       }));
     } catch (error) {
-      console.error('Error in fetchVerificationStatus:', error);
+      console.error('❌ ProfilePage: Error in fetchVerificationStatus:', error);
     } finally {
       setVerificationLoading(false);
     }

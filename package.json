@@ -54,7 +54,10 @@
     "deploy:frontend": "npm run build:prod && vercel --prod",
     "deploy:all": "npm run deploy:push-server && npm run deploy:frontend",
     "security-check": "npm audit && npm run lint:security",
-    "lint:security": "eslint . --config .eslintrc.security.js"
+    "lint:security": "eslint . --config .eslintrc.security.js",
+    "test:verification": "node test_verification_status.js",
+    "migrate:verification-table": "node run_verification_table_migration.js",
+    "update:verification-helpers": "echo 'Please run update_existing_verification_table.sql in Supabase SQL Editor'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

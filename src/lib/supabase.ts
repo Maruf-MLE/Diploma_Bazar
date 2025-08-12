@@ -216,60 +216,40 @@ export const getUserVerificationStatus = async (userId: string) => {
       return { isVerified: false, error: 'User ID is required' };
     }
     
-    // Try using the SQL function first
-    try {
-      const { data: isVerified, error: rpcError } = await supabase.rpc('is_user_verified', {
-        user_id_param: userId
-      });
-      
-      if (!rpcError) {
-        console.log('User verification status from RPC:', isVerified);
-        return { isVerified: !!isVerified, error: null };
-      } else {
-        console.error('Error calling is_user_verified RPC:', rpcError);
-      }
-    } catch (rpcError) {
-      console.error('Exception calling is_user_verified RPC:', rpcError);
-    }
+    console.log('Checking verification status for user:', userId);
     
-    // Fallback to direct table queries if RPC fails
-    console.log('Falling back to direct table queries for verification status');
-    
-    // First check verification_data table
+    // Check verification_data table directly (using the new table structure)
     const { data: verificationData, error: verificationError } = await supabase
       .from('verification_data')
-      .select('is_verified')
+      .select('is_verified, status, name, roll_no, reg_no')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle() to handle missing records
     
-    if (verificationError && verificationError.code !== 'PGRST116') {
-      // PGRST116 is "no rows returned" error, which is fine - it means user hasn't started verification
+    if (verificationError) {
       console.error('Error checking verification_data:', verificationError);
+      return { isVerified: false, error: verificationError.message };
     }
     
-    // If verification data exists and is verified, return true
-    if (verificationData && verificationData.is_verified) {
-      return { isVerified: true, error: null };
+    // If no verification record exists
+    if (!verificationData) {
+      console.log('No verification record found for user:', userId);
+      return { isVerified: false, error: null };
     }
     
-    // If no verification data or not verified, check face_verification table
-    const { data: faceData, error: faceError } = await supabase
-      .from('face_verification')
-      .select('is_verified, status')
-      .eq('user_id', userId)
-      .single();
+    // Check verification status
+    const isUserVerified = verificationData.is_verified === true;
     
-    if (faceError && faceError.code !== 'PGRST116') {
-      console.error('Error checking face_verification:', faceError);
-    }
+    console.log('Verification check result:', {
+      userId,
+      isVerified: isUserVerified,
+      status: verificationData.status,
+      hasName: !!verificationData.name,
+      hasRollNo: !!verificationData.roll_no,
+      hasRegNo: !!verificationData.reg_no
+    });
     
-    // If face verification data exists and is verified, return true
-    if (faceData && faceData.is_verified) {
-      return { isVerified: true, error: null };
-    }
+    return { isVerified: isUserVerified, error: null };
     
-    // If we got here, user is not verified
-    return { isVerified: false, error: null };
   } catch (error) {
     console.error('Error getting user verification status:', error);
     return { isVerified: false, error };
@@ -284,37 +264,26 @@ export const subscribeToVerificationChanges = (userId: string, callback: () => v
   }
   
   try {
-    // Subscribe to changes in verification_data table
+    // Subscribe to changes in verification_data table only
     const verificationChannel = supabase
       .channel(`verification-${userId}`)
       .on('postgres_changes', { 
-        event: 'UPDATE',
+        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
         schema: 'public',
         table: 'verification_data',
         filter: `user_id=eq.${userId}` 
-      }, callback)
+      }, (payload) => {
+        console.log('Verification data change received:', payload);
+        callback();
+      })
       .subscribe((status) => {
         console.log(`Verification data subscription status for ${userId}:`, status);
       });
     
-    // Subscribe to changes in face_verification table
-    const faceVerificationChannel = supabase
-      .channel(`face-verification-${userId}`)
-      .on('postgres_changes', { 
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'face_verification',
-        filter: `user_id=eq.${userId}` 
-      }, callback)
-      .subscribe((status) => {
-        console.log(`Face verification subscription status for ${userId}:`, status);
-      });
-    
-    // Return a combined unsubscribe function
+    // Return unsubscribe function
     return {
       unsubscribe: () => {
         verificationChannel.unsubscribe();
-        faceVerificationChannel.unsubscribe();
       }
     };
   } catch (error) {

@@ -73,12 +73,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ইউজার ভেরিফিকেশন স্টেটাস চেক করার ফাংশন
   const checkVerification = async () => {
     if (!user) {
+      console.log('checkVerification: No user found')
       setIsVerified(false)
       setVerificationLoading(false)
       return
     }
     
     try {
+      console.log('checkVerification: Checking for user ID:', user.id)
       setVerificationLoading(true)
       const { isVerified, error } = await getUserVerificationStatus(user.id)
       
@@ -86,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error checking verification status:', error)
         setIsVerified(false)
       } else {
+        console.log('checkVerification: User verification status:', isVerified)
         setIsVerified(isVerified)
       }
     } catch (error) {
@@ -277,10 +280,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (data?.session?.user) {
           console.log("User from session:", data.session.user.id);
-          setUser(data.session.user);
+          const sessionUser = data.session.user;
+          setUser(sessionUser);
           
-          // Check verification status if user exists
-          checkVerification();
+          // Check verification status with the session user directly
+          try {
+            console.log('Initial verification check for user:', sessionUser.id);
+            const { isVerified, error } = await getUserVerificationStatus(sessionUser.id);
+            
+            if (error) {
+              console.error('Error checking initial verification status:', error);
+              setIsVerified(false);
+            } else {
+              console.log('Initial verification status:', isVerified);
+              setIsVerified(isVerified);
+            }
+            setVerificationLoading(false);
+          } catch (error) {
+            console.error('Error in initial verification check:', error);
+            setIsVerified(false);
+            setVerificationLoading(false);
+          }
+          
+          // Check other statuses
           checkBanStatus();
           checkEmailVerified();
         }

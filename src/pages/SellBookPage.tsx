@@ -16,9 +16,13 @@ import { navigateToRoute } from '@/lib/urlHelper';
 import { validateImageForBookCover, quickImageCheck } from '@/lib/lightweightImageScanner';
 
 const SellBookPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isVerified, verificationLoading, checkVerification } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Local state for verification check
+  const [isCheckingVerification, setIsCheckingVerification] = useState(true);
+  const [userVerificationStatus, setUserVerificationStatus] = useState<boolean | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState('');
@@ -32,8 +36,6 @@ const SellBookPage: React.FC = () => {
   const [department, setDepartment] = useState('');
   const [instituteName, setInstituteName] = useState('');
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [isVerified, setIsVerified] = useState<boolean | null>(null);
-  const [isCheckingVerification, setIsCheckingVerification] = useState(true);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
@@ -44,15 +46,18 @@ const SellBookPage: React.FC = () => {
   const [isNegotiable] = useState(true); // Hidden field with default value
   const [isUploadingImages, setIsUploadingImages] = useState(false);
 
-  // Fetch user profile data and verification status
+  // Fetch user profile data and check verification status
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserDataAndCheckVerification = async () => {
       if (!user?.id) {
         setIsCheckingVerification(false);
+        setUserVerificationStatus(false);
         return;
       }
       
       try {
+        setIsCheckingVerification(true);
+        
         // Fetch profile data
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -67,30 +72,32 @@ const SellBookPage: React.FC = () => {
           setDepartment(profile.department || '');
           setInstituteName(profile.institute_name || '');
         }
-
-        // Fetch verification status
-        const { data: verificationData, error: verificationError } = await supabase
-          .from('verification_data')
-          .select('is_verified')
-          .eq('user_id', user.id)
-          .single();
-
+        
+        // Check verification status using the RLS-safe function
+        console.log('🔍 Checking verification status for user:', user.id);
+        const { data: verificationResult, error: verificationError } = await supabase
+          .rpc('check_user_verification_status', {
+            user_uuid: user.id
+          });
+          
         if (verificationError) {
-          console.error('Error fetching verification:', verificationError);
-          // If no verification record exists, user is not verified
-          setIsVerified(false);
+          console.error('❌ Error checking verification:', verificationError);
+          setUserVerificationStatus(false);
         } else {
-          setIsVerified(verificationData?.is_verified || false);
+          const isUserVerified = verificationResult === true;
+          console.log('✅ Verification status:', isUserVerified);
+          setUserVerificationStatus(isUserVerified);
         }
+        
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setIsVerified(false);
+        console.error('❌ Error fetching user data:', error);
+        setUserVerificationStatus(false);
       } finally {
         setIsCheckingVerification(false);
       }
     };
 
-    fetchUserData();
+    fetchUserDataAndCheckVerification();
   }, [user?.id]);
 
   // Simple and fast image upload function
@@ -233,7 +240,7 @@ const SellBookPage: React.FC = () => {
   }
 
   // Show loading while checking verification
-  if (isCheckingVerification) {
+  if (isCheckingVerification || verificationLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
@@ -247,8 +254,8 @@ const SellBookPage: React.FC = () => {
     );
   }
 
-  // Check if user is verified
-  if (isVerified === false) {
+  // Check if user is verified using our local verification check
+  if (userVerificationStatus === false) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
