@@ -1,0 +1,119 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const { phoneNumber, message } = await req.json()
+
+    // Validate input
+    if (!phoneNumber || !message) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Phone number and message are required' 
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    // Get Twilio credentials from environment
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+    const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+
+    if (!accountSid || !authToken || !twilioPhoneNumber) {
+      console.error('Missing Twilio credentials')
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Twilio configuration missing' 
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    // Format phone number for Twilio
+    const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`
+    
+    console.log('Sending SMS to:', formattedPhone)
+    console.log('From:', twilioPhoneNumber)
+    console.log('Message preview:', message.substring(0, 50) + '...')
+
+    // Create Twilio API request
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`
+    
+    const body = new URLSearchParams({
+      To: formattedPhone,
+      From: twilioPhoneNumber,
+      Body: message,
+    })
+
+    const response = await fetch(twilioUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${btoa(`${accountSid}:${authToken}`)}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      console.error('Twilio API error:', result)
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: result.message || 'Failed to send SMS',
+          details: result
+        }),
+        { 
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    console.log('SMS sent successfully:', result.sid)
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        messageSid: result.sid,
+        status: result.status
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
+
+  } catch (error) {
+    console.error('Error in send-sms function:', error)
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: 'Internal server error',
+        details: error.message
+      }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
+  }
+})

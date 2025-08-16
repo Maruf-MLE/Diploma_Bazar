@@ -1,0 +1,125 @@
+// Direct Twilio SMS Integration
+// This bypasses Supabase Edge Functions and sends SMS directly
+
+import { supabase } from './supabase';
+
+interface TwilioSMSResponse {
+  success: boolean;
+  messageSid?: string;
+  error?: string;
+}
+
+class TwilioSMSService {
+  private accountSid: string;
+  private authToken: string;
+  private fromNumber: string;
+
+  constructor() {
+    // Use environment variables - Vite requires VITE_ prefix for client-side access
+    this.accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID || 'ACa720c01d7e884945bbfbbb318206972c';
+    this.authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN || 'a4c83d43958b7466c4793c20a3331e46';
+    this.fromNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER || '+16193323473';
+    
+    console.log('🔧 Twilio SMS Service initialized');
+    console.log('   Account SID:', this.accountSid ? `${this.accountSid.substring(0, 8)}...` : 'Missing');
+    console.log('   From Number:', this.fromNumber || 'Missing');
+  }
+
+  /**
+   * Send SMS using Twilio REST API directly
+   */
+  async sendSMS(toNumber: string, message: string): Promise<TwilioSMSResponse> {
+    try {
+      console.log('📤 Sending SMS via Direct Twilio API');
+      console.log('📱 To:', toNumber);
+      console.log('📝 Message:', message);
+      
+      // Prepare request
+      const url = `https://api.twilio.com/2010-04-01/Accounts/${this.accountSid}/Messages.json`;
+      
+      const body = new URLSearchParams({
+        To: toNumber,
+        From: this.fromNumber,
+        Body: message
+      });
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${btoa(`${this.accountSid}:${this.authToken}`)}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString()
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.sid) {
+        console.log('✅ SMS sent successfully via Twilio:', result.sid);
+        return {
+          success: true,
+          messageSid: result.sid
+        };
+      } else {
+        console.error('❌ Twilio API error:', result);
+        return {
+          success: false,
+          error: result.message || 'SMS sending failed'
+        };
+      }
+
+    } catch (error) {
+      console.error('❌ Error sending SMS:', error);
+      return {
+        success: false,
+        error: `SMS sending failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  }
+
+  /**
+   * Send OTP via SMS
+   */
+  async sendOTPSMS(phoneNumber: string, otpCode: string): Promise<TwilioSMSResponse> {
+    const message = `আপনার বই চাপা বাজার যাচাইকরণ কোড: ${otpCode}। এই কোডটি ১০ মিনিটের জন্য বৈধ। কোড শেয়ার করবেন না।`;
+    
+    return this.sendSMS(phoneNumber, message);
+  }
+
+  /**
+   * Test SMS sending capability
+   */
+  async testSMSConnection(): Promise<boolean> {
+    try {
+      const testResponse = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${this.accountSid}.json`, {
+        headers: {
+          'Authorization': `Basic ${btoa(`${this.accountSid}:${this.authToken}`)}`
+        }
+      });
+
+      return testResponse.ok;
+    } catch (error) {
+      console.error('❌ Twilio connection test failed:', error);
+      return false;
+    }
+  }
+}
+
+// Export singleton instance
+export const twilioSMSService = new TwilioSMSService();
+
+// Test function to verify Twilio configuration
+export const testTwilioConfiguration = async (): Promise<void> => {
+  console.log('🔍 Testing Twilio Configuration...');
+  
+  const isConnected = await twilioSMSService.testSMSConnection();
+  
+  if (isConnected) {
+    console.log('✅ Twilio connection successful!');
+    console.log('📞 Account SID:', twilioSMSService['accountSid'].substring(0, 10) + '...');
+    console.log('📱 From Number:', twilioSMSService['fromNumber']);
+  } else {
+    console.error('❌ Twilio connection failed!');
+    console.error('Please check your credentials in .env file');
+  }
+};

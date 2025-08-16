@@ -1,0 +1,352 @@
+import { supabase } from './supabase';
+
+export interface PhoneVerificationResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  otp_code?: string; // Only for development
+  expires_in?: number;
+  attempts_remaining?: number;
+}
+
+export interface PhoneVerificationAttempt {
+  id: string;
+  user_id: string;
+  phone_number: string;
+  otp_code: string;
+  attempts: number;
+  verified: boolean;
+  expires_at: string;
+  created_at: string;
+}
+
+class PhoneVerificationService {
+  /**
+   * Send OTP to phone number
+   */
+  async sendOTP(phoneNumber: string): Promise<PhoneVerificationResponse> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return {
+          success: false,
+          error: 'User not authenticated'
+        };
+      }
+
+      console.log('Sending OTP to:', phoneNumber, 'for user:', user.id);
+
+      // Clean phone number format
+      const cleanedPhone = this.cleanPhoneNumber(phoneNumber);
+      
+      if (!this.isValidBangladeshiPhoneNumber(cleanedPhone)) {
+        return {
+          success: false,
+          error: 'অবৈধ ফোন নম্বর। বাংলাদেশী নম্বর ব্যবহার করুন (যেমন: +8801XXXXXXXXX)'
+        };
+      }
+
+      // Call database function to generate OTP
+      const { data, error } = await supabase.rpc('generate_phone_otp', {
+        p_phone_number: cleanedPhone
+      });
+
+      if (error) {
+        console.error('Error creating phone verification attempt:', {
+          error,
+          errorMessage: error.message,
+          errorCode: error.code,
+          errorDetails: error.details,
+          userId: user.id,
+          phoneNumber: cleanedPhone
+        });
+        
+        // Check if the error is related to missing function or table
+        if (error.message?.includes('function') || error.message?.includes('does not exist')) {
+          return {
+            success: false,
+            error: 'ডাটাবেস সেটআপ সম্পূর্ণ হয়নি। অনুগ্রহ করে admin এর সাথে যোগাযোগ করুন।'
+          };
+        }
+        
+        return {
+          success: false,
+          error: `OTP পাঠাতে সমস্যা হয়েছে: ${error.message || 'আবার চেষ্টা করুন।'}`
+        };
+      }
+
+      console.log('Generated OTP:', data); // Development logging
+      
+      // Check if we should send real SMS (controlled by environment variable)
+      const shouldSendRealSMS = import.meta.env.VITE_ENABLE_SMS === 'true';
+      
+      console.log('🔍 SMS Configuration Check:');
+      console.log('   NODE_ENV:', process.env.NODE_ENV);
+      console.log('   VITE_ENABLE_SMS:', import.meta.env.VITE_ENABLE_SMS);
+      console.log('   shouldSendRealSMS:', shouldSendRealSMS);
+      
+      // Send real SMS if enabled
+      if (shouldSendRealSMS) {
+        try {
+          console.log('📤 Real SMS mode: Attempting to send SMS via Twilio');
+          await this.sendSMSViaTwilio(cleanedPhone, data);
+          console.log('✅ SMS sent successfully!');
+        } catch (smsError) {
+          console.error('❌ SMS sending failed:', smsError);
+          // Still show development fallback if SMS fails
+          console.log('📋 Showing development OTP as fallback');
+          alert(`⚠️ SMS Failed - Development OTP\n\nPhone: ${cleanedPhone}\nOTP Code: ${data}\n\nSMS Error: ${smsError.message}`);
+        }
+      } else {
+        // Development mode or SMS disabled - show OTP in console and alert
+        console.log('🔢 DEVELOPMENT MODE: OTP Code =', data);
+        console.log('🔢 Use this OTP to verify:', data);
+        console.log('📱 Phone Number:', cleanedPhone);
+        console.log('⚠️  SMS is disabled. Set VITE_ENABLE_SMS=true to enable real SMS');
+        
+        // Show alert in development
+        alert(`🔢 Development Mode OTP\n\nPhone: ${cleanedPhone}\nOTP Code: ${data}\n\n⚠️ Real SMS disabled. Check VITE_ENABLE_SMS setting`);
+        
+        // Also show in browser notification if supported
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Development OTP', {
+            body: `Your OTP is: ${data}`,
+            icon: '/favicon.ico'
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: 'OTP পাঠানো হয়েছে। ১০ মিনিটের মধ্যে যাচাই করুন।',
+        expires_in: 10,
+        // Remove OTP from response in production
+        ...(process.env.NODE_ENV !== 'production' && { otp_code: data })
+      };
+
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      return {
+        success: false,
+        error: 'OTP পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।'
+      };
+    }
+  }
+
+  /**
+   * Verify OTP code
+   */
+  async verifyOTP(otpCode: string): Promise<PhoneVerificationResponse> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return {
+          success: false,
+          error: 'User not authenticated'
+        };
+      }
+
+      console.log('Verifying OTP for user:', user.id);
+
+      // First get user's phone number from profiles
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone_number')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.phone_number) {
+        return {
+          success: false,
+          error: 'ফোন নম্বর পাওয়া যায়নি। আবার OTP পাঠান।'
+        };
+      }
+
+      // Call database function to verify OTP
+      const { data, error } = await supabase.rpc('verify_phone_otp', {
+        p_phone_number: profile.phone_number,
+        p_otp_code: otpCode.trim()
+      });
+
+      if (error) {
+        console.error('Error verifying OTP:', error);
+        return {
+          success: false,
+          error: 'OTP যাচাই করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।'
+        };
+      }
+
+      if (data.success) {
+        // Trigger profile update event
+        window.dispatchEvent(new CustomEvent('phone-verified', { 
+          detail: { userId: user.id } 
+        }));
+      }
+
+      return data;
+
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      return {
+        success: false,
+        error: 'OTP যাচাই করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।'
+      };
+    }
+  }
+
+  /**
+   * Check if user's phone is verified
+   */
+  async getPhoneVerificationStatus(): Promise<{
+    phone_verified: boolean;
+    phone_number?: string;
+  }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return { phone_verified: false };
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('phone_verified, phone_number')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error getting phone verification status:', error);
+        return { phone_verified: false };
+      }
+
+      return {
+        phone_verified: profile?.phone_verified || false,
+        phone_number: profile?.phone_number
+      };
+
+    } catch (error) {
+      console.error('Error checking phone verification status:', error);
+      return { phone_verified: false };
+    }
+  }
+
+  /**
+   * Get current verification attempt status
+   */
+  async getCurrentVerificationAttempt(): Promise<PhoneVerificationAttempt | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('phone_verification_attempts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('verified', false)
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error getting current verification attempt:', error);
+        return null;
+      }
+
+      return data;
+
+    } catch (error) {
+      console.error('Error getting current verification attempt:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clean and format phone number
+   */
+  private cleanPhoneNumber(phoneNumber: string): string {
+    // Remove all spaces, dashes, and other non-numeric characters except +
+    let cleaned = phoneNumber.replace(/[^\d+]/g, '');
+    
+    // Handle Bangladeshi phone number formats
+    if (cleaned.startsWith('01')) {
+      cleaned = '+880' + cleaned;
+    } else if (cleaned.startsWith('8801')) {
+      cleaned = '+' + cleaned;
+    } else if (!cleaned.startsWith('+880') && cleaned.startsWith('880')) {
+      cleaned = '+' + cleaned;
+    }
+    
+    return cleaned;
+  }
+
+  /**
+   * Validate Bangladeshi phone number
+   */
+  private isValidBangladeshiPhoneNumber(phoneNumber: string): boolean {
+    // Bangladesh phone number format: +8801XXXXXXXXX (11 digits after +880)
+    // Allow both +8801XXXXXXXX (10 digits) and +8801XXXXXXXXX (11 digits)
+    const bangladeshiPhoneRegex = /^\+880[1-9]\d{8,9}$/;
+    return bangladeshiPhoneRegex.test(phoneNumber);
+  }
+
+  /**
+   * Send SMS via Direct Twilio API
+   */
+  private async sendSMSViaTwilio(phoneNumber: string, otpCode: string): Promise<void> {
+    try {
+      console.log('📤 Sending SMS via Direct Twilio API to:', phoneNumber);
+      
+      // Import Twilio service dynamically
+      const { twilioSMSService } = await import('./twilioSMS');
+      
+      // Send SMS using direct Twilio integration
+      const result = await twilioSMSService.sendOTPSMS(phoneNumber, otpCode);
+
+      if (!result.success) {
+        console.error('❌ SMS sending failed:', result.error);
+        throw new Error(result.error || 'SMS sending failed');
+      }
+
+      console.log('✅ SMS sent successfully via Twilio:', result.messageSid);
+
+    } catch (error) {
+      console.error('❌ Error sending SMS via Twilio:', error);
+      // Don't throw error here as the OTP is already saved in database
+      // The user can still use the OTP even if SMS sending fails
+      console.warn('⚠️ SMS sending failed, but OTP is still valid for verification');
+      throw error; // Re-throw so caller knows SMS failed
+    }
+  }
+
+  /**
+   * Resend OTP (same as sendOTP but with additional validation)
+   */
+  async resendOTP(phoneNumber: string): Promise<PhoneVerificationResponse> {
+    return this.sendOTP(phoneNumber);
+  }
+}
+
+// Export singleton instance
+export const phoneVerificationService = new PhoneVerificationService();
+
+// Helper function to format phone number for display
+export const formatPhoneNumberForDisplay = (phoneNumber: string): string => {
+  if (!phoneNumber) return '';
+  
+  if (phoneNumber.startsWith('+880')) {
+    const number = phoneNumber.slice(4); // Remove +880
+    return `0${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5)}`;
+  }
+  
+  return phoneNumber;
+};
+
+// Helper function to check if phone verification is required
+export const isPhoneVerificationRequired = async (): Promise<boolean> => {
+  const status = await phoneVerificationService.getPhoneVerificationStatus();
+  return !status.phone_verified;
+};

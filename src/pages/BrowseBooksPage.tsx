@@ -489,7 +489,7 @@ const FilterDialog = ({
 };
 
 const BrowseBooksPage = () => {
-  const { user } = useAuth();
+  const { user, isVerified, verificationLoading } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -860,6 +860,81 @@ const fetchBooks = async () => {
       navigate('/login');
       return;
     }
+    
+    // Check if user is verified using AuthContext isVerified state
+    console.log('🔍 Checking user verification status...');
+    console.log('📋 User Info:', {
+      userId: user.id,
+      userEmail: user.email,
+      isVerified: isVerified,
+      verificationLoading: verificationLoading,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Additional debug: Check verification_data directly
+    try {
+      const { data: verificationData, error: verificationError } = await supabase
+        .from('verification_data')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      console.log('📄 Direct verification_data check:', {
+        data: verificationData,
+        error: verificationError,
+        count: verificationData?.length || 0
+      });
+      
+      if (verificationData && verificationData.length > 0) {
+        const record = verificationData[0];
+        console.log('📝 Verification record details:', {
+          is_verified: record.is_verified,
+          status: record.status,
+          name: record.name,
+          roll_no: record.roll_no,
+          reg_no: record.reg_no
+        });
+      } else {
+        console.log('⚠️ No verification record found in database');
+      }
+    } catch (dbError) {
+      console.error('📊 Database check error:', dbError);
+    }
+    
+    // If verification is still loading, wait a moment and check again
+    if (verificationLoading) {
+      console.log('⏳ Verification is still loading, waiting...');
+      toast({
+        title: 'দয়া করে অপেক্ষা করুন',
+        description: 'আপনার ভেরিফিকেশন স্টাটাস চেক করা হচ্ছে...',
+        variant: 'default'
+      });
+      return;
+    }
+    
+    if (!isVerified) {
+      console.log('❌ User is NOT verified according to AuthContext');
+      
+      // TEMPORARY: Development bypass (remove in production)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚧 Development mode: Bypassing verification check');
+        toast({
+          title: 'Development Mode',
+          description: 'ভেরিফিকেশন চেক bypass করা হয়েছে (Development Only)',
+          variant: 'default'
+        });
+        // Continue to message dialog
+      } else {
+        toast({
+          title: 'ভেরিফিকেশন প্রয়োজন',
+          description: 'বিক্রেতার সাথে মেসেজ করতে আপনার অ্যাকাউন্ট ভেরিফাই করা থাকতে হবে।',
+          variant: 'destructive'
+        });
+        navigate('/verification');
+        return;
+      }
+    }
+    
+    console.log('✅ User is verified according to AuthContext - proceeding with message flow');
     
     // Check if user and seller are from the same institution
     if (profile && book.seller_id) {

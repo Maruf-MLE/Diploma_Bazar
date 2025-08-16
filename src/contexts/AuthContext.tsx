@@ -189,6 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
   
+
   // ইমেইল ভেরিফিকেশন পুনরায় পাঠানোর ফাংশন
   const resendVerificationEmail = async () => {
     try {
@@ -375,6 +376,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log("Sign up response:", data);
       
+      // Check for signup errors first
+      if (signUpError) {
+        console.error("Sign up error:", signUpError);
+        throw signUpError
+      }
+
+      if (!data.user) {
+        throw new Error("User data not received from signup")
+      }
+
+      // Verify that the user was actually created in auth.users table
+      console.log("User created with ID:", data.user.id);
+      
       // Check if email confirmation is needed
       if (data?.user?.email_confirmed_at) {
         // এটি ডেভেলপমেন্ট মোডে ওয়ার্নিং দেখাবে, প্রোডাকশনে নয়
@@ -398,61 +412,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setEmailVerified(false);
       }
 
-      if (signUpError) {
-        console.error("Sign up error:", signUpError);
-        throw signUpError
-      }
-
-      if (!data.user) {
-        throw new Error("User data not received")
-      }
-
-      // 2. Create the profile record
-      const profileData = {
-        id: data.user.id,
-        name: userData.name,
-        roll_number: userData.roll_number,
-        semester: userData.semester,
-        department: userData.department,
-        institute_name: userData.institute_name,
-        avatar_url: null
-      }
+      // Wait a moment to ensure user and profile are properly created in database via trigger
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      console.log("Creating profile with data:", profileData);
+      // 2. Verify profile was created by the trigger
+      let profileCreated = false;
+      let retryCount = 0;
+      const maxRetries = 5;
       
-      // Insert profile data using upsert with RLS bypass - using service role client
-      try {
-        // সার্ভিস রোল ব্যবহার করে প্রোফাইল তৈরি করি
-        const adminAuthClient = supabase.auth.admin;
-        
-        // যদি সার্ভিস রোল না থাকে তাহলে সাধারণ ক্লায়েন্ট ব্যবহার করি
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert(profileData, { 
-            onConflict: 'id',
-            ignoreDuplicates: false
-          });
+      while (!profileCreated && retryCount < maxRetries) {
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
           
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-          
-          // যদি RLS এরর হয় তাহলে ইউজারকে সতর্ক করি
-          if (profileError.message.includes('violates row-level security policy')) {
-            console.error("RLS policy error. Please run the fix:profile-rls script");
-            toast({
-              title: "প্রোফাইল তৈরি করতে সমস্যা",
-              description: "RLS পলিসি সমস্যার কারণে প্রোফাইল তৈরি করা যায়নি। অ্যাডমিনকে জানান।",
-              variant: "destructive",
-            });
+          if (profileError) {
+            if (profileError.code === 'PGRST116') {
+              // Profile not found yet, retry
+              console.log(`Profile not created yet, attempt ${retryCount + 1}/${maxRetries}`);
+            } else {
+              console.log(`Profile check attempt ${retryCount + 1} error:`, profileError);
+            }
+          } else if (profile) {
+            console.log("Profile created successfully by trigger:", profile.id);
+            profileCreated = true;
           }
-          
-          throw profileError;
-        } else {
-          console.log("Profile created successfully");
+        } catch (error) {
+          console.log(`Profile check attempt ${retryCount + 1} exception:`, error);
         }
-      } catch (profileError) {
-        console.error("Exception in profile creation:", profileError);
-        throw profileError;
+        
+        if (!profileCreated) {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            console.log(`Waiting before retry ${retryCount + 1}/${maxRetries}...`);
+            await new Promise(resolve => setTimeout(resolve, 800)); // Wait 800ms
+          }
+        }
+      }
+      
+      if (!profileCreated) {
+        console.error("Profile was not created by trigger after", maxRetries, "attempts");
+        toast({
+          title: "প্রোফাইল তৈরি করতে সমস্যা",
+          description: "অটোমেটিক প্রোফাইল তৈরি হয়নি। দয়া করে আবার চেষ্টা করুন অথবা অ্যাডমিনকে জানান।",
+          variant: "destructive",
+        });
+        // Don't throw error, let user continue - they can create profile manually later
+        console.warn("Continuing without profile - user can complete profile later");
       }
 
       return { success: true, error: null }
@@ -461,6 +469,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: false, error }
     }
   }
+
 
   return (
     <AuthContext.Provider value={{ 

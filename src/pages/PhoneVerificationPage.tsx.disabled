@@ -1,0 +1,457 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Smartphone, ArrowLeft, RefreshCw, CheckCircle, Clock, Shield } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { phoneVerificationService, PhoneVerificationResponse } from '@/lib/phoneVerification';
+import { useToast } from '@/components/ui/use-toast';
+
+const PhoneVerificationPage = () => {
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [attemptsRemaining, setAttemptsRemaining] = useState(3);
+  const [developmentOtp, setDevelopmentOtp] = useState(''); // For development only
+
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    // Check if already verified
+    checkVerificationStatus();
+  }, [user, navigate]);
+
+  useEffect(() => {
+    // Timer for OTP expiration
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeft]);
+
+  const checkVerificationStatus = async () => {
+    try {
+      const status = await phoneVerificationService.getPhoneVerificationStatus();
+      if (status.phone_verified) {
+        toast({
+          title: "ফোন যাচাই সম্পন্ন",
+          description: "আপনার ফোন নম্বর ইতিমধ্যে যাচাই করা হয়েছে।",
+          variant: "default",
+        });
+        navigate('/profile');
+      }
+    } catch (error) {
+      console.error('Error checking verification status:', error);
+    }
+  };
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!phoneNumber.trim()) {
+      setError('ফোন নম্বর প্রয়োজন');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await phoneVerificationService.sendOTP(phoneNumber);
+      
+      if (response.success) {
+        setStep('otp');
+        setTimeLeft(600); // 10 minutes
+        setSuccess(response.message || 'OTP পাঠানো হয়েছে');
+        
+        // Store development OTP if available
+        if (response.otp_code) {
+          setDevelopmentOtp(response.otp_code);
+          console.log('🔢 Development OTP received:', response.otp_code);
+          console.log('📱 Phone verification in development mode');
+        } else {
+          console.log('⚠️  No OTP code in response - check database functions');
+        }
+
+        toast({
+          title: "OTP পাঠানো হয়েছে",
+          description: `${phoneNumber} নম্বরে OTP পাঠানো হয়েছে`,
+          variant: "default",
+        });
+      } else {
+        setError(response.error || 'OTP পাঠাতে সমস্যা হয়েছে');
+      }
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      setError('OTP পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) return; // Only allow single digit
+    
+    const newOtp = [...otpCode];
+    newOtp[index] = value;
+    setOtpCode(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+    
+    // Auto-submit when all 6 digits are entered
+    if (newOtp.every(digit => digit) && newOtp.join('').length === 6) {
+      handleOtpSubmit(newOtp.join(''));
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    // Handle backspace to go to previous input
+    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpSubmit = async (code?: string) => {
+    const codeToSubmit = code || otpCode.join('');
+    
+    if (codeToSubmit.length !== 6) {
+      setError('৬ সংখ্যার OTP কোড প্রয়োজন');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await phoneVerificationService.verifyOTP(codeToSubmit);
+      
+      if (response.success) {
+        setSuccess('ফোন নম্বর সফলভাবে যাচাই হয়েছে!');
+        
+        toast({
+          title: "ফোন যাচাই সম্পন্ন",
+          description: "আপনার ফোন নম্বর সফলভাবে যাচাই হয়েছে",
+          variant: "default",
+        });
+
+        // Redirect after short delay
+        setTimeout(() => {
+          navigate('/profile');
+        }, 2000);
+      } else {
+        setError(response.error || 'OTP যাচাই করতে সমস্যা হয়েছে');
+        
+        if (response.attempts_remaining !== undefined) {
+          setAttemptsRemaining(response.attempts_remaining);
+        }
+
+        // Clear OTP inputs for retry
+        setOtpCode(['', '', '', '', '', '']);
+        otpInputRefs.current[0]?.focus();
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      setError('OTP যাচাই করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setResendLoading(true);
+    setError('');
+    
+    try {
+      const response = await phoneVerificationService.resendOTP(phoneNumber);
+      
+      if (response.success) {
+        setTimeLeft(600); // Reset timer
+        setAttemptsRemaining(3); // Reset attempts
+        setSuccess('নতুন OTP পাঠানো হয়েছে');
+        
+        // Store development OTP if available
+        if (response.otp_code) {
+          setDevelopmentOtp(response.otp_code);
+          console.log('🔢 New Development OTP received:', response.otp_code);
+        } else {
+          console.log('⚠️  No OTP code in resend response');
+        }
+
+        toast({
+          title: "নতুন OTP পাঠানো হয়েছে",
+          description: "আপনার ফোনে নতুন OTP পাঠানো হয়েছে",
+          variant: "default",
+        });
+      } else {
+        setError(response.error || 'OTP পাঠাতে সমস্যা হয়েছে');
+      }
+    } catch (error) {
+      console.error('Error resending OTP:', error);
+      setError('OTP পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const formatPhoneNumber = (phone: string): string => {
+    // Format for display: +880 1X XXX XXXX
+    if (phone.startsWith('+880')) {
+      const number = phone.slice(4);
+      return `+880 ${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5)}`;
+    }
+    return phone;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-xl border-0">
+          <CardHeader className="text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+              <Smartphone className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold">
+                {step === 'phone' ? 'ফোন যাচাইকরণ' : 'OTP যাচাইকরণ'}
+              </CardTitle>
+              <CardDescription className="text-base">
+                {step === 'phone' 
+                  ? 'নিরাপত্তার জন্য আপনার ফোন নম্বর যাচাই করুন'
+                  : `${formatPhoneNumber(phoneNumber)} নম্বরে পাঠানো OTP প্রবেশ করুন`
+                }
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {/* Phone Number Step */}
+            {step === 'phone' && (
+              <form onSubmit={handlePhoneSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                    ফোন নম্বর
+                  </label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="01XXXXXXXXX বা +8801XXXXXXXXX"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="text-center text-lg"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-500 text-center">
+                    বাংলাদেশী মোবাইল নম্বর ব্যবহার করুন
+                  </p>
+                </div>
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading || !phoneNumber.trim()}
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      OTP পাঠানো হচ্ছে...
+                    </>
+                  ) : (
+                    <>
+                      <Smartphone className="mr-2 h-4 w-4" />
+                      OTP পাঠান
+                    </>
+                  )}
+                </Button>
+              </form>
+            )}
+
+            {/* OTP Verification Step */}
+            {step === 'otp' && (
+              <div className="space-y-6">
+                {/* SMS Status Feedback */}
+                {success && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      <div className="space-y-1">
+                        <div><strong>✅ SMS পাঠানো হয়েছে!</strong></div>
+                        <div className="text-sm">{formatPhoneNumber(phoneNumber)} নম্বরে OTP পাঠানো হয়েছে</div>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                {/* Development OTP Display */}
+                {developmentOtp && (
+                  <Alert className="border-orange-200 bg-orange-50">
+                    <Shield className="h-4 w-4 text-orange-600" />
+                    <AlertDescription className="text-orange-800">
+                      <div className="space-y-2">
+                        <div><strong>🔧 Development/Fallback Mode</strong></div>
+                        <div className="text-lg">
+                          OTP Code: <span className="font-mono font-bold text-xl bg-orange-200 px-2 py-1 rounded">{developmentOtp}</span>
+                        </div>
+                        <div className="text-sm text-orange-700">
+                          ⚠️ SMS সার্ভিস বন্ধ বা সমস্যা আছে। উপরের কোড ব্যবহার করুন।
+                        </div>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Timer */}
+                {timeLeft > 0 && (
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-1 text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                      <Clock className="h-4 w-4" />
+                      <span>মেয়াদ শেষ: {formatTime(timeLeft)}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* OTP Input */}
+                <div className="space-y-4">
+                  <div className="flex justify-center gap-2">
+                    {otpCode.map((digit, index) => (
+                      <Input
+                        key={index}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value.replace(/\D/g, ''))}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className="w-12 h-12 text-center text-xl font-bold border-2"
+                        disabled={loading}
+                      />
+                    ))}
+                  </div>
+
+                  {attemptsRemaining < 3 && (
+                    <p className="text-sm text-orange-600 text-center">
+                      {attemptsRemaining} টি চেষ্টা বাকি
+                    </p>
+                  )}
+                </div>
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                {success && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      {success}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Verify Button */}
+                <Button
+                  onClick={() => handleOtpSubmit()}
+                  className="w-full"
+                  disabled={loading || otpCode.some(digit => !digit)}
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      যাচাই করা হচ্ছে...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      OTP যাচাই করুন
+                    </>
+                  )}
+                </Button>
+
+                {/* Resend OTP */}
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-gray-600">
+                    OTP পাননি?
+                  </p>
+                  <Button
+                    variant="ghost"
+                    onClick={handleResendOtp}
+                    disabled={resendLoading || timeLeft > 540} // Allow resend in last 1 minute
+                    className="text-primary hover:text-primary/80"
+                  >
+                    {resendLoading ? (
+                      <>
+                        <RefreshCw className="mr-1 h-4 w-4 animate-spin" />
+                        পাঠানো হচ্ছে...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="mr-1 h-4 w-4" />
+                        আবার OTP পাঠান
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Back Button */}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setStep('phone');
+                    setOtpCode(['', '', '', '', '', '']);
+                    setError('');
+                    setSuccess('');
+                    setTimeLeft(0);
+                  }}
+                  className="w-full"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  ফোন নম্বর পরিবর্তন করুন
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Security Note */}
+        <div className="mt-6 text-center text-sm text-gray-600">
+          <p>আপনার তথ্য সুরক্ষিত এবং কেবলমাত্র যাচাইকরণের জন্য ব্যবহৃত হবে</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PhoneVerificationPage;

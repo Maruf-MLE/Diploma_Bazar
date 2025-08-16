@@ -47,6 +47,11 @@ import { usePushNotifications } from "./hooks/usePushNotifications";
 import FallbackNotification from "@/components/FallbackNotification";
 import { initSafariNotificationFix } from "@/lib/safariNotificationFix";
 
+// Debug utility for development
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/debugVerification');
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

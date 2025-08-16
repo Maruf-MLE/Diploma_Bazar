@@ -46,13 +46,13 @@ export default function VerifyEmailPage() {
         setVerificationStatus("success");
         toast({
           title: "ইমেইল ভেরিফাই সম্পন্ন হয়েছে",
-          description: "আপনার ইমেইল সফলভাবে ভেরিফাই করা হয়েছে।",
+          description: "এখন আপনি সাইটের সব ফিচার ব্যবহার করতে পারবেন।",
         });
         
-        // ২ সেকেন্ড পর হোম পেজে রিডাইরেক্ট করি
+        // ৩ সেকেন্ড পর হোম পেজে রিডাইরেক্ট করি
         setTimeout(() => {
           navigate("/");
-        }, 2000);
+        }, 3000);
         
         return;
       } else if (status === "pending") {
@@ -135,13 +135,13 @@ export default function VerifyEmailPage() {
                 setVerificationStatus("success");
                 toast({
                   title: "ইমেইল ভেরিফাই সম্পন্ন হয়েছে",
-                  description: "আপনার ইমেইল সফলভাবে ভেরিফাই করা হয়েছে।",
+                  description: "এখন আপনি সাইটের সব ফিচার ব্যবহার করতে পারবেন।",
                 });
                 
-                // ৫ সেকেন্ড পর হোম পেজে রিডাইরেক্ট করি
+                // ৩ সেকেন্ড পর হোম পেজে রিডাইরেক্ট করি
                 setTimeout(() => {
                   navigate("/");
-                }, 5000);
+                }, 3000);
                 
                 return;
               } else {
@@ -178,6 +178,14 @@ export default function VerifyEmailPage() {
         
         if (isVerified) {
           setVerificationStatus("success");
+          // ইমেইল ইতিমধ্যে ভেরিফাইড হলে হোম পেজে যান
+          toast({
+            title: "ইমেইল ভেরিফাই করা আছে",
+            description: "আপনি ইতিমধ্যে সাইটের সব ফিচার ব্যবহার করতে পারেন।",
+          });
+          setTimeout(() => {
+            navigate("/");
+          }, 2000);
         } else {
           // Double check with direct method
           const directlyVerified = await checkEmailVerificationDirectly();
@@ -348,7 +356,7 @@ export default function VerifyEmailPage() {
               <CheckCircle className="h-5 w-5 text-green-600" />
               <AlertTitle className="text-green-800">সফল!</AlertTitle>
               <AlertDescription className="text-green-700">
-                আপনার ইমেইল সফলভাবে ভেরিফাই করা হয়েছে। আপনি কয়েক সেকেন্ডের মধ্যে হোম পেজে রিডাইরেক্ট হবেন।
+                আপনার ইমেইল সফলভাবে ভেরিফাই করা হয়েছে। এখন আপনি সাইটের সব ফিচার ব্যবহার করতে পারবেন। কয়েক সেকেন্ডের মধ্যে হোম পেজে রিডাইরেক্ট হবেন।
               </AlertDescription>
             </Alert>
           ) : verificationStatus === "error" ? (

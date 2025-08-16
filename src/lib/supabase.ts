@@ -216,42 +216,52 @@ export const getUserVerificationStatus = async (userId: string) => {
       return { isVerified: false, error: 'User ID is required' };
     }
     
-    console.log('Checking verification status for user:', userId);
+    console.log('🔍 Checking verification status for user:', userId);
     
     // Check verification_data table directly (using the new table structure)
     const { data: verificationData, error: verificationError } = await supabase
       .from('verification_data')
-      .select('is_verified, status, name, roll_no, reg_no')
-      .eq('user_id', userId)
-      .maybeSingle(); // Use maybeSingle() to handle missing records
+      .select('*')
+      .eq('user_id', userId);
     
     if (verificationError) {
-      console.error('Error checking verification_data:', verificationError);
+      console.error('❌ Error checking verification_data:', verificationError);
       return { isVerified: false, error: verificationError.message };
     }
     
+    console.log('📊 Verification query result:', {
+      recordCount: verificationData?.length || 0,
+      records: verificationData
+    });
+    
     // If no verification record exists
-    if (!verificationData) {
-      console.log('No verification record found for user:', userId);
+    if (!verificationData || verificationData.length === 0) {
+      console.log('⚠️ No verification record found for user:', userId);
       return { isVerified: false, error: null };
     }
     
-    // Check verification status
-    const isUserVerified = verificationData.is_verified === true;
+    // Get the first (and should be only) record
+    const record = verificationData[0];
     
-    console.log('Verification check result:', {
+    // Check verification status with detailed logging
+    const isUserVerified = record.is_verified === true;
+    
+    console.log('📋 Verification check result:', {
       userId,
+      recordId: record.id,
       isVerified: isUserVerified,
-      status: verificationData.status,
-      hasName: !!verificationData.name,
-      hasRollNo: !!verificationData.roll_no,
-      hasRegNo: !!verificationData.reg_no
+      is_verified_value: record.is_verified,
+      is_verified_type: typeof record.is_verified,
+      status: record.status,
+      hasName: !!record.name,
+      hasRollNo: !!record.roll_no,
+      hasRegNo: !!record.reg_no
     });
     
     return { isVerified: isUserVerified, error: null };
     
   } catch (error) {
-    console.error('Error getting user verification status:', error);
+    console.error('💥 Error getting user verification status:', error);
     return { isVerified: false, error };
   }
 };
