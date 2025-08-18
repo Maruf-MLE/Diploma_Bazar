@@ -39,7 +39,7 @@ const HeroSection = () => {
                 </h1>
                 
                 <p className="text-lg text-foreground/80 leading-relaxed max-w-lg font-medium">
-                বই খোঁজার ঝামেলা শেষ,পলিটেকনিক শিক্ষার্থীদের জন্য দেশের প্রথম প্রিমিয়াম বুক এক্সচেঞ্জ।
+                বই খোঁজার ঝামেলা শেষ,পলিটেকনিক শিক্ষার্থীদের জন্য দেশের প্রথম প্রিমিয়াম বুক এক্সচেঞ্জ প্ল্যাটফর্ম।
                 বই খুঁজুন, কিনুন, বিক্রি করুন — সব নিরাপদে।
                 </p>
               </div>
@@ -61,7 +61,7 @@ const HeroSection = () => {
                   }}
                 >
                   <Play className="mr-2 h-5 w-5" />
-                  <span className="hidden sm:inline">ডেমো ভিডিও দেখুন</span>
+                  <span className="hidgden sm:inline">ডেমো ভিডিও দেখুন</span>
                   <span className="sm:hidden">ডেমো ভিডিও</span>
                 </Button>
               </div>

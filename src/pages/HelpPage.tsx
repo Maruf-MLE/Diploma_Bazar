@@ -58,7 +58,7 @@ export default function HelpPage() {
           </div>
           <h1 className="text-3xl font-bold">সাহায্য ও সহযোগিতা কেন্দ্র</h1>
           <p className="text-gray-500 mt-2 max-w-lg">
-            আপনার যেকোনো প্রশ্নের উত্তর এবং বই এক্সচেঞ্জ প্ল্যাটফর্ম সম্পর্কে সহায়তা পেতে এখানে আছে
+            আপনার যেকোনো প্রশ্নের উত্তর এবং ডিপ্লোমা বাজার প্ল্যাটফর্ম সম্পর্কে সহায়তা পেতে এখানে আছে
           </p>
           
           {/* Search bar */}
@@ -84,10 +84,10 @@ export default function HelpPage() {
               
               <Accordion type="single" collapsible className="w-full border rounded-lg">
                 <AccordionItem value="item-1" className="border-b">
-                  <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">বই এক্সচেঞ্জ প্ল্যাটফর্ম কিভাবে কাজ করে?</AccordionTrigger>
+                  <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">বই ডিপ্লোমা বাজার কিভাবে কাজ করে?</AccordionTrigger>
                   <AccordionContent className="px-4 pb-3">
                     <p className="text-gray-600">
-                      আমাদের প্ল্যাটফর্ম শিক্ষার্থীদের মধ্যে বই কেনাবেচা সহজ করে। বিক্রেতারা তাদের ব্যবহৃত বই তালিকাভুক্ত করতে পারেন, 
+                      আমাদের ডিপ্লোমা বাজার শিক্ষার্থীদের মধ্যে বই কেনাবেচা সহজ করে। বিক্রেতারা তাদের ব্যবহৃত বই তালিকাভুক্ত করতে পারেন, 
                       এবং ক্রেতারা সহজেই সেগুলি খুঁজে পেতে পারেন। আপনি বই বিক্রি করার জন্য 'বই বিক্রি করুন' বাটনে ক্লিক করুন, 
                       অথবা বই খুঁজতে 'বই খুঁজুন' বিভাগে যান।
                     </p>
@@ -387,7 +387,7 @@ export default function HelpPage() {
                   <div className="space-y-2 pt-4 border-t border-gray-100">
                     <h3 className="text-lg font-medium">আমাদের সম্পর্কে</h3>
                     <p className="text-gray-600">
-                      বই চাপা বাজার হল বাংলাদেশের শিক্ষার্থীদের মধ্যে বই আদান-প্রদান সহজ করার একটি প্ল্যাটফর্ম। 
+                      বই ডিপ্লোমা বাজার হল বাংলাদেশের শিক্ষার্থীদের মধ্যে বই আদান-প্রদান সহজ করার একটি প্ল্যাটফর্ম। 
                       আমরা শিক্ষার্থীদের মধ্যে নিরাপদ ও সহজ উপায়ে ব্যবহৃত বই কেনাবেচা করার সুযোগ তৈরি করি।
                     </p>
                   </div>

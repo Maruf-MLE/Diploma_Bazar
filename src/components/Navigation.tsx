@@ -272,7 +272,7 @@ const Navigation = () => {
             <Link to="/" className="flex items-center space-x-3">
               <BookOpen className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold gradient-text">
-                বুক এক্সচেঞ্জ
+                ডিপ্লোমা বাজার
               </span>
             </Link>
 
@@ -512,7 +512,7 @@ const Navigation = () => {
             <div className="p-5 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <BookOpen className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold gradient-text">বুক এক্সচেঞ্জ</span>
+                <span className="text-lg font-bold gradient-text">ডিপ্লোমা বাজার</span>
               </div>
               <Button
                 variant="ghost"
