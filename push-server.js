@@ -29,7 +29,7 @@ app.use(bodyParser.json());
 // Configure VAPID keys
 webpush.setVapidDetails(
   'mailto:admin@example.com',
-  process.env.VAPID_PUBLIC_KEY,
+  process.env.VITE_VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 );
 

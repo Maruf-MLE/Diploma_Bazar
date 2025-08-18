@@ -13,7 +13,7 @@ const Footer = () => {
             <div className="flex items-center space-x-2 mb-3 md:mb-4">
               <BookOpen className="h-6 w-6 md:h-7 md:w-7 text-primary" />
               <span className="text-xl md:text-2xl font-bold gradient-text">
-                বুক এক্সচেঞ্জ
+                ডিপ্লোমা বাজার
               </span>
             </div>
             <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 max-w-md leading-relaxed">
@@ -148,7 +148,7 @@ const Footer = () => {
         <div className="border-t border-gray-100 px-4 md:px-6 py-4 md:py-5 lg:px-8 bg-gradient-to-r from-primary/5 to-accent/5">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-600 text-xs md:text-sm mb-3 md:mb-0 text-center md:text-left">
-              © ২০২৫ বুক এক্সচেঞ্জ। সমস্ত অধিকার সংরক্ষিত।
+              © ২০২৫ ডিপ্লোমা বাজার। সমস্ত অধিকার সংরক্ষিত।
             </div>
             <div className="flex flex-wrap justify-center md:justify-end space-x-3 md:space-x-6 text-xs md:text-sm">
               <Link to="/privacy-policy" className="text-gray-600 hover:text-primary transition-colors">

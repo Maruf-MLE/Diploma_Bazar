@@ -46,6 +46,8 @@ import { useBanStatusListener } from "./hooks/useBanStatusListener";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 import FallbackNotification from "@/components/FallbackNotification";
 import { initSafariNotificationFix } from "@/lib/safariNotificationFix";
+import NotificationPermissionRequest from "@/components/NotificationPermissionRequest";
+import NotificationReminder from "@/components/NotificationReminder";
 
 // Debug utility for development
 
@@ -171,6 +173,10 @@ const AppContent = () => {
       <MessageToaster />
       {/* Fallback notification for unsupported browsers */}
       <FallbackNotification show={!!user} />
+      {/* Notification permission request */}
+      <NotificationPermissionRequest autoRequest={true} />
+      {/* Persistent notification reminder for users who don't enable */}
+      <NotificationReminder />
       <BannedUserCheck>
         <Routes>
           <Route path="/" element={<Index />} />
