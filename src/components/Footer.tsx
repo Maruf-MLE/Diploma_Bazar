@@ -148,7 +148,7 @@ const Footer = () => {
         <div className="border-t border-gray-100 px-4 md:px-6 py-4 md:py-5 lg:px-8 bg-gradient-to-r from-primary/5 to-accent/5">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-600 text-xs md:text-sm mb-3 md:mb-0 text-center md:text-left">
-              © ২০২৪ বুক এক্সচেঞ্জ। সমস্ত অধিকার সংরক্ষিত।
+              © ২০২৫ বুক এক্সচেঞ্জ। সমস্ত অধিকার সংরক্ষিত।
             </div>
             <div className="flex flex-wrap justify-center md:justify-end space-x-3 md:space-x-6 text-xs md:text-sm">
               <Link to="/privacy-policy" className="text-gray-600 hover:text-primary transition-colors">
