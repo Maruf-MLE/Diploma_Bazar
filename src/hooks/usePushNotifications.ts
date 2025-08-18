@@ -113,12 +113,17 @@ export function usePushNotifications(userId?: string) {
       }
     }
     
-    // Check for VAPID key
+    // Check for VAPID key with detailed logging
     if (!PUBLIC_KEY) {
       console.error('❌ VAPID public key not found in environment variables');
+      console.log('📋 Current environment variables:');
+      console.log('- VITE_VAPID_PUBLIC_KEY:', import.meta.env.VITE_VAPID_PUBLIC_KEY ? 'Present' : 'Missing');
+      console.log('- VITE_PUSH_SERVER_URL:', import.meta.env.VITE_PUSH_SERVER_URL || 'Not set');
+      console.log('💡 Please check your .env file and restart the development server');
       return;
     }
 
+    console.log('✅ VAPID key found, setting up push notifications...');
     setupPushNotifications();
   }, [userId]);
 

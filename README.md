@@ -195,3 +195,38 @@ npm run dev
 - **Service worker not registering**: Ensure your site is served over HTTPS in production
 
 For detailed instructions, see `PUSH_SERVER_DEPLOYMENT.md`
+
+## 🔔 Notification System Quick Fix
+
+If you're experiencing notification issues (VAPID key errors, permission not requested), run:
+
+```bash
+# Complete notification system fix
+npm run fix:notifications-complete
+
+# Test notification configuration
+npm run test:notifications
+
+# Start development with notifications
+npm run dev
+# In another terminal:
+npm run push-server
+```
+
+### Common Notification Issues:
+
+1. **"VAPID public key not found" error**:
+   - `.env` file missing or incorrect
+   - Restart development server after creating `.env`
+   - Clear browser cache
+
+2. **Permission not requested**:
+   - Make sure you're logged in
+   - Check browser console for errors
+   - Try incognito mode
+   - Test in different browser
+
+3. **Service worker issues**:
+   - Clear browser storage
+   - Unregister old service workers
+   - Check browser DevTools > Application > Service Workers

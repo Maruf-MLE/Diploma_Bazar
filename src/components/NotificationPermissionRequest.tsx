@@ -41,18 +41,19 @@ const NotificationPermissionRequest: React.FC<NotificationPermissionRequestProps
     const hasBeenDismissed = localStorage.getItem('notification-prompt-dismissed') === 'true';
     
     if (currentPermission === 'default' && !hasBeenDismissed && !dismissed) {
-      // Show prompt after a small delay to not interrupt page loading
+      // Show prompt immediately for better user experience
       setTimeout(() => {
         setShowPrompt(true);
-      }, 2000);
+      }, 1000);
     }
 
     // Auto request if enabled and permission is default
     if (autoRequest && currentPermission === 'default' && !hasBeenDismissed) {
-      // Wait a bit before auto-requesting to let page load
+      // Auto-request immediately after a short delay
       setTimeout(async () => {
+        console.log('🔔 Auto-requesting notification permission...');
         await requestPermission();
-      }, 1500);
+      }, 2000);
     }
   };
 

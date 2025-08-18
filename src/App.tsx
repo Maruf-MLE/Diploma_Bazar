@@ -174,7 +174,7 @@ const AppContent = () => {
       {/* Fallback notification for unsupported browsers */}
       <FallbackNotification show={!!user} />
       {/* Notification permission request */}
-      <NotificationPermissionRequest autoRequest={true} />
+      <NotificationPermissionRequest autoRequest={!!user} />
       {/* Persistent notification reminder for users who don't enable */}
       <NotificationReminder />
       <BannedUserCheck>

@@ -59,7 +59,9 @@
     "migrate:verification-table": "node run_verification_table_migration.js",
     "update:verification-helpers": "echo 'Please run update_existing_verification_table.sql in Supabase SQL Editor'",
     "test:database": "node test-database-functions.js",
-    "disable:phone-verification": "node disable_phone_verification.cjs"
+    "disable:phone-verification": "node disable_phone_verification.cjs",
+    "test:notifications": "node test-notification-fix.js",
+    "fix:notifications-complete": "node complete-notification-fix.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
