@@ -1,7 +1,45 @@
+User-agent: *
+Allow: /
+
+# High priority pages for all crawlers
+Allow: /browse
+Allow: /all-departments
+Allow: /sell-book
+Allow: /help
+Allow: /register
+Allow: /login
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /cookie-policy
+
+# Block admin and private pages
+Disallow: /admin/
+Disallow: /admin/*
+Disallow: /messages
+Disallow: /profile
+Disallow: /settings
+Disallow: /verification
+Disallow: /verification-step2
+Disallow: /purchase-request/
+Disallow: /message-redirect
+Disallow: /banned
+Disallow: /email-confirmation
+Disallow: /verify-email-confirm
+Disallow: /auth/callback
+Disallow: /verification/details/
+Disallow: /verification/approved/
+
+# Block API endpoints if any
+Disallow: /api/
+
+# Allow specific search engine bots
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
 Allow: /
 
 User-agent: Twitterbot
@@ -10,7 +48,18 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
 
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Sitemap location
 Sitemap: https://diplomabazar.vercel.app/sitemap.xml
+
+# Crawl delay to be respectful
+Crawl-delay: 1
