@@ -61,8 +61,7 @@ const HeroSection = () => {
                   }}
                 >
                   <Play className="mr-2 h-5 w-5" />
-                  <span className="hidgden sm:inline">ডেমো ভিডিও দেখুন</span>
-                  <span className="sm:hidden">ডেমো ভিডিও</span>
+                  ডেমো ভিডিও দেখুন
                 </Button>
               </div>
               

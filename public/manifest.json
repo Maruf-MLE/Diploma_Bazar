@@ -1,6 +1,6 @@
 {
-  "name": "Book Exchange",
-  "short_name": "BookX",
+  "name": "Diploma Bazar",
+  "short_name": "Diploma Bazar",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
