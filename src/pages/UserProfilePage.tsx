@@ -151,7 +151,7 @@ const UserProfilePage = () => {
     }
   };
 
-  // Fetch user's reviews with more detailed logging
+  // Fetch user's reviews - using exact same logic as ProfilePage
   const fetchReviews = async (userId: string) => {
     try {
       setLoadingReviews(true);
@@ -173,6 +173,12 @@ const UserProfilePage = () => {
       if (!sellerReviews || sellerReviews.length === 0) {
         console.log('No reviews found for this user');
         setReviews([]);
+        // Set zero ratings when no reviews
+        setUserData(prevData => ({
+          ...prevData,
+          totalReviews: 0,
+          rating: 0
+        }));
         return;
       }
       
@@ -216,6 +222,21 @@ const UserProfilePage = () => {
       
       console.log('Reviews with profiles:', reviewsWithProfiles);
       setReviews(reviewsWithProfiles);
+
+      // Calculate average rating - EXACT same logic as ProfilePage
+      const averageRating =
+        reviewsWithProfiles.length > 0
+          ?
+            reviewsWithProfiles.reduce((sum, r) => sum + (r.rating ?? 0), 0) /
+              reviewsWithProfiles.length
+          : 0;
+      
+      // Update review stats in userData - same as ProfilePage
+      setUserData(prevData => ({
+        ...prevData,
+        totalReviews: reviewsWithProfiles.length,
+        rating: Number(averageRating.toFixed(1))
+      }));
       
     } catch (error) {
       console.error('Error in fetchReviews:', error);
@@ -225,6 +246,12 @@ const UserProfilePage = () => {
         variant: 'destructive',
       });
       setReviews([]);
+      // Set zero ratings on error
+      setUserData(prevData => ({
+        ...prevData,
+        totalReviews: 0,
+        rating: 0
+      }));
     } finally {
       setLoadingReviews(false);
     }
@@ -267,8 +294,8 @@ const UserProfilePage = () => {
             semester: profile.semester || '',
             roll_number: profile.roll_number || '',
             avatar_url: profile.avatar_url || '/placeholder.svg',
-            rating: profile.avg_rating || 0,
-            totalReviews: profile.review_count || 0,
+            rating: profile.avg_rating || 0, // Initial value from profile
+            totalReviews: profile.review_count || 0, // Initial value from profile
             totalPosts: 0,
             totalSold: 0,
             isVerified: isVerified
@@ -410,15 +437,15 @@ const UserProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-[#EEF4FF]">
       <Navigation />
       
       <div className="container mx-auto px-4 pt-24 pb-12">
         {/* Hero Section - Similar to ProfilePage */}
-        <div className="relative mb-12">
+        <div className="relative mb-12 bg-blue-200 p-4 shadow-lg rounded-b-lg sm:rounded-xl">
           {/* Profile content container */}
           <div className="mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 md:p-8">
+            <div className="bg-[#EEF4FF] rounded-lg sm:rounded-2xl shadow-xl border border-gray-50 p-4 sm:p-6 md:p-8">
               <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
                 {/* Avatar section */}
                 <div className="relative">
@@ -437,19 +464,19 @@ const UserProfilePage = () => {
                       <h1 className="text-2xl md:text-3xl font-bold">{userData.name}</h1>
                       <div className="flex items-center justify-center md:justify-start mt-2 gap-2">
                         {userData.isVerified ? (
-                          <Badge className="bg-green-500 hover:bg-green-600 text-white border-0">
+                          <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-sm">
                             <Check className="h-3 w-3 mr-1" /> ভেরিফায়েড
                           </Badge>
                         ) : (
-                          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white border-0">
+                          <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-sm">
                             <FileCheck className="h-3 w-3 mr-1" /> ভেরিফায়েড নয়
                           </Badge>
                         )}
-                        <div className="flex items-center bg-yellow-50 dark:bg-yellow-900/20 rounded-full px-3 py-1 border border-yellow-200 dark:border-yellow-800/50">
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 mr-1" />
-                          <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">{userData.rating.toFixed(1)}</span>
-                          <span className="text-xs text-yellow-600/70 dark:text-yellow-500/70 ml-1">({userData.totalReviews} রিভিউ)</span>
-                  </div>
+                        <div className="flex items-center bg-amber-50 rounded-full px-3 py-1 border border-amber-200">
+                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-amber-500 fill-amber-400 mr-1" />
+                          <span className="text-sm font-semibold text-amber-700">{userData.rating}</span>
+                          <span className="text-xs text-amber-600/80 ml-1">({userData.totalReviews} রিভিউ)</span>
+                        </div>
                 </div>
                     </div>
                     
@@ -531,13 +558,13 @@ const UserProfilePage = () => {
             </div>
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">গড় রেটিং</div>
-              <div className="text-2xl font-bold">{userData.rating.toFixed(1)} <span className="text-sm font-normal">({userData.totalReviews})</span></div>
+              <div className="text-2xl font-bold">{userData.rating} <span className="text-sm font-normal">({userData.totalReviews})</span></div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-50 p-6">
           <Tabs defaultValue={activeTab} value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid grid-cols-3 mb-6 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
               <TabsTrigger value="mybooks" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-md">

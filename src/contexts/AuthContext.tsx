@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [verificationLoading, setVerificationLoading] = useState(true)
   const [emailVerified, setEmailVerified] = useState(false)
   const banCheckIntervalRef = useRef<number | null>(null)
+  const verificationCheckedRef = useRef(false)
   const { toast } = useToast()
   
   // Sign out function
@@ -71,11 +72,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // ইউজার ভেরিফিকেশন স্টেটাস চেক করার ফাংশন
-  const checkVerification = async () => {
+  const checkVerification = async (forceCheck = false) => {
     if (!user) {
       console.log('checkVerification: No user found')
       setIsVerified(false)
       setVerificationLoading(false)
+      verificationCheckedRef.current = false
+      return
+    }
+    
+    // Avoid unnecessary checks if already checked and not forcing
+    if (!forceCheck && verificationCheckedRef.current) {
+      console.log('checkVerification: Already checked for this user, skipping...')
       return
     }
     
@@ -91,6 +99,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('checkVerification: User verification status:', isVerified)
         setIsVerified(isVerified)
       }
+      
+      verificationCheckedRef.current = true
     } catch (error) {
       console.error('Error in verification check:', error)
       setIsVerified(false)
@@ -293,14 +303,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('Error checking initial verification status:', error);
               setIsVerified(false);
             } else {
-              console.log('Initial verification status:', isVerified);
+            console.log('Initial verification status:', isVerified);
               setIsVerified(isVerified);
             }
             setVerificationLoading(false);
+            verificationCheckedRef.current = true;
           } catch (error) {
             console.error('Error in initial verification check:', error);
             setIsVerified(false);
             setVerificationLoading(false);
+            verificationCheckedRef.current = false;
           }
           
           // Check other statuses
@@ -326,8 +338,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('User authenticated:', session.user.id);
         setUser(session.user);
         
-        // Check verification status if user exists
-        checkVerification();
+        // Check verification status if user exists (only if not already checked)
+        if (!verificationCheckedRef.current) {
+          checkVerification();
+        }
         checkBanStatus();
         checkEmailVerified();
       } else {
@@ -338,6 +352,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsBanned(false);
         setBanInfo(null);
         setEmailVerified(false);
+        verificationCheckedRef.current = false;
       }
       
       setLoading(false);

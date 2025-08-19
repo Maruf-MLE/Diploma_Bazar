@@ -61,15 +61,15 @@ export const useVerificationCheck = () => {
       return false;
     }
     
-    // আগে লোকাল স্টেট চেক করি
+    // If verified already, return true immediately
     if (isVerified) {
       console.log('User is verified, allowing action');
       return true;
     }
     
-    // সব অ্যাকশনের জন্য কঠোর ভেরিফিকেশন চেক প্রয়োজন
     console.log(`Checking verification for action: ${actionType}`);
     
+    // Do a direct verification check to avoid race conditions
     const { allowed, message, error } = await checkVerificationRequired(userId, actionType);
     
     if (error) {
