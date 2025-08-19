@@ -35,13 +35,14 @@ interface VerificationData {
   name: string;
   roll_no: string;
   reg_no: string;
+  department: string | null;
+  institute_name: string | null;
   document_url: string;
   created_at: string;
   updated_at: string;
   photo_url: string | null;
   status: string | null;
   is_verified: boolean;
-  institute_name: string | null;
 }
 
 const AdminVerificationPage = () => {
@@ -170,72 +171,62 @@ const AdminVerificationPage = () => {
       
       console.log('Fetching verification data...');
       
-      // প্রথমে combined function দিয়ে চেষ্টা করি
-      let { data, error } = await supabase
-        .rpc('get_combined_verification_data');
+      // সরাসরি verification_data table থেকে ডেটা নেই (সবচেয়ে reliable)
+      const { data: directData, error: directError } = await supabase
+        .from('verification_data')
+        .select(`
+          id,
+          user_id,
+          name,
+          roll_no,
+          reg_no,
+          department,
+          institute_name,
+          document_url,
+          is_verified,
+          created_at,
+          updated_at,
+          status
+        `)
+        .order('created_at', { ascending: false });
       
-      // যদি main function কাজ না করে, তাহলে simple function চেষ্টা করি
-      if (error || !data) {
-        console.log('Main function failed, trying simple function...', error);
+      if (directError) {
+        console.error('Direct query failed:', directError);
+        throw directError;
+      }
+      
+      console.log('Raw data from database:', directData);
+      
+      // Direct query ডেটা format করি
+      const formattedData = directData?.map(item => {
+        console.log('Processing item:', {
+          id: item.id.substring(0, 8),
+          department: item.department,
+          institute_name: item.institute_name,
+          name: item.name
+        });
         
-        // Simple function চেষ্টা করি
-        const { data: simpleData, error: simpleError } = await supabase
-          .rpc('get_verification_data_simple');
-        
-        if (!simpleError && simpleData) {
-          console.log(`Simple function successful! Found ${simpleData.length} records`);
-          setVerificationData(simpleData);
-          return;
-        }
-        
-        console.log('Simple function also failed, trying direct query...', simpleError);
-        
-        // Direct query করি verification_data থেকে (last resort)
-        const { data: directData, error: directError } = await supabase
-          .from('verification_data')
-          .select(`
-            id,
-            user_id,
-            name,
-            roll_no,
-            reg_no,
-            document_url,
-            is_verified,
-            created_at,
-            updated_at,
-            status
-          `)
-          .order('created_at', { ascending: false });
-        
-        if (directError) {
-          console.error('Direct query also failed:', directError);
-          throw new Error('সমস্ত ডেটা লোডিং পদ্ধতি ব্যর্থ হয়েছে');
-        }
-        
-        // Direct query ডেটা format করি - শুধু existing columns ব্যবহার
-        const formattedData = directData?.map(item => ({
+        return {
           id: item.id,
           user_id: item.user_id,
           email: '', // খালি রাখি
           name: item.name || 'অজানা',
           roll_no: item.roll_no || '',
           reg_no: item.reg_no || '',
+          department: item.department || '',
+          institute_name: item.institute_name || '',
           document_url: item.document_url || '',
           created_at: item.created_at,
           updated_at: item.updated_at,
           photo_url: '', // খালি রাখি  
-          status: item.status || 'pending', // existing column থেকে নেই
-          is_verified: item.is_verified || false,
-          institute_name: '' // খালি রাখি
-        })) || [];
-        
-        console.log(`Direct query successful! Found ${formattedData.length} records`);
-        setVerificationData(formattedData);
-        return;
-      }
+          status: item.status || 'pending',
+          is_verified: item.is_verified || false
+        };
+      }) || [];
       
-      console.log(`Main function successful! Found ${data?.length || 0} records`);
-      setVerificationData(data || []);
+      console.log(`Direct query successful! Found ${formattedData.length} records`);
+      console.log('Sample formatted data:', formattedData.slice(0, 2));
+      setVerificationData(formattedData);
       
     } catch (error) {
       console.error('Error fetching verification data:', error);
@@ -260,6 +251,7 @@ const AdminVerificationPage = () => {
     (data.name?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
     (data.roll_no?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
     (data.reg_no?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
+    (data.department?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
     (data.institute_name?.toLowerCase().includes(searchTerm.toLowerCase()) || '')
   );
 
@@ -300,6 +292,27 @@ const AdminVerificationPage = () => {
           </div>
         </div>
         
+        {/* Debug info - show data statistics */}
+        {verificationData.length > 0 && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="text-blue-800 font-medium mb-2">📊 ডেটা পরিসংখ্যান</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="text-blue-700">
+                <span className="font-medium">মোট রেকর্ড:</span> {verificationData.length}
+              </div>
+              <div className="text-blue-700">
+                <span className="font-medium">বিভাগ সহ:</span> {verificationData.filter(d => d.department && d.department.trim() !== '').length}
+              </div>
+              <div className="text-blue-700">
+                <span className="font-medium">প্রতিষ্ঠান সহ:</span> {verificationData.filter(d => d.institute_name && d.institute_name.trim() !== '').length}
+              </div>
+              <div className="text-blue-700">
+                <span className="font-medium">সম্পূর্ণ:</span> {verificationData.filter(d => d.department && d.institute_name && d.department.trim() !== '' && d.institute_name.trim() !== '').length}
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Debug info - show if no data found */}
         {verificationData.length === 0 && !loading && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -309,8 +322,8 @@ const AdminVerificationPage = () => {
             </p>
             <ul className="text-yellow-700 text-sm list-disc list-inside space-y-1">
               <li>এখনও কোন ইউজার ভেরিফিকেশন রিকোয়েস্ট পাঠায়নি</li>
-              <li>Database RPC function কাজ করছে না</li>
-              <li>Row Level Security (RLS) policy সমস্যা</li>
+              <li>Database RLS policy সমস্যা</li>
+              <li>Database connection সমস্যা</li>
             </ul>
             <p className="text-yellow-700 text-sm mt-3">
               <strong>সমাধান:</strong> প্রথমে নিশ্চিত করুন যে ইউজাররা ভেরিফিকেশন পেজে গিয়ে তাদের তথ্য submit করেছে।
@@ -322,7 +335,7 @@ const AdminVerificationPage = () => {
         <div className="mb-6 flex w-full max-w-sm items-center space-x-2">
           <Input
             type="text"
-            placeholder="নাম, রোল, রেজিস্ট্রেশন বা প্রতিষ্ঠান দ্বারা সার্চ করুন..."
+            placeholder="নাম, রোল, রেজিস্ট্রেশন, বিভাগ বা প্রতিষ্ঠান দ্বারা সার্চ করুন..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full"
@@ -347,9 +360,9 @@ const AdminVerificationPage = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[100px]">আইডি</TableHead>
-                        <TableHead>নাম / প্রতিষ্ঠান</TableHead>
                         <TableHead>রোল নম্বর</TableHead>
-                        <TableHead>রেজিস্ট্রেশন নম্বর</TableHead>
+                        <TableHead>বিভাগ</TableHead>
+                        <TableHead>প্রতিষ্ঠান</TableHead>
                         <TableHead>স্ট্যাটাস</TableHead>
                         <TableHead className="text-right">অ্যাকশন</TableHead>
                       </TableRow>
@@ -360,13 +373,14 @@ const AdminVerificationPage = () => {
                           <TableRow key={data.id}>
                             <TableCell className="font-medium">{data.id.substring(0, 6)}...</TableCell>
                             <TableCell>
-                              <div className="flex flex-col">
-                                <span>{data.name || 'N/A'}</span>
-                                <span className="text-xs text-gray-500">{data.institute_name || 'প্রতিষ্ঠানের নাম নেই'}</span>
-                              </div>
+                              <span className="text-blue-600 font-medium">{data.roll_no || 'নেই'}</span>
                             </TableCell>
-                            <TableCell>{data.roll_no || 'N/A'}</TableCell>
-                            <TableCell>{data.reg_no || 'N/A'}</TableCell>
+                            <TableCell>
+                              <span className="text-sm">{data.department || 'বিভাগ নেই'}</span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm">{data.institute_name || 'প্রতিষ্ঠানের নাম নেই'}</span>
+                            </TableCell>
                             <TableCell>
                               {data.is_verified ? (
                                 <Badge className="bg-green-100 text-green-800">ভেরিফাইড</Badge>
@@ -407,9 +421,9 @@ const AdminVerificationPage = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[100px]">আইডি</TableHead>
-                        <TableHead>নাম / প্রতিষ্ঠান</TableHead>
                         <TableHead>রোল নম্বর</TableHead>
-                        <TableHead>রেজিস্ট্রেশন নম্বর</TableHead>
+                        <TableHead>বিভাগ</TableHead>
+                        <TableHead>প্রতিষ্ঠান</TableHead>
                         <TableHead>স্ট্যাটাস</TableHead>
                         <TableHead className="text-right">অ্যাকশন</TableHead>
                       </TableRow>
@@ -422,13 +436,14 @@ const AdminVerificationPage = () => {
                             <TableRow key={data.id}>
                               <TableCell className="font-medium">{data.id.substring(0, 6)}...</TableCell>
                               <TableCell>
-                                <div className="flex flex-col">
-                                  <span>{data.name || 'N/A'}</span>
-                                  <span className="text-xs text-gray-500">{data.institute_name || 'প্রতিষ্ঠানের নাম নেই'}</span>
-                                </div>
+                                <span className="text-blue-600 font-medium">{data.roll_no || 'নেই'}</span>
                               </TableCell>
-                              <TableCell>{data.roll_no || 'N/A'}</TableCell>
-                              <TableCell>{data.reg_no || 'N/A'}</TableCell>
+                              <TableCell>
+                                <span className="text-sm">{data.department || 'বিভাগ নেই'}</span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-sm">{data.institute_name || 'প্রতিষ্ঠানের নাম নেই'}</span>
+                              </TableCell>
                               <TableCell>
                                 <Badge className="bg-yellow-100 text-yellow-800">পেন্ডিং</Badge>
                               </TableCell>
@@ -465,9 +480,9 @@ const AdminVerificationPage = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[100px]">আইডি</TableHead>
-                        <TableHead>নাম / প্রতিষ্ঠান</TableHead>
                         <TableHead>রোল নম্বর</TableHead>
-                        <TableHead>রেজিস্ট্রেশন নম্বর</TableHead>
+                        <TableHead>বিভাগ</TableHead>
+                        <TableHead>প্রতিষ্ঠান</TableHead>
                         <TableHead>স্ট্যাটাস</TableHead>
                         <TableHead className="text-right">অ্যাকশন</TableHead>
                       </TableRow>
@@ -480,13 +495,14 @@ const AdminVerificationPage = () => {
                             <TableRow key={data.id}>
                               <TableCell className="font-medium">{data.id.substring(0, 6)}...</TableCell>
                               <TableCell>
-                                <div className="flex flex-col">
-                                  <span>{data.name || 'N/A'}</span>
-                                  <span className="text-xs text-gray-500">{data.institute_name || 'প্রতিষ্ঠানের নাম নেই'}</span>
-                                </div>
+                                <span className="text-blue-600 font-medium">{data.roll_no || 'নেই'}</span>
                               </TableCell>
-                              <TableCell>{data.roll_no || 'N/A'}</TableCell>
-                              <TableCell>{data.reg_no || 'N/A'}</TableCell>
+                              <TableCell>
+                                <span className="text-sm">{data.department || 'বিভাগ নেই'}</span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-sm">{data.institute_name || 'প্রতিষ্ঠানের নাম নেই'}</span>
+                              </TableCell>
                               <TableCell>
                                 <Badge className="bg-green-100 text-green-800">ভেরিফাইড</Badge>
                               </TableCell>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Check, AlertCircle, Loader2, FileCheck, X, BookOpen, School, User, ScanLine, ArrowRight, CheckCircle2, AlertTriangle, GraduationCap } from 'lucide-react';
+import { Upload, Check, AlertCircle, Loader2, FileCheck, X, BookOpen, School, User, ArrowRight, CheckCircle2, AlertTriangle, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,9 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, getUserVerificationStatus } from '@/lib/supabase';
 import Navigation from '@/components/Navigation';
-import { createWorker } from 'tesseract.js';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -26,28 +23,34 @@ const VerificationPage = () => {
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentPreview, setDocumentPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [extractedText, setExtractedText] = useState<string>('');
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   
   // ওয়ার্নিং ডায়ালগ স্টেট
   const [warningDialogOpen, setWarningDialogOpen] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
   
-  // সনাক্তকৃত তথ্য
-  const [extractedData, setExtractedData] = useState<{
-    name: string;
+  // ম্যানুয়াল ইনপুট ডেটা
+  const [formData, setFormData] = useState<{
     rollNo: string;
     regNo: string;
+    department: string;
+    instituteName: string;
   }>({
-    name: '',
     rollNo: '',
-    regNo: ''
+    regNo: 'অজানা',
+    department: '',
+    instituteName: ''
   });
   
   // ইউজারের ডেটা লোডিং স্টেট
   const [isLoading, setIsLoading] = useState(true);
   const [hasExistingData, setHasExistingData] = useState(false);
+  const [profileData, setProfileData] = useState<{
+    roll_number: string;
+    name: string;
+    department: string;
+    institute_name: string;
+  } | null>(null);
   
   const { user } = useAuth();
   const { toast } = useToast();
@@ -98,149 +101,94 @@ const VerificationPage = () => {
   // ব্যবহারকারীর ডেটা চেক করি
   useEffect(() => {
     if (user) {
-      checkExistingData();
+      loadUserProfileAndVerificationData();
     } else {
       setIsLoading(false);
     }
   }, [user]);
 
-  // আগে থেকে ডেটা আছে কিনা চেক করি
-  const checkExistingData = async () => {
+  // ইউজারের প্রোফাইল এবং ভেরিফিকেশন ডেটা লোড করি
+  const loadUserProfileAndVerificationData = async () => {
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase
+      // প্রোফাইল ডেটা লোড করি
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('roll_number, name, department, institute_name')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error loading profile data:', profileError);
+        toast({
+          title: "প্রোফাইল লোড করতে সমস্যা",
+          description: "আপনার প্রোফাইল তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (profile) {
+        setProfileData(profile);
+        
+        // প্রোফাইল থেকে তথ্য দিয়ে form ডেটা সেট করি
+        setFormData(prev => ({
+          ...prev,
+          rollNo: profile.roll_number || '',
+          department: profile.department || '',
+          instituteName: profile.institute_name || ''
+        }));
+      }
+      
+      // ভেরিফিকেশন ডেটা লোড করি
+      const { data: verificationData, error: verificationError } = await supabase
         .from('verification_data')
         .select('*')
         .eq('user_id', user?.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking existing data:', error);
+      if (verificationError && verificationError.code !== 'PGRST116') {
+        console.error('Error checking existing verification data:', verificationError);
         return;
       }
 
-      if (data) {
+      if (verificationData) {
         setHasExistingData(true);
-        setExtractedData({
-          name: '',
-          rollNo: data.roll_no || '',
-          regNo: data.reg_no || ''
+        setFormData({
+          rollNo: profile?.roll_number || verificationData.roll_no || '',
+          regNo: verificationData.reg_no || 'অজানা',
+          department: profile?.department || verificationData.department || '',
+          instituteName: profile?.institute_name || verificationData.institute_name || ''
         });
         
-        if (data.document_url) {
-          setDocumentPreview(data.document_url);
+        if (verificationData.document_url) {
+          setDocumentPreview(verificationData.document_url);
         }
         
         // যদি ইউজারের আগে থেকে ভেরিফিকেশন ডেটা থাকে তাহলে সাকসেস স্টেট true করি
         setVerificationSuccess(true);
+      } else if (profile) {
+        // যদি ভেরিফিকেশন ডেটা না থাকে কিন্তু প্রোফাইল আছে, প্রোফাইল থেকে সব তথ্য সেট করি
+        setFormData({
+          rollNo: profile.roll_number || '',
+          regNo: 'অজানা',
+          department: profile.department || '',
+          instituteName: profile.institute_name || ''
+        });
       }
     } catch (error) {
-      console.error('Error checking existing data:', error);
+      console.error('Error loading user data:', error);
+      toast({
+        title: "ডেটা লোড করতে সমস্যা",
+        description: "আপনার তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // OCR দিয়ে ছবি থেকে টেক্সট সনাক্ত করার ফাংশন
-  const extractTextFromImage = async (imageUrl: string) => {
-    try {
-      setIsProcessing(true);
-
-      // টেসারেক্ট ওয়ার্কার তৈরি করি
-      const worker = await createWorker('ben+eng');
-      
-      // OCR অপশন সেট করি - উচ্চ গুণমান এবং ডকুমেন্ট মোড
-      await worker.setParameters({
-        tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,:;[]()/ ',
-        preserve_interword_spaces: '1',
-      });
-      
-      // ছবি থেকে টেক্সট সনাক্ত করি
-      const { data: { text } } = await worker.recognize(imageUrl);
-      
-      // টেক্সট সেট করি
-      setExtractedText(text);
-      
-      // টেক্সট থেকে প্রয়োজনীয় তথ্য বের করি
-      extractRequiredData(text);
-      
-      // ওয়ার্কার বন্ধ করি
-      await worker.terminate();
-      
-      // সাফল্য মেসেজ দেখাই
-      toast({
-        title: "টেক্সট সনাক্ত করা হয়েছে",
-        description: "ছবি থেকে টেক্সট সনাক্ত করা হয়েছে।",
-      });
-    } catch (error) {
-      console.error('Error extracting text from image:', error);
-      toast({
-        title: "টেক্সট সনাক্ত করতে সমস্যা",
-        description: "ছবি থেকে টেক্সট সনাক্ত করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // টেক্সট থেকে শুধু প্রয়োজনীয় তথ্য (রোল, রেজিস্ট্রেশন) বের করার ফাংশন
-  const extractRequiredData = (text: string) => {
-    console.log("Extracted raw text:", text);
-    
-    // রোল নম্বর খুঁজি - "Roll No : 818315" এই ফরম্যাটে
-    const rollMatch = text.match(/Roll No\s*[:]\s*([0-9]+)/i) ||
-                     text.match(/Roll\s*[:]\s*([0-9]+)/i);
-    
-    // রেজিস্ট্রেশন নম্বর খুঁজি - "Reg. No: [1502322924]" এই ফরম্যাটে
-    const regMatch = text.match(/Reg\.\s*No\s*[:]\s*\[?([0-9]+)\]?/i) ||
-                    text.match(/Registration No\s*[:]\s*\[?([0-9]+)\]?/i) ||
-                    text.match(/Reg No\s*[:]\s*\[?([0-9]+)\]?/i);
-    
-    console.log("Roll match:", rollMatch);
-    console.log("Reg match:", regMatch);
-    
-    let rollNo = '';
-    if (rollMatch && rollMatch[1]) {
-      // শুধুমাত্র সংখ্যা নেই
-      rollNo = rollMatch[1].replace(/[^0-9]/g, '');
-    }
-    
-    let regNo = '';
-    if (regMatch && regMatch[1]) {
-      // শুধুমাত্র সংখ্যা নেই
-      regNo = regMatch[1].replace(/[^0-9]/g, '');
-    }
-    
-    // যদি রেগুলার এক্সপ্রেশন দিয়ে খুঁজে না পাই, তাহলে সরাসরি টেক্সট থেকে খুঁজি
-    if (!rollNo) {
-      // সাধারণ সংখ্যা প্যাটার্ন খুঁজি যা 6-9 ডিজিট লম্বা (রোল নম্বর)
-      const rollPattern = /\b[0-9]{6,9}\b/g;
-      const rollMatches = [...text.matchAll(rollPattern)];
-      if (rollMatches.length > 0) {
-        // প্রথম ম্যাচ নেই
-        rollNo = rollMatches[0][0];
-      }
-    }
-    
-    if (!regNo) {
-      // সাধারণ সংখ্যা প্যাটার্ন খুঁজি যা 10 বা তার বেশি ডিজিট লম্বা (রেজিস্ট্রেশন নম্বর)
-      const regPattern = /\b[0-9]{10,}\b/g;
-      const regMatches = [...text.matchAll(regPattern)];
-      if (regMatches.length > 0) {
-        // প্রথম ম্যাচ নেই
-        regNo = regMatches[0][0];
-      }
-    }
-    
-    // সনাক্তকৃত তথ্য আপডেট করি
-    setExtractedData({
-      name: '', // নাম ডিটেক্ট না করার জন্য খালি রাখি
-      rollNo: rollNo,
-      regNo: regNo
-    });
-  };
 
   // ফাইল আপলোড হ্যান্ডলার
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -272,9 +220,6 @@ const VerificationPage = () => {
     setDocumentFile(file);
     const previewUrl = URL.createObjectURL(file);
     setDocumentPreview(previewUrl);
-    
-    // OCR প্রসেসিং শুরু করি
-    extractTextFromImage(previewUrl);
   };
 
   // ফাইল রিমুভ হ্যান্ডলার
@@ -284,12 +229,13 @@ const VerificationPage = () => {
       URL.revokeObjectURL(documentPreview);
     }
     setDocumentPreview(null);
-    setExtractedText('');
-    setExtractedData({
-      name: '',
-      rollNo: '',
-      regNo: ''
-    });
+    // প্রোফাইল থেকে সব তথ্য রেখে দিই, শুধু রেজিস্ট্রেশন নম্বর রিসেট করি
+    setFormData(prev => ({
+      rollNo: profileData?.roll_number || prev.rollNo,
+      regNo: 'অজানা',
+      department: profileData?.department || prev.department,
+      instituteName: profileData?.institute_name || prev.instituteName
+    }));
   };
 
   // ওয়ার্নিং ডায়ালগ দেখানোর ফাংশন
@@ -321,11 +267,11 @@ const VerificationPage = () => {
       return;
     }
     
-    // রোল নম্বর এবং রেজিস্ট্রেশন নম্বর চেক করি
-    if (!extractedData.rollNo || !extractedData.regNo) {
+    // রোল নম্বর চেক করি (প্রোফাইল থেকে আসা উচিত)
+    if (!formData.rollNo.trim()) {
       toast({
-        title: "তথ্য অসম্পূর্ণ",
-        description: "রোল নম্বর এবং রেজিস্ট্রেশন নম্বর সনাক্ত করা যায়নি। দয়া করে আবার চেষ্টা করুন।",
+        title: "রোল নম্বর পাওয়া যায়নি",
+        description: "আপনার প্রোফাইলে রোল নম্বর নেই। দয়া করে প্রথমে প্রোফাইল আপডেট করুন।",
         variant: "destructive",
       });
       return;
@@ -334,12 +280,11 @@ const VerificationPage = () => {
     setUploading(true);
     
     try {
-      // চেক করি যে roll_no এবং reg_no কম্বিনেশন দিয়ে আগে কেউ ভেরিফিকেশন করেছে কিনা
+      // চেক করি যে roll_no দিয়ে আগে কেউ ভেরিফিকেশন করেছে কিনা
       const { data: existingVerification, error: verificationCheckError } = await supabase
         .from('verification_data')
         .select('*')
-        .eq('roll_no', extractedData.rollNo)
-        .eq('reg_no', extractedData.regNo)
+        .eq('roll_no', formData.rollNo.trim())
         .neq('user_id', user.id);
       
       if (verificationCheckError) {
@@ -384,8 +329,10 @@ const VerificationPage = () => {
         const { error: updateError } = await supabase
           .from('verification_data')
           .update({
-            roll_no: extractedData.rollNo,
-            reg_no: extractedData.regNo,
+            roll_no: formData.rollNo.trim(),
+            reg_no: formData.regNo.trim(),
+            department: formData.department.trim(),
+            institute_name: formData.instituteName.trim(),
             document_url: documentUrl,
             is_verified: false, // অ্যাডমিন পরে ভেরিফাইড করবে
             status: 'pending', // পেন্ডিং স্ট্যাটাস সেট করি
@@ -400,8 +347,10 @@ const VerificationPage = () => {
           .from('verification_data')
           .insert({
             user_id: user.id,
-            roll_no: extractedData.rollNo,
-            reg_no: extractedData.regNo,
+            roll_no: formData.rollNo.trim(),
+            reg_no: formData.regNo.trim(),
+            department: formData.department.trim(),
+            institute_name: formData.instituteName.trim(),
             document_url: documentUrl,
             is_verified: false, // অ্যাডমিন পরে ভেরিফাইড করবে
             status: 'pending', // পেন্ডিং স্ট্যাটাস সেট করি
@@ -539,21 +488,39 @@ const VerificationPage = () => {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-gray-50 border border-gray-200 md:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <Card className="bg-gray-50 border border-gray-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">রোল নম্বর</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-lg font-medium">{extractedData.rollNo}</p>
+                  <p className="text-lg font-medium">{formData.rollNo}</p>
                 </CardContent>
               </Card>
-              <Card className="bg-gray-50 border border-gray-200 md:col-span-2">
+              <Card className="bg-gray-50 border border-gray-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">রেজিস্ট্রেশন নম্বর</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-lg font-medium">{extractedData.regNo}</p>
+                  <p className="text-lg font-medium">{formData.regNo}</p>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="bg-gray-50 border border-gray-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">বিভাগ</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-lg font-medium">{formData.department}</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gray-50 border border-gray-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">প্রতিষ্ঠান</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-lg font-medium">{formData.instituteName}</p>
                 </CardContent>
               </Card>
             </div>
@@ -568,40 +535,85 @@ const VerificationPage = () => {
             </div>
             
             <form onSubmit={handleSubmit}>
-              {/* সনাক্তকৃত তথ্য প্রদর্শন */}
-              {(extractedData.name || extractedData.rollNo || extractedData.regNo) && (
-                <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <h3 className="font-medium text-green-800 flex items-center gap-2 mb-3">
-                    <ScanLine className="h-5 w-5" />
-                    সনাক্তকৃত তথ্য
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="extracted-roll" className="text-sm text-green-800">Roll No</Label>
-                      <Input
-                        id="extracted-roll"
-                        value={extractedData.rollNo}
-                        readOnly
-                        className="h-8 text-sm bg-green-50 border-green-200"
-                        placeholder="Roll No"
-                      />
+              {/* ম্যানুয়াল ইনপুট ফিল্ডস */}
+              <div className="mb-8">
+                <Card className="shadow-sm border border-gray-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-primary" />
+                      ভেরিফিকেশন তথ্য
+                    </CardTitle>
+                    <CardDescription>
+                      আপনার তথ্যসমূহ (প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="roll-no" className="text-sm font-medium">রোল নম্বর * (প্রোফাইল থেকে)</Label>
+                          <Input
+                            id="roll-no"
+                            type="text"
+                            value={formData.rollNo}
+                            readOnly
+                            className="h-10 bg-gray-100 cursor-not-allowed"
+                            placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="reg-no" className="text-sm font-medium">রেজিস্ট্রেশন নম্বর</Label>
+                          <Input
+                            id="reg-no"
+                            type="text"
+                            value={formData.regNo}
+                            onChange={(e) => setFormData(prev => ({ ...prev, regNo: e.target.value }))}
+                            placeholder="রেজিস্ট্রেশন নম্বর (অপশনাল)"
+                            className="h-10"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="department" className="text-sm font-medium">বিভাগ * (প্রোফাইল থেকে)</Label>
+                          <Input
+                            id="department"
+                            type="text"
+                            value={formData.department}
+                            readOnly
+                            className="h-10 bg-gray-100 cursor-not-allowed"
+                            placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="institute-name" className="text-sm font-medium">প্রতিষ্ঠানের নাম * (প্রোফাইল থেকে)</Label>
+                          <Input
+                            id="institute-name"
+                            type="text"
+                            value={formData.instituteName}
+                            readOnly
+                            className="h-10 bg-gray-100 cursor-not-allowed"
+                            placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
+                          />
+                        </div>
+                      </div>
+                      
+                      {profileData && (
+                        <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                          <p className="text-xs text-green-700 flex items-center gap-2">
+                            <Check className="h-4 w-4" />
+                            প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ: <span className="font-medium">{profileData.name}</span>
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="extracted-reg" className="text-sm text-green-800">Reg. No</Label>
-                      <Input
-                        id="extracted-reg"
-                        value={extractedData.regNo}
-                        readOnly
-                        className="h-8 text-sm bg-green-50 border-green-200"
-                        placeholder="Reg. No"
-                      />
-                    </div>
-                  </div>
-                  <p className="mt-3 text-xs text-green-700">
-                    * সনাক্তকৃত তথ্য স্বয়ংক্রিয়ভাবে সংগ্রহ করা হয়েছে। ভেরিফিকেশন সাবমিট করার সময় এই তথ্যগুলো সংরক্ষণ করা হবে।
-                  </p>
-                </div>
-              )}
+                    <p className="mt-3 text-xs text-gray-600">
+                      * রোল নম্বর, বিভাগ এবং প্রতিষ্ঠানের নাম আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে এনে দেওয়া হয়েছে। রেজিস্ট্রেশন নম্বর না থাকলে "অজানা" লিখে রাখুন।
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
               
               {/* ডকুমেন্ট আপলোড কার্ড */}
               <Card className="shadow-sm border border-gray-200 mb-8">
@@ -628,31 +640,9 @@ const VerificationPage = () => {
                         size="icon"
                         className="absolute top-2 right-2 h-8 w-8 rounded-full"
                         onClick={removeFile}
-                        disabled={uploading || isProcessing}
+                        disabled={uploading}
                       >
                         <X className="h-4 w-4" />
-                      </Button>
-                      
-                      {/* OCR বাটন */}
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        className="absolute bottom-2 right-2"
-                        onClick={() => documentPreview && extractTextFromImage(documentPreview)}
-                        disabled={isProcessing || !documentPreview}
-                      >
-                        {isProcessing ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            প্রসেসিং...
-                          </>
-                        ) : (
-                          <>
-                            <ScanLine className="h-4 w-4 mr-2" />
-                            টেক্সট সনাক্ত করুন
-                          </>
-                        )}
                       </Button>
                     </div>
                   ) : (
@@ -675,23 +665,8 @@ const VerificationPage = () => {
                     accept="image/jpeg,image/png,image/jpg"
                     className="hidden"
                     onChange={handleFileChange}
-                    disabled={uploading || isProcessing}
+                    disabled={uploading}
                   />
-                  
-                  {/* সনাক্তকৃত টেক্সট - হাইড করা */}
-                  {/* {extractedText && (
-                    <div className="mt-4">
-                      <Label htmlFor="extracted-text" className="text-sm text-gray-600 mb-1 block">
-                        সনাক্তকৃত টেক্সট:
-                      </Label>
-                      <Textarea
-                        id="extracted-text"
-                        value={extractedText}
-                        readOnly
-                        className="text-xs h-24 bg-gray-50"
-                      />
-                    </div>
-                  )} */}
                 </CardContent>
               </Card>
               
@@ -699,7 +674,7 @@ const VerificationPage = () => {
                 <Button 
                   type="submit" 
                   className="min-w-[200px]"
-                  disabled={uploading || isProcessing || !documentPreview}
+                  disabled={uploading || !documentPreview}
                 >
                   {uploading ? (
                     <>

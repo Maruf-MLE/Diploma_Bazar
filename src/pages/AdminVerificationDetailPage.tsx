@@ -26,13 +26,14 @@ interface VerificationData {
   name: string;
   roll_no: string;
   reg_no: string;
+  department: string | null;
+  institute_name: string | null;
   document_url: string;
   created_at: string;
   updated_at: string;
   photo_url: string | null;
   status: string | null;
   is_verified: boolean;
-  institute_name: string | null;
 }
 
 const AdminVerificationDetailPage = () => {
@@ -98,7 +99,8 @@ const AdminVerificationDetailPage = () => {
         photo_url: faceData?.photo_url || null,
         status: faceData?.status || null,
         name: profileData?.name || null,
-        institute_name: profileData?.institute_name || null,
+        department: profileData?.department || verificationData?.department || null,
+        institute_name: profileData?.institute_name || verificationData?.institute_name || null,
         email: null // ইমেইল ফিল্ড খালি রাখি
       };
       
@@ -534,11 +536,14 @@ const AdminVerificationDetailPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">নাম</h3>
-                    <p className="font-medium text-lg">{verificationData.name || 'অজানা'}</p>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">বিভাগ</h3>
+                    <p className="font-medium text-lg">{verificationData.department || 'বিভাগ উপলব্ধ নয়'}</p>
                   </div>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-6">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">প্রতিষ্ঠান</h3>
                     <p className="font-medium text-lg">{verificationData.institute_name || 'প্রতিষ্ঠানের নাম উপলব্ধ নয়'}</p>
