@@ -536,83 +536,85 @@ const VerificationPage = () => {
             
             <form onSubmit={handleSubmit}>
               {/* ম্যানুয়াল ইনপুট ফিল্ডস */}
-              <div className="mb-8">
-                <Card className="shadow-sm border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-primary" />
-                      ভেরিফিকেশন তথ্য
-                    </CardTitle>
-                    <CardDescription>
-                      আপনার তথ্যসমূহ (প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="roll-no" className="text-sm font-medium">রোল নম্বর * (প্রোফাইল থেকে)</Label>
-                          <Input
-                            id="roll-no"
-                            type="text"
-                            value={formData.rollNo}
-                            readOnly
-                            className="h-10 bg-gray-100 cursor-not-allowed"
-                            placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
-                          />
+              <div className="hidden">
+                <div className="mb-8">
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="h-5 w-5 text-primary" />
+                        ভেরিফিকেশন তথ্য
+                      </CardTitle>
+                      <CardDescription>
+                        আপনার তথ্যসমূহ (প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে)
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="roll-no" className="text-sm font-medium">রোল নম্বর * (প্রোফাইল থেকে)</Label>
+                            <Input
+                              id="roll-no"
+                              type="text"
+                              value={formData.rollNo}
+                              readOnly
+                              className="h-10 bg-gray-100 cursor-not-allowed"
+                              placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="reg-no" className="text-sm font-medium">রেজিস্ট্রেশন নম্বর</Label>
+                            <Input
+                              id="reg-no"
+                              type="text"
+                              value={formData.regNo}
+                              onChange={(e) => setFormData(prev => ({ ...prev, regNo: e.target.value }))}
+                              placeholder="রেজিস্ট্রেশন নম্বর (অপশনাল)"
+                              className="h-10"
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="reg-no" className="text-sm font-medium">রেজিস্ট্রেশন নম্বর</Label>
-                          <Input
-                            id="reg-no"
-                            type="text"
-                            value={formData.regNo}
-                            onChange={(e) => setFormData(prev => ({ ...prev, regNo: e.target.value }))}
-                            placeholder="রেজিস্ট্রেশন নম্বর (অপশনাল)"
-                            className="h-10"
-                          />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="department" className="text-sm font-medium">বিভাগ * (প্রোফাইল থেকে)</Label>
+                            <Input
+                              id="department"
+                              type="text"
+                              value={formData.department}
+                              readOnly
+                              className="h-10 bg-gray-100 cursor-not-allowed"
+                              placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="institute-name" className="text-sm font-medium">প্রতিষ্ঠানের নাম * (প্রোফাইল থেকে)</Label>
+                            <Input
+                              id="institute-name"
+                              type="text"
+                              value={formData.instituteName}
+                              readOnly
+                              className="h-10 bg-gray-100 cursor-not-allowed"
+                              placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
+                            />
+                          </div>
                         </div>
+
+                        {profileData && (
+                          <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                            <p className="text-xs text-green-700 flex items-center gap-2">
+                              <Check className="h-4 w-4" />
+                              প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ: <span className="font-medium">{profileData.name}</span>
+                            </p>
+                          </div>
+                        )}
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="department" className="text-sm font-medium">বিভাগ * (প্রোফাইল থেকে)</Label>
-                          <Input
-                            id="department"
-                            type="text"
-                            value={formData.department}
-                            readOnly
-                            className="h-10 bg-gray-100 cursor-not-allowed"
-                            placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="institute-name" className="text-sm font-medium">প্রতিষ্ঠানের নাম * (প্রোফাইল থেকে)</Label>
-                          <Input
-                            id="institute-name"
-                            type="text"
-                            value={formData.instituteName}
-                            readOnly
-                            className="h-10 bg-gray-100 cursor-not-allowed"
-                            placeholder="প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ হবে"
-                          />
-                        </div>
-                      </div>
-                      
-                      {profileData && (
-                        <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                          <p className="text-xs text-green-700 flex items-center gap-2">
-                            <Check className="h-4 w-4" />
-                            প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূর্ণ: <span className="font-medium">{profileData.name}</span>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    <p className="mt-3 text-xs text-gray-600">
-                      * রোল নম্বর, বিভাগ এবং প্রতিষ্ঠানের নাম আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে এনে দেওয়া হয়েছে। রেজিস্ট্রেশন নম্বর না থাকলে "অজানা" লিখে রাখুন।
-                    </p>
-                  </CardContent>
-                </Card>
+                      <p className="mt-3 text-xs text-gray-600">
+                        * রোল নম্বর, বিভাগ এবং প্রতিষ্ঠানের নাম আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে এনে দেওয়া হয়েছে। রেজিস্ট্রেশন নম্বর না থাকলে "অজানা" লিখে রাখুন।
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
               
               {/* ডকুমেন্ট আপলোড কার্ড */}
