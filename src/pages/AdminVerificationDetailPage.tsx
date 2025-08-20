@@ -268,6 +268,43 @@ const AdminVerificationDetailPage = () => {
       setProcessingAction(false);
     }
   };
+
+  // ভেরিফিকেশন ডেটা ডিলিট করি
+  const deleteVerification = async () => {
+    if (!verificationData?.id) return;
+
+    try {
+      setProcessingAction(true);
+
+      // ডাটাবেস থেকে ভেরিফিকেশন ডেটা ডিলিট করি
+      const { error } = await supabase
+        .from('verification_data')
+        .delete()
+        .eq('id', verificationData.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // সফল টোস্ট দেখাই
+      toast({
+        title: 'ভেরিফিকেশন বাতিল',
+        description: 'ব্যবহারকারীর ভেরিফিকেশন ডেটা বাতিল করা হয়েছে।',
+      });
+
+      // UI আপডেট করি এবং অ্যাডমিন প্যানেলে ফিরে যাই
+      navigate('/admin/verification');
+    } catch (error) {
+      console.error('Error deleting verification:', error);
+      toast({
+        title: 'বাতিল সমস্যা',
+        description: 'ভেরিফিকেশন ডেটা বাতিল করতে সমস্যা হয়েছে।',
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
   
   // রোল নম্বর কপি করার ফাংশন
   const copyRollNumber = async () => {
@@ -647,7 +684,19 @@ const AdminVerificationDetailPage = () => {
                   ) : (
                     <XIcon className="mr-2 h-4 w-4" />
                   )}
-                  বাতিল করুন
+                  বাতিল করুন (Reject)
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={deleteVerification}
+                  disabled={processingAction}
+                >
+                  {processingAction ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <XIcon className="mr-2 h-4 w-4" />
+                  )}
+                  বাতিল করুন (Delete)
                 </Button>
                 <Button
                   onClick={approveVerification}
