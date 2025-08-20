@@ -116,7 +116,8 @@ export type NotificationType =
   | 'message'         // সাধারণ বার্তা
   | 'verification_approved'  // যাচাইয়ের অনুমোদন
   | 'verification_rejected'  // যাচাইয়ের প্রত্যাখ্যাত
-  | 'book_added';         // বই যোগাযোগ হয়েছে
+  | 'book_added'         // বই যোগাযোগ হয়েছে
+  | 'verification_deleted'; // যাচাইয়ের বাতিল
 
 export interface Notification {
   id: string;
@@ -499,14 +500,14 @@ export async function handleNotificationClick(
     // Handle different notification types
     switch (notification.type) {
       case 'verification_approved':
-        // Navigate to verification approved page using URL helper
+        // Navigate to verification approved details page using URL helper
         if (notification.related_id) {
-          navigateToRoute(`/verification/approved/${notification.related_id}`);
+          navigateToRoute(`/verification/approved_details/${notification.related_id}`);
         } else {
           navigateToRoute('/verification');
         }
         break;
-        
+
       case 'verification_rejected':
         // Navigate to verification details page with rejected status using URL helper
         if (notification.related_id) {
@@ -515,7 +516,16 @@ export async function handleNotificationClick(
           navigateToRoute('/verification');
         }
         break;
-        
+      
+      case 'verification_deleted':
+        // Navigate to verification deleted details page
+        if (notification.related_id) {
+          navigateToRoute(`/verification/deleted_details/${notification.related_id}`);
+        } else {
+          navigateToRoute('/verification');
+        }
+        break;
+
       case 'message':
         // Navigate to messages with conversation
         if (notification.related_id) {
