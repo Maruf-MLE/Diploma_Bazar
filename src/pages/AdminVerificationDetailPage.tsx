@@ -177,6 +177,33 @@ const AdminVerificationDetailPage = () => {
       
       // লোকাল স্টেট আপডেট করি যাতে UI তাৎক্ষণিকভাবে আপডেট হয়
       setVerificationData(prev => prev ? { ...prev, is_verified: true, status: 'approved' } : null);
+
+      // Insert notification into the notifications table
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert([
+          {
+            user_id: verificationData.user_id,
+            title: 'ভেরিফিকেশন অনুমোদিত',
+            message: 'আপনার ভেরিফিকেশন সফলভাবে অনুমোদিত হয়েছে।',
+            type: 'verification_approved',
+          },
+        ]);
+
+      if (notificationError) {
+        console.error('Error inserting notification:', notificationError);
+        toast({
+          title: 'নোটিফিকেশন সমস্যা',
+          description: 'নোটিফিকেশন পাঠাতে সমস্যা হয়েছে।',
+          variant: 'destructive',
+        });
+      } else {
+        // সফল টোস্ট দেখাই
+        toast({
+          title: 'ভেরিফিকেশন অনুমোদিত',
+          description: 'ব্যবহারকারীর ভেরিফিকেশন অনুমোদিত হয়েছে।',
+        });
+      }
       
       // আপডেটেড ডেটা লোড করি
       fetchVerificationData();
@@ -257,17 +284,24 @@ const AdminVerificationDetailPage = () => {
       
       // আপডেটেড ডেটা লোড করি
       fetchVerificationData();
-    } catch (error) {
-      console.error('Error rejecting verification:', error);
+
+      // Send notification to the user
       toast({
-        title: 'বাতিল সমস্যা',
-        description: 'ভেরিফিকেশন বাতিল করতে সমস্যা হয়েছে।',
-        variant: 'destructive',
+        title: 'ভেরিফিকেশন বাতিল',
+        description: `আপনার ভেরিফিকেশন বাতিল করা হয়েছে। কারণ: ${feedback || 'আপনার ভেরিফিকেশন তথ্য সঠিক নয়।'}`
       });
-    } finally {
-      setProcessingAction(false);
-    }
-  };
+
+  } catch (error) {
+    console.error('Error rejecting verification:', error);
+    toast({
+      title: 'বাতিল সমস্যা',
+      description: 'ভেরিফিকেশন বাতিল করতে সমস্যা হয়েছে।',
+      variant: 'destructive',
+    });
+  } finally {
+    setProcessingAction(false);
+  }
+};
 
   // ভেরিফিকেশন ডেটা ডিলিট করি
   const deleteVerification = async () => {
@@ -294,17 +328,44 @@ const AdminVerificationDetailPage = () => {
 
       // UI আপডেট করি এবং অ্যাডমিন প্যানেলে ফিরে যাই
       navigate('/admin/verification');
-    } catch (error) {
-      console.error('Error deleting verification:', error);
-      toast({
-        title: 'বাতিল সমস্যা',
-        description: 'ভেরিফিকেশন ডেটা বাতিল করতে সমস্যা হয়েছে।',
-        variant: 'destructive',
-      });
-    } finally {
-      setProcessingAction(false);
-    }
-  };
+
+      // Insert notification into the notifications table
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert([
+          {
+            user_id: verificationData.user_id,
+            title: 'ভেরিফিকেশন বাতিল',
+            message: 'আপনার ভেরিফিকেশন ডেটা বাতিল করা হয়েছে।',
+            type: 'verification_deleted',
+          },
+        ]);
+
+      if (notificationError) {
+        console.error('Error inserting notification:', notificationError);
+        toast({
+          title: 'নোটিফিকেশন সমস্যা',
+          description: 'নোটিফিকেশন পাঠাতে সমস্যা হয়েছে।',
+          variant: 'destructive',
+        });
+      } else {
+        // Show success toast
+        toast({
+          title: 'ভেরিফিকেশন বাতিল',
+          description: 'ব্যবহারকারীর ভেরিফিকেশন ডেটা বাতিল করা হয়েছে।',
+        });
+      }
+  } catch (error) {
+    console.error('Error deleting verification:', error);
+    toast({
+      title: 'বাতিল সমস্যা',
+      description: 'ভেরিফিকেশন ডেটা বাতিল করতে সমস্যা হয়েছে।',
+      variant: 'destructive',
+    });
+  } finally {
+    setProcessingAction(false);
+  }
+};
   
   // রোল নম্বর কপি করার ফাংশন
   const copyRollNumber = async () => {
