@@ -132,7 +132,7 @@ const Footer = () => {
             <p className="text-gray-600 mb-4 text-sm md:text-base">নতুন বইয়ের আপডেট এবং বিশেষ অফার পেতে</p>
             <div className="flex justify-center">
               <a 
-                href="https://www.facebook.com/boichapabazar" 
+                href="https://www.facebook.com/diplomabazar" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="flex items-center bg-[#1877F2] text-white px-4 md:px-6 py-2 rounded-md hover:bg-[#166FE5] transition-colors text-sm md:text-base"
