@@ -326,7 +326,7 @@ export default function HelpPage() {
                             আমাদের ফেসবুক পেজে মেসেজ দিয়ে আপনার প্রশ্ন বা সমস্যা জানান। আমরা দ্রুততম সময়ে উত্তর দেব।
                           </p>
                           <a 
-                            href="https://www.facebook.com/boichapabazar" 
+                            href="https://www.facebook.com/diplomabazar" 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="inline-flex items-center justify-center gap-2 bg-[#1877F2] text-white px-6 py-3 rounded-md hover:bg-[#166FE5] transition-colors w-full"
@@ -339,7 +339,7 @@ export default function HelpPage() {
                         <div className="border-t border-gray-100 pt-4">
                           <p className="text-gray-600 mb-2">অথবা সরাসরি আমাদের পেজে মেসেজ করুন</p>
                           <a 
-                            href="https://m.me/boichapabazar" 
+                            href="https://m.me/diplomabazar" 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="inline-flex items-center justify-center gap-2 bg-white border-2 border-[#1877F2] text-[#1877F2] px-6 py-2 rounded-md hover:bg-[#1877F2]/5 transition-colors"
@@ -379,7 +379,7 @@ export default function HelpPage() {
                         <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
                         <h4 className="font-medium text-red-600">জরুরি সহায়তা লাইন</h4>
                       </div>
-                      <p className="text-red-600 text-sm mt-1">ফেসবুক পেজ: <a href="https://www.facebook.com/boichapabazar" target="_blank" rel="noopener noreferrer" className="underline">facebook.com/boichapabazar</a></p>
+                      <p className="text-red-600 text-sm mt-1">ফেসবুক পেজ: <a href="https://www.facebook.com/diplomabazar" target="_blank" rel="noopener noreferrer" className="underline">facebook.com/diplomabazar</a></p>
                       
                     </div>
                   </div>
