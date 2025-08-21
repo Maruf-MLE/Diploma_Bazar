@@ -36,6 +36,7 @@ import VerificationApprovedPage from "@/pages/VerificationApprovedPage";
 import BannedUserPage from "@/pages/BannedUserPage";
 import SettingsPage from "@/pages/SettingsPage";
 import HelpPage from "@/pages/HelpPage";
+import AboutPage from "@/pages/AboutPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import EmailConfirmationPage from "./pages/EmailConfirmationPage";
 import VerifyEmailConfirmPage from "./pages/VerifyEmailConfirmPage";
@@ -185,6 +186,7 @@ const AppContent = () => {
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/banned" element={<BannedUserPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/email-confirmation" element={<EmailConfirmationPage />} />
           <Route path="/verify-email-confirm" element={<VerifyEmailConfirmPage />} />

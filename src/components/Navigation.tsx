@@ -366,6 +366,10 @@ const Navigation = () => {
                             <Settings className="h-4 w-4 text-gray-500" />
                             <span>সেটিংস এবং গোপনীয়তা</span>
                           </Link>
+                          <Link to="/about" className="flex items-center space-x-2 p-2 rounded hover:bg-primary/5 hover:text-primary transition-colors duration-200 text-sm">
+                            <BookOpen className="h-4 w-4 text-gray-500" />
+                            <span>আমাদের সম্পর্কে</span>
+                          </Link>
                           <Link to="/help" className="flex items-center space-x-2 p-2 rounded hover:bg-primary/5 hover:text-primary transition-colors duration-200 text-sm">
                             <HelpCircle className="h-4 w-4 text-gray-500" />
                             <span>সাহায্য এবং সমর্থন</span>
