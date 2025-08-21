@@ -204,6 +204,18 @@ export const getUserConversations = async (userId: string) => {
       };
     });
 
+    // Sort conversations: unread first, then by timestamp
+    conversations.sort((a, b) => {
+      if (a.unread && !b.unread) {
+        return -1; // a comes first
+      } else if (!a.unread && b.unread) {
+        return 1; // b comes first
+      } else {
+        // Both are either unread or read, so sort by timestamp
+        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      }
+    });
+
     return { data: conversations, error: null };
   } catch (error) {
     console.error('Error fetching conversations:', error);

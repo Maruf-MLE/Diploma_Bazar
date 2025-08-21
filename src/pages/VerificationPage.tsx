@@ -206,13 +206,13 @@ const VerificationPage = () => {
       return;
     }
     
-    // ফাইল সাইজ চেক করি (5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // ফাইল সাইজ চেক করি (15MB)
+    if (file.size > 15 * 1024 * 1024) {
       toast({
         title: "ফাইল সাইজ খুব বড়",
-        description: "দয়া করে 5MB এর কম সাইজের ছবি আপলোড করুন।",
+        description: "দয়া করে 15MB এর কম সাইজের ছবি আপলোড করুন।",
         variant: "destructive",
-      });
+        });
       return;
     }
     
@@ -657,7 +657,7 @@ const VerificationPage = () => {
                         ছবি আপলোড করতে ক্লিক করুন বা ছবি টেনে আনুন
                       </p>
                       <p className="text-xs text-gray-500 mt-2">
-                        JPG, PNG (সর্বোচ্চ 5MB)
+                        JPG, PNG (সর্বোচ্চ 15MB)
                       </p>
                     </div>
                   )}

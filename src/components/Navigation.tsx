@@ -268,9 +268,13 @@ const Navigation = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Desktop Navigation */}
           <div className="hidden md:flex justify-between items-center h-16 py-0">
-            {/* Logo */}
+            {}
             <Link to="/" className="flex items-center space-x-3">
-              <BookOpen className="h-8 w-8 text-primary" />
+              <img 
+                src="/images/Logo.png" 
+                alt="ডিপ্লোমা বাজার লোগো" 
+                className="h-12 w-12 object-contain"
+              />
               <span className="text-xl font-bold gradient-text">
                 ডিপ্লোমা বাজার
               </span>
@@ -403,7 +407,11 @@ const Navigation = () => {
           <div className="md:hidden flex justify-between items-center h-16">
             {/* Logo - Mobile */}
             <Link to="/" className="flex items-center">
-              <BookOpen className="h-7 w-7 text-primary" />
+              <img 
+                src="/images/Logo.png" 
+                alt="ডিপ্লোমা বাজার লোগো" 
+                className="h-10 w-10 object-contain"
+              />
             </Link>
 
             {/* Main Navigation Items Group */}
@@ -511,7 +519,11 @@ const Navigation = () => {
           >
             <div className="p-5 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <BookOpen className="h-6 w-6 text-primary" />
+                <img 
+                  src="/images/Logo.png" 
+                  alt="ডিপ্লোমা বাজার লোগো" 
+                  className="h-8 w-8 object-contain"
+                />
                 <span className="text-lg font-bold gradient-text">ডিপ্লোমা বাজার</span>
               </div>
               <Button
