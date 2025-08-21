@@ -31,15 +31,15 @@ const HeroSection = () => {
             <div className="md:col-span-6 text-left space-y-5 px-3 md:px-5">
               <div>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4">
-                  <span className="gradient-text">বই কিনুন বিক্রি করুন</span>
+                  <span className="gradient-text">ডিপ্লোমা বাজারে</span>
                   <br />
-                  <span className="text-foreground">সাশ্রয়ী দামে</span>
+                  <span className="text-foreground">বই কিনুন বিক্রি করুন</span>
                   <br />
                   <span className="text-foreground">সহজেই এবং নিরাপদে</span>
                 </h1>
                 
                 <p className="text-lg text-foreground/80 leading-relaxed max-w-lg font-medium">
-                বই খোঁজার ঝামেলা শেষ,পলিটেকনিক শিক্ষার্থীদের জন্য দেশের প্রথম প্রিমিয়াম বুক এক্সচেঞ্জ প্ল্যাটফর্ম।
+                ডিপ্লোমা বাজার (Diploma Bazar) - বই খোঁজার ঝামেলা শেষ! পলিটেকনিক শিক্ষার্থীদের জন্য দেশের প্রথম প্রিমিয়াম বুক এক্সচেঞ্জ প্ল্যাটফর্ম।
                 বই খুঁজুন, কিনুন, বিক্রি করুন — সব নিরাপদে।
                 </p>
               </div>
