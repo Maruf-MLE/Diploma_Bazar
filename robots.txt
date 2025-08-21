@@ -1,0 +1,38 @@
+User-agent: *
+Allow: /
+Allow: /browse
+Allow: /all-departments
+Allow: /sell-book
+Allow: /help
+Allow: /register
+Allow: /login
+Allow: /verify-email
+Allow: /reset-password
+Allow: /book/*
+Allow: /profile/*
+
+# Disallow private/authenticated pages
+Disallow: /messages
+Disallow: /message-redirect
+Disallow: /profile$
+Disallow: /settings
+Disallow: /verification
+Disallow: /verification-step2
+Disallow: /admin/
+Disallow: /purchase-request/
+Disallow: /auth/
+Disallow: /banned
+
+# Allow static assets
+Allow: /assets/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.ico
+
+# Sitemap location
+Sitemap: https://diplomabazar.vercel.app/sitemap.xml
