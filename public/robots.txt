@@ -35,4 +35,4 @@ Allow: /*.svg
 Allow: /*.ico
 
 # Sitemap location
-Sitemap: https://your-frontend-domain.com/sitemap.xml
+Sitemap: https://diplomabazar.vercel.app/sitemap.xml
