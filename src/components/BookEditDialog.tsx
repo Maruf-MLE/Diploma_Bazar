@@ -58,7 +58,8 @@ const BookEditDialog: React.FC<BookEditDialogProps> = ({
     institute_name: book?.institute_name || '',
     location: book?.location || '',
     is_negotiable: book?.is_negotiable !== undefined ? book.is_negotiable : true,
-    status: book?.status || 'available'
+    status: book?.status || 'available',
+    discount_rate: book?.discount_rate || 0
   });
   
   // Cover image preview
@@ -105,7 +106,8 @@ const BookEditDialog: React.FC<BookEditDialogProps> = ({
         institute_name: book.institute_name || '',
         location: book.location || '',
         is_negotiable: book.is_negotiable !== undefined ? book.is_negotiable : true,
-        status: book.status || 'available'
+        status: book.status || 'available',
+        discount_rate: book.discount_rate || 0
       });
       setCoverImagePreview(book.cover_image_url || null);
     }
@@ -116,7 +118,7 @@ const BookEditDialog: React.FC<BookEditDialogProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'price' ? parseFloat(value) || 0 : value
+      [name]: (name === 'price' || name === 'discount_rate') ? parseFloat(value) || 0 : value
     }));
   };
   
@@ -236,6 +238,7 @@ const BookEditDialog: React.FC<BookEditDialogProps> = ({
         location: formData.location,
         is_negotiable: formData.is_negotiable,
         cover_image_url: formData.cover_image_url,
+        discount_rate: formData.discount_rate,
       };
       
       // Update book in database
@@ -355,21 +358,44 @@ const BookEditDialog: React.FC<BookEditDialogProps> = ({
               />
             </div>
             
-            <div className="grid gap-2">
-              <Label htmlFor="price" className="text-sm font-medium text-slate-800">
-                মূল্য (টাকা) *
-              </Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={handleInputChange}
-                required
-                disabled={!canEdit}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="price" className="text-sm font-medium text-slate-800">
+                  মূল্য (টাকা) *
+                </Label>
+                <Input
+                  id="price"
+                  name="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  required
+                  disabled={!canEdit}
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="discount_rate" className="text-sm font-medium text-slate-800">
+                  ছাড়ের হার (%)
+                </Label>
+                <Input
+                  id="discount_rate"
+                  name="discount_rate"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={formData.discount_rate}
+                  onChange={handleInputChange}
+                  placeholder="0"
+                  disabled={!canEdit}
+                />
+                <p className="text-xs text-muted-foreground">
+                  ছাড়ের হার (০-১০০%)। যেমন: ১০% ছাড়ের জন্য ১০ লিখুন।
+                </p>
+              </div>
             </div>
             
             <div className="grid gap-2">
