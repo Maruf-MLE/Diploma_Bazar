@@ -421,15 +421,15 @@ const Navigation = () => {
             {/* Main Navigation Items Group */}
             <div className="flex items-center justify-center mx-1 ml-4">
               <Link to="/" className="px-1 mx-1">
-                <span className={`text-sm font-medium ${isMobileActive('/')}`}>হোম</span>
+                <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/')}`}>হোম</span>
               </Link>
               
               <Link to="/browse" className="px-1 mx-1">
-                <span className={`text-sm font-medium ${isMobileActive('/browse')}`}>খুঁজুন</span>
+                <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/browse')}`}>খুঁজুন</span>
               </Link>
               
               <Link to="/sell-book" className="px-1 mx-1">
-                <span className={`text-sm font-medium ${isMobileActive('/sell-book')}`}>বিক্রি</span>
+                <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/sell-book')}`}>বিক্রি</span>
               </Link>
               
             </div>
@@ -491,14 +491,14 @@ const Navigation = () => {
               
               {/* Login/Register buttons for logged out users - All pages */}
               {!user && (
-                <div className="flex items-center space-x-2">
-                  <Link to="/login" className="px-1 mx-1">
-                    <span className={`text-sm font-medium ${isMobileActive('/login')}`}>লগ ইন</span>
+                <div className="flex items-center space-x-1">
+                  <Link to="/login" className="px-1">
+                    <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/login')}`}>লগ ইন</span>
                   </Link>
                   <Link to="/register">
-                    <Button 
+                    <Button
                       size="sm"
-                      className="primary-button text-xs px-3 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                      className="primary-button text-xs px-2.5 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
                     >
                       রেজিস্টার
                     </Button>
