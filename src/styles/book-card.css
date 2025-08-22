@@ -171,6 +171,10 @@
   font-size: 10px;
   font-weight: 500;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 }
 
 @media (min-width: 768px) {
@@ -178,6 +182,14 @@
     padding: 6px 12px;
     border-radius: 10px;
     font-size: 11px;
+    max-width: 150px;
+  }
+  
+  .publisher-badge {
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    max-width: 150px;
   }
 }
 
@@ -186,6 +198,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 18px; /* Maintain minimum height for layout consistency */
 }
 
 .publisher-text-simple {
@@ -198,6 +211,21 @@
   .publisher-text-simple {
     font-size: 12px;
   }
+}
+
+/* Publisher badge style - using similar style to semester badge */
+.publisher-badge {
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 }
 
 /* Keep old styles for backward compatibility */
@@ -367,6 +395,19 @@
   .semester-badge {
     font-size: 9px;
     padding: 3px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+  
+  .publisher-badge {
+    font-size: 9px;
+    padding: 3px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
   }
 
   .publisher-text-simple {

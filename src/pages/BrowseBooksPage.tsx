@@ -145,7 +145,7 @@ const BookCard = ({
           {book.semester || 'উল্লেখ নেই'}
         </div>
         <div className="publisher-info-simple">
-          <div className="publisher-text-simple">
+          <div className="publisher-text-simple publisher-badge">
             {/* Show only 'টেকনিক্যাল' for 'টেকনিক্যাল প্রকাশনী' on mobile, full name on larger screens */}
             <span className="block md:hidden">
               {book.publisher === 'টেকনিক্যাল প্রকাশনী' ? 'টেকনিক্যাল' : (book.publisher || 'প্রকাশনী উল্লেখ নেই')}
