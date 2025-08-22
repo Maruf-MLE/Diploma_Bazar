@@ -492,7 +492,7 @@ const UserProfilePage = () => {
                   </div>
                   
                   {/* User details in a grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6 text-sm">
                     <div className="bg-gray-50 dark:bg-gray-700/30 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
                       <div className="text-gray-500 dark:text-gray-400 mb-1">প্রতিষ্ঠান</div>
                       <div className="font-medium">{userData.institute_name}</div>
@@ -504,11 +504,7 @@ const UserProfilePage = () => {
                     <div className="bg-gray-50 dark:bg-gray-700/30 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
                       <div className="text-gray-500 dark:text-gray-400 mb-1">সেমিস্টার</div>
                       <div className="font-medium">{userData.semester}</div>
-                </div>
-                    <div className="bg-gray-50 dark:bg-gray-700/30 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
-                      <div className="text-gray-500 dark:text-gray-400 mb-1">রোল</div>
-                      <div className="font-medium">{userData.roll_number}</div>
-                  </div>
+                    </div>
                   </div>
                   
                   {/* Report button - only show if not viewing own profile */}
