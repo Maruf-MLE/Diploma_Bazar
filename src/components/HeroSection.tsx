@@ -71,7 +71,7 @@ const HeroSection = () => {
                       <CheckCircle className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-500 group-hover:scale-110 transition-transform" />
                       <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full animate-pulse"></div>
                     </div>
-                    <span className="text-xs md:text-sm font-semibold text-gray-800 whitespace-nowrap">AI যাচাইকরণ</span>
+                    <span className="text-xs md:text-sm font-semibold text-gray-800 whitespace-nowrap">যাচাইকৃত ID</span>
                   </div>
 
                   <div className="flex items-center gap-1 md:gap-1.5 bg-white/95 backdrop-blur-sm rounded-full px-2 py-1.5 md:px-3 md:py-2 shadow-md md:shadow-lg border border-primary/20 hover:shadow-lg md:hover:shadow-xl hover:scale-105 transition-all duration-300 hover:bg-white group flex-shrink-0">
