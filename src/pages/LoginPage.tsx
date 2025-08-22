@@ -323,6 +323,12 @@ export default function LoginPage() {
                   রেজিস্টার করুন
                 </Link>
               </p>
+              <p className="text-gray-500">
+                সমস্যা হচ্ছে?{" "}
+                <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  সাহায্য নিন
+                </a>
+              </p>
             </div>
           </CardFooter>
         </form>

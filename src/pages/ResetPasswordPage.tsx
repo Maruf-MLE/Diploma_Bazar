@@ -417,6 +417,15 @@ export default function ResetPasswordPage() {
                 পেজ রিলোড করুন
               </Button>
             </div>
+            
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-500">
+                সমস্যা সমাধান না হলে{" "}
+                <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  সাহায্য নিন
+                </a>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

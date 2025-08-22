@@ -340,12 +340,20 @@ export default function RegistrationPage() {
             >
               {loading ? "প্রক্রিয়াকরণ হচ্ছে..." : "রেজিস্টার করুন"}
             </Button>
-            <p className="text-sm text-center text-gray-600">
-              ইতিমধ্যে অ্যাকাউন্ট আছে?{" "}
-              <Link to="/login" className="text-blue-600 font-medium hover:underline">
-                লগইন করুন
-              </Link>
-            </p>
+            <div className="text-sm text-center text-gray-600 space-y-2">
+              <p>
+                ইতিমধ্যে অ্যাকাউন্ট আছে?{" "}
+                <Link to="/login" className="text-blue-600 font-medium hover:underline">
+                  লগইন করুন
+                </Link>
+              </p>
+              <p className="text-gray-500">
+                সমস্যা হচ্ছে?{" "}
+                <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  সাহায্য নিন
+                </a>
+              </p>
+            </div>
           </CardFooter>
         </form>
       </Card>

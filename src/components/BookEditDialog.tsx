@@ -284,7 +284,15 @@ const BookEditDialog: React.FC<BookEditDialogProps> = ({
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>এডিট করা সম্ভব নয়</AlertTitle>
-            <AlertDescription>{validationError}</AlertDescription>
+            <AlertDescription>
+              {validationError}
+              <div className="mt-2 text-xs">
+                সমস্যা থাকলে{" "}
+                <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="underline">
+                  সাহায্য নিন
+                </a>
+              </div>
+            </AlertDescription>
           </Alert>
         )}
         

@@ -443,7 +443,7 @@ const VerificationPage = () => {
             </div>
           </div>
           
-          <DialogFooter className="bg-gray-50 p-4 rounded-b-lg border-t border-gray-200">
+          <DialogFooter className="bg-gray-50 p-4 rounded-b-lg border-t border-gray-200 space-y-2">
             <Button 
               variant="default"
               className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2"
@@ -451,6 +451,12 @@ const VerificationPage = () => {
             >
               বুঝেছি
             </Button>
+            <p className="text-xs text-center text-gray-500">
+              সমস্যা থাকলে{" "}
+              <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                সাহায্য নিন
+              </a>
+            </p>
           </DialogFooter>
         </DialogContent>
       </Dialog>

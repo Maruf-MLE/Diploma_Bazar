@@ -370,10 +370,10 @@ const Navigation = () => {
                             <BookOpen className="h-4 w-4 text-gray-500" />
                             <span>আমাদের সম্পর্কে</span>
                           </Link>
-                          <Link to="/help" className="flex items-center space-x-2 p-2 rounded hover:bg-primary/5 hover:text-primary transition-colors duration-200 text-sm">
+                          <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 p-2 rounded hover:bg-primary/5 hover:text-primary transition-colors duration-200 text-sm">
                             <HelpCircle className="h-4 w-4 text-gray-500" />
                             <span>সাহায্য এবং সমর্থন</span>
-                          </Link>
+                          </a>
                           <div className="h-px bg-gray-100 my-1"></div>
                           <button 
                             onClick={handleLogout}
@@ -607,14 +607,16 @@ const Navigation = () => {
                     <span className="font-medium">সেটিংস এবং গোপনীয়তা</span>
                   </Link>
                   
-                  <Link 
-                    to="/help"
+                  <a 
+                    href="https://www.facebook.com/diplomabazar/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
                     onClick={toggleMenu}
                     className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors duration-200"
                   >
                     <HelpCircle className="h-5 w-5" />
                     <span className="font-medium">সাহায্য এবং সমর্থন</span>
-                  </Link>
+                  </a>
                   
                   <div className="h-px bg-gray-100 my-2"></div>
                   

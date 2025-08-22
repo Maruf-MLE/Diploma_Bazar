@@ -159,7 +159,15 @@ export default function EmailConfirmationPage() {
         <p className="mt-4 text-lg text-gray-600">ভেরিফিকেশন পেজে যাওয়া হচ্ছে...</p>
         <p className="mt-2 text-sm text-gray-500">অনুগ্রহ করে অপেক্ষা করুন, আপনাকে স্বয়ংক্রিয়ভাবে রিডাইরেক্ট করা হবে</p>
         {error && (
-          <p className="mt-4 text-sm text-red-600">{error}</p>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-red-600 mb-2">{error}</p>
+            <p className="text-xs text-gray-500">
+              সমস্যা থাকলে{" "}
+              <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                সাহায্য নিন
+              </a>
+            </p>
+          </div>
         )}
       </div>
     </div>

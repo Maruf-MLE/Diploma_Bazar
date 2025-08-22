@@ -208,7 +208,15 @@ const SettingsPage = () => {
                       <Alert variant="destructive" className="mb-4">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>ত্রুটি</AlertTitle>
-                        <AlertDescription>{emailError}</AlertDescription>
+                        <AlertDescription>
+                          {emailError}
+                          <div className="mt-2 text-xs">
+                            সমস্যা থাকলে{" "}
+                            <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="underline">
+                              সাহায্য নিন
+                            </a>
+                          </div>
+                        </AlertDescription>
                       </Alert>
                     )}
                     
@@ -288,7 +296,15 @@ const SettingsPage = () => {
                       <Alert variant="destructive" className="mb-4">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>ত্রুটি</AlertTitle>
-                        <AlertDescription>{passwordError}</AlertDescription>
+                        <AlertDescription>
+                          {passwordError}
+                          <div className="mt-2 text-xs">
+                            সমস্যা থাকলে{" "}
+                            <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="underline">
+                              সাহায্য নিন
+                            </a>
+                          </div>
+                        </AlertDescription>
                       </Alert>
                     )}
                     

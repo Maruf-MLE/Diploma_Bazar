@@ -86,6 +86,15 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
                 পেজ রিফ্রেশ করুন
               </Button>
             )}
+            
+            <Button
+              onClick={() => window.open('https://www.facebook.com/diplomabazar/', '_blank')}
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              সাহায্য নিন
+            </Button>
           </div>
         </div>
       )}
