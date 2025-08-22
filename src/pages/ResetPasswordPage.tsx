@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff, Lock, Shield, AlertTriangle, Clock, RefreshCw, Mail, Loader2, CheckCircle } from "lucide-react"
+import { Eye, EyeOff, Lock, Shield, AlertTriangle, Clock, Mail, Loader2, CheckCircle, ArrowLeft, KeyRound } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { useAuthUrlParams } from "@/lib/urlParams"
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -17,221 +16,139 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isValidSession, setIsValidSession] = useState(false)
-  const [sessionChecked, setSessionChecked] = useState(false)
-  const [newLinkLoading, setNewLinkLoading] = useState(false)
+  const [sessionStatus, setSessionStatus] = useState<'checking' | 'valid' | 'invalid' | 'expired'>('checking')
   const [newLinkEmail, setNewLinkEmail] = useState("")
+  const [newLinkLoading, setNewLinkLoading] = useState(false)
   const [showNewLinkSuccess, setShowNewLinkSuccess] = useState(false)
-  const [rateLimitInfo, setRateLimitInfo] = useState<{remaining: number, resetTime: string} | null>(null)
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: "",
   })
-  
-  // Parse URL parameters using the new utility
-  const urlParams = useAuthUrlParams()
-  const { params, hasError, isOtpExpired, isValidAuthFlow, errorMessage, debugInfo } = urlParams
+
+  // Simple URL parameter extraction
+  const extractUrlParams = () => {
+    const accessToken = searchParams.get('access_token')
+    const refreshToken = searchParams.get('refresh_token')
+    const token = searchParams.get('token')
+    const type = searchParams.get('type')
+    const error = searchParams.get('error')
+    const errorDescription = searchParams.get('error_description')
+
+    return { accessToken, refreshToken, token, type, error, errorDescription }
+  }
 
   // Check if the reset session is valid
   useEffect(() => {
-    // Prevent multiple rapid executions
-    let isExecuting = false
-    
     const checkResetSession = async () => {
-      if (isExecuting) return
-      isExecuting = true
-      
       try {
-        // Log comprehensive URL parameter analysis
-        console.log('🔍 Reset Password URL Analysis:', {
-          hasError,
-          isOtpExpired,
-          isValidAuthFlow,
-          errorMessage,
-          parametersFound: Object.keys(params).length
-        })
+        const { accessToken, refreshToken, token, type, error, errorDescription } = extractUrlParams()
         
-        // Handle OTP expiration error specifically
-        if (isOtpExpired) {
-          console.log('⏰ OTP Expired - showing specific error message')
-          toast({
-            title: "OTP মেয়াদ শেষ",
-            description: "পাসওয়ার্ড রিসেট লিংকের মেয়াদ শেষ হয়ে গেছে। দয়া করে নতুন লিংকের জন্য অনুরোধ করুন।",
-            variant: "destructive",
-          })
-          setSessionChecked(true)
-          return
-        }
-        
-        // Handle other errors
-        if (hasError && !isOtpExpired) {
-          console.log('🚨 Authentication Error:', { 
-            error: params.error,
-            error_code: params.error_code,
-            error_description: params.error_description 
-          })
-          throw new Error(errorMessage || 'Authentication error occurred')
-        }
-        
-        // Extract tokens using the utility
-        const { accessToken, refreshToken, token, type } = urlParams.extractTokens()
-        
-        console.log('🎫 Extracted tokens for password reset:', { 
+        console.log('🔍 Reset Password URL Parameters:', { 
           hasAccessToken: !!accessToken, 
           hasRefreshToken: !!refreshToken, 
           hasToken: !!token, 
-          type 
+          type,
+          hasError: !!error 
         })
-        
-      // Method 1: Check if there's an access token and refresh token in URL (new format)
+
+        // Handle errors from URL
+        if (error) {
+          console.log('🚨 Authentication Error:', error)
+          
+          if (error.includes('expired') || error.includes('invalid_token')) {
+            setSessionStatus('expired')
+            toast({
+              title: "লিংকের মেয়াদ শেষ",
+              description: "পাসওয়ার্ড রিসেট লিংকের মেয়াদ শেষ হয়ে গেছে। নতুন লিংকের জন্য অনুরোধ করুন।",
+              variant: "destructive",
+            })
+          } else {
+            setSessionStatus('invalid')
+            toast({
+              title: "অথেনটিকেশন ত্রুটি",
+              description: errorDescription || "একটি অথেনটিকেশন ত্রুটি ঘটেছে।",
+              variant: "destructive",
+            })
+          }
+          return
+        }
+
+        // Method 1: Try with access_token and refresh_token
         if (type === 'recovery' && accessToken && refreshToken) {
-          console.log('🔄 Method 1: Using access_token and refresh_token for session')
-          // Set the session using the tokens
+          console.log('🔄 Attempting session with access and refresh tokens')
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           })
 
           if (error) {
-            console.error('❌ Error setting session with tokens:', error)
-            // Don't throw error immediately, try other methods
-            console.log('⚠️ Token session failed, trying other methods...')
+            console.error('❌ Token session failed:', error)
           } else if (data.session) {
-            console.log('✅ Session established successfully with tokens')
-            setIsValidSession(true)
+            console.log('✅ Session established with tokens')
+            setSessionStatus('valid')
             toast({
               title: "সেশন বৈধ",
-              description: "আপনি এখন আপনার পাসওয়ার্ড পরিবর্তন করতে পারেন।",
+              description: "আপনি এখন নতুন পাসওয়ার্ড সেট করতে পারেন।",
             })
             return
           }
         }
-        
-        // Method 2: Check if there's a token parameter (PKCE format)
+
+        // Method 2: Try with token (PKCE flow)
         if (type === 'recovery' && token) {
-          console.log('🔄 Method 2: Using PKCE token for verification')
-          
-          // For PKCE flow, we need to verify the token with Supabase
-          try {
-            const { data, error } = await supabase.auth.verifyOtp({
-              token_hash: token,
-              type: 'recovery'
+          console.log('🔄 Attempting PKCE token verification')
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: token,
+            type: 'recovery'
+          })
+
+          if (error) {
+            console.error('❌ PKCE verification failed:', error)
+          } else if (data.session) {
+            console.log('✅ Session established with PKCE token')
+            setSessionStatus('valid')
+            toast({
+              title: "সেশন বৈধ",
+              description: "আপনি এখন নতুন পাসওয়ার্ড সেট করতে পারেন।",
             })
-            
-            if (error) {
-              console.error('❌ Error verifying PKCE token:', error)
-              // Don't throw error immediately, try other methods
-              console.log('⚠️ PKCE verification failed, trying other methods...')
-            } else if (data.session) {
-              console.log('✅ Session established successfully with PKCE token')
-              setIsValidSession(true)
-              toast({
-                title: "সেশন বৈধ",
-                description: "আপনি এখন আপনার পাসওয়ার্ড পরিবর্তন করতে পারেন।",
-              })
-              return
-            }
-          } catch (verifyError) {
-            console.error('❌ PKCE verification failed:', verifyError)
-            // Continue to other methods
-            console.log('⚠️ Trying alternative verification methods...')
+            return
           }
         }
-        
-        // Method 3: Check if user is already authenticated (direct access)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
-        if (sessionError) {
-          console.error('❌ Error getting current session:', sessionError)
-        }
-        
+
+        // Method 3: Check existing session
+        const { data: { session } } = await supabase.auth.getSession()
         if (session) {
-          console.log('✅ Method 3: Using existing session')
-          setIsValidSession(true)
+          console.log('✅ Using existing session')
+          setSessionStatus('valid')
           toast({
             title: "সেশন বৈধ",
-            description: "আপনি এখন আপনার পাসওয়ার্ড পরিবর্তন করতে পারেন।",
+            description: "আপনি এখন নতুন পাসওয়ার্ড সেট করতে পারেন।",
           })
           return
         }
-        
-        // Method 4: Try alternative verification for recovery type with any token
-        if (type === 'recovery' && (token || accessToken)) {
-          console.log('🔄 Method 4: Alternative recovery verification')
-          try {
-            // Try to exchange token for session
-            const tokenToUse = token || accessToken
-            if (tokenToUse) {
-              console.log('🎫 Attempting to exchange token for session...')
-              
-              // Create a temporary session to test password reset capability
-              const { data: userData, error: userError } = await supabase.auth.getUser(tokenToUse)
-              
-              if (!userError && userData.user) {
-                console.log('✅ Method 4: Token is valid, allowing password reset')
-                setIsValidSession(true)
-                toast({
-                  title: "সেশন বৈধ",
-                  description: "আপনি এখন আপনার পাসওয়ার্ড পরিবর্তন করতে পারেন।",
-                })
-                return
-              }
-            }
-          } catch (altError) {
-            console.error('❌ Alternative verification failed:', altError)
-          }
-        }
-        
-        // If none of the methods work, but we have recovery type with valid token, allow password reset
-        if (type === 'recovery' && (token || accessToken)) {
-          console.log('⚠️ Recovery type detected with token - allowing password reset attempt')
-          setIsValidSession(true)
-          toast({
-            title: "পাসওয়ার্ড রিসেট লিংক বৈধ",
-            description: "আপনি এখন আপনার পাসওয়ার্ড পরিবর্তন করতে পারেন।",
-          })
-          return
-        }
-        
-        // If none of the methods work, throw error
-        console.log('❌ No valid authentication method found')
-        throw new Error('Invalid reset link - no valid authentication method found')
-        
-      } catch (error: any) {
-        console.error('❌ Reset session error:', error)
-        
-        // Generate detailed debug report for troubleshooting
-        const debugReport = urlParams.generateDebugReport()
-        console.log('📋 Debug Report:', debugReport)
-        
-        let errorTitle = "অবৈধ লিংক"
-        let errorDescription = "পাসওয়ার্ড রিসেট লিংকটি অবৈধ বা মেয়াদ শেষ হয়ে গেছে। দয়া করে আবার পাসওয়ার্ড রিসেট করার জন্য অনুরোধ করুন।"
-        
-        // Customize error message based on the type of error
-        if (isOtpExpired) {
-          errorTitle = "OTP মেয়াদ শেষ"
-          errorDescription = "পাসওয়ার্ড রিসেট লিংকের মেয়াদ শেষ হয়ে গেছে। একটি নতুন রিসেট লিংকের জন্য অনুরোধ করুন।"
-        } else if (hasError) {
-          errorTitle = "অথেনটিকেশন ত্রুটি"
-          errorDescription = errorMessage || "একটি অথেনটিকেশন ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।"
-        }
-        
+
+        // If none of the methods work
+        console.log('❌ No valid session found')
+        setSessionStatus('invalid')
         toast({
-          title: errorTitle,
-          description: errorDescription,
+          title: "অবৈধ লিংক",
+          description: "পাসওয়ার্ড রিসেট লিংকটি অবৈধ বা মেয়াদ শেষ হয়ে গেছে।",
           variant: "destructive",
         })
         
-        // Redirect to login page after a short delay
-        setTimeout(() => navigate("/login"), 5000)
-      } finally {
-        setSessionChecked(true)
-        isExecuting = false
+      } catch (error: any) {
+        console.error('❌ Session check error:', error)
+        setSessionStatus('invalid')
+        toast({
+          title: "ত্রুটি",
+          description: "সেশন যাচাই করতে সমস্যা হয়েছে।",
+          variant: "destructive",
+        })
       }
     }
 
     checkResetSession()
-  }, [searchParams, navigate, toast]) // Simplified dependencies to prevent rapid re-execution
+  }, [searchParams, toast])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -258,61 +175,28 @@ export default function ResetPasswordPage() {
     }
 
     setNewLinkLoading(true)
-    setShowNewLinkSuccess(false)
-    setRateLimitInfo(null)
 
     try {
-      // Get the correct redirect URL based on current environment
-      let redirectUrl
-      redirectUrl = `${window.location.origin}/reset-password`
-
-      console.log('🔄 Requesting new password reset link for:', newLinkEmail)
-      console.log('🔗 Redirect URL:', redirectUrl)
-
-      const { data, error } = await supabase.auth.resetPasswordForEmail(
+      const { error } = await supabase.auth.resetPasswordForEmail(
         newLinkEmail.trim(),
         {
-          redirectTo: redirectUrl,
+          redirectTo: `${window.location.origin}/reset-password`,
         }
       )
 
-      if (error) {
-        // Handle rate limiting error specifically
-        if (error.message?.includes('rate limit') || error.message?.includes('too many requests')) {
-          // Try to extract rate limit info from error (this depends on Supabase's error format)
-          const rateLimitMatch = error.message.match(/(\d+)\s*seconds?/i)
-          const waitTime = rateLimitMatch ? parseInt(rateLimitMatch[1]) : 60
-          const resetTime = new Date(Date.now() + waitTime * 1000).toLocaleTimeString('bn-BD')
-          
-          setRateLimitInfo({
-            remaining: waitTime,
-            resetTime
-          })
-          
-          toast({
-            title: "অনুরোধের সীমা অতিক্রম",
-            description: `অনেক বেশি অনুরোধ করা হয়েছে। ${waitTime} সেকেন্ড পরে আবার চেষ্টা করুন।`,
-            variant: "destructive",
-          })
-          return
-        }
-        
-        throw error
-      }
+      if (error) throw error
 
       setShowNewLinkSuccess(true)
       toast({
         title: "নতুন রিসেট লিংক পাঠানো হয়েছে",
-        description: "আপনার ইমেইলে নতুন পাসওয়ার্ড রিসেট লিংক পাঠানো হয়েছে। অনুগ্রহ করে আপনার ইনবক্স চেক করুন।",
+        description: "আপনার ইমেইলে নতুন পাসওয়ার্ড রিসেট লিংক পাঠানো হয়েছে।",
       })
-
-      console.log('✅ New password reset email sent successfully')
 
     } catch (error: any) {
       console.error('❌ Error requesting new reset link:', error)
       toast({
         title: "নতুন লিংক পাঠাতে সমস্যা",
-        description: error.message || "নতুন পাসওয়ার্ড রিসেট লিংক পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+        description: error.message || "নতুন পাসওয়ার্ড রিসেট লিংক পাঠাতে সমস্যা হয়েছে।",
         variant: "destructive",
       })
     } finally {
@@ -359,7 +243,7 @@ export default function ResetPasswordPage() {
       
       if (sessionError || !session) {
         // If no session, try to establish one using URL parameters
-        const { accessToken, refreshToken, token, type } = urlParams.extractTokens()
+        const { accessToken, refreshToken, token, type } = extractUrlParams()
         
         if (type === 'recovery') {
           if (accessToken && refreshToken) {
@@ -432,13 +316,13 @@ export default function ResetPasswordPage() {
   }
 
   // Show loading state while checking session
-  if (!sessionChecked) {
+  if (sessionStatus === 'checking') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex items-center justify-center space-x-2">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              <Loader2 className="animate-spin h-8 w-8" />
               <span>যাচাই করা হচ্ছে...</span>
             </div>
           </CardContent>
@@ -447,16 +331,14 @@ export default function ResetPasswordPage() {
     )
   }
 
-  // Show error state if session is invalid
-  if (!isValidSession) {
-    // Determine the appropriate error icon and message
-    const ErrorIcon = isOtpExpired ? Clock : hasError ? AlertTriangle : Shield
-    const errorTitle = isOtpExpired ? "OTP মেয়াদ শেষ" : hasError ? "অথেনটিকেশন ত্রুটি" : "অবৈধ লিংক"
-    const errorDesc = isOtpExpired 
+  // Show error state if session is invalid or expired
+  if (sessionStatus === 'invalid' || sessionStatus === 'expired') {
+    const isExpired = sessionStatus === 'expired'
+    const ErrorIcon = isExpired ? Clock : AlertTriangle
+    const errorTitle = isExpired ? "লিংকের মেয়াদ শেষ" : "অবৈধ লিংক"
+    const errorDesc = isExpired 
       ? "পাসওয়ার্ড রিসেট লিংকের মেয়াদ শেষ হয়ে গেছে। একটি নতুন রিসেট লিংকের জন্য অনুরোধ করুন।"
-      : hasError 
-      ? (errorMessage || "একটি অথেনটিকেশন ত্রুটি ঘটেছে। দয়া করে আবার চেষ্টা করুন।")
-      : "পাসওয়ার্ড রিসেট লিংকটি অবৈধ বা মেয়াদ শেষ হয়ে গেছে। আপনাকে লগইন পেজে পাঠানো হচ্ছে..."
+      : "পাসওয়ার্ড রিসেট লিংকটি অবৈধ বা মেয়াদ শেষ হয়ে গেছে।"
     
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8">
@@ -470,132 +352,55 @@ export default function ResetPasswordPage() {
               </AlertDescription>
             </Alert>
             
-            {/* Show specific error details if available */}
-            {hasError && (
-              <Alert className="bg-orange-50 border-orange-200">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                <AlertTitle className="text-orange-800">ত্রুটির বিস্তারিত</AlertTitle>
-                <AlertDescription className="text-orange-700">
-                  <div className="space-y-1">
-                    {params.error && <div><strong>Error:</strong> {params.error}</div>}
-                    {params.error_code && <div><strong>Error Code:</strong> {params.error_code}</div>}
-                    {params.error_description && <div><strong>Description:</strong> {params.error_description}</div>}
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {/* Special handling for OTP expired error - Enhanced with direct request functionality */}
-            {(isOtpExpired || !isValidAuthFlow) && (
-              <Alert className="bg-blue-50 border-blue-200">
-                <Clock className="h-4 w-4 text-blue-600" />
-                <AlertTitle className="text-blue-800">নতুন রিসেট লিংক পান</AlertTitle>
-                <AlertDescription className="text-blue-700">
-                  <div className="space-y-4 mt-3">
-                    <p>আপনার ইমেইল ঠিকানা দিন এবং আমরা আপনাকে একটি নতুন পাসওয়ার্ড রিসেট লিংক পাঠাবো:</p>
+            <Alert className="bg-blue-50 border-blue-200">
+              <Clock className="h-4 w-4 text-blue-600" />
+              <AlertTitle className="text-blue-800">নতুন রিসেট লিংক পান</AlertTitle>
+              <AlertDescription className="text-blue-700">
+                <div className="space-y-4 mt-3">
+                  <p>আপনার ইমেইল ঠিকানা দিন এবং আমরা আপনাকে একটি নতুন পাসওয়ার্ড রিসেট লিংক পাঠাবো:</p>
+                  
+                  <div className="space-y-3">
+                    <Input
+                      type="email"
+                      placeholder="আপনার ইমেইল ঠিকানা"
+                      value={newLinkEmail}
+                      onChange={(e) => setNewLinkEmail(e.target.value)}
+                      disabled={newLinkLoading}
+                      className="bg-white"
+                    />
                     
-                    <div className="space-y-3">
-                      <Input
-                        type="email"
-                        placeholder="আপনার ইমেইল ঠিকানা"
-                        value={newLinkEmail}
-                        onChange={(e) => setNewLinkEmail(e.target.value)}
-                        disabled={newLinkLoading}
-                        className="bg-white"
-                      />
-                      
-                      <Button 
-                        onClick={handleRequestNewLink}
-                        disabled={newLinkLoading || !newLinkEmail.trim()}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        {newLinkLoading ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            পাঠানো হচ্ছে...
-                          </>
-                        ) : (
-                          <>
-                            <Mail className="mr-2 h-4 w-4" />
-                            নতুন রিসেট লিংক পাঠান
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                    
-                    {/* Success message */}
-                    {showNewLinkSuccess && (
-                      <Alert className="bg-green-50 border-green-200 mt-3">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <AlertTitle className="text-green-800">সফল!</AlertTitle>
-                        <AlertDescription className="text-green-700">
-                          নতুন পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে। অনুগ্রহ করে আপনার ইনবক্স (এবং স্প্যাম ফোল্ডার) চেক করুন।
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    
-                    {/* Rate limit information */}
-                    {rateLimitInfo && (
-                      <Alert className="bg-yellow-50 border-yellow-200 mt-3">
-                        <Clock className="h-4 w-4 text-yellow-600" />
-                        <AlertTitle className="text-yellow-800">অপেক্ষা করুন</AlertTitle>
-                        <AlertDescription className="text-yellow-700">
-                          অনেক বেশি অনুরোধের কারণে আপনাকে অপেক্ষা করতে হবে। পরবর্তী অনুরোধের জন্য {rateLimitInfo.resetTime} পর্যন্ত অপেক্ষা করুন।
-                        </AlertDescription>
-                      </Alert>
-                    )}
+                    <Button 
+                      onClick={handleRequestNewLink}
+                      disabled={newLinkLoading || !newLinkEmail.trim()}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {newLinkLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          পাঠানো হচ্ছে...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          নতুন রিসেট লিংক পাঠান
+                        </>
+                      )}
+                    </Button>
                   </div>
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {/* Debug information - enhanced with new utility */}
-            <details className="bg-gray-50 p-4 rounded-lg">
-              <summary className="cursor-pointer font-medium text-sm text-gray-700 mb-2">
-                ডিবাগ তথ্য (ডেভেলপমেন্টের জন্য)
-              </summary>
-              <div className="text-xs space-y-3 text-gray-600">
-                <div>
-                  <strong>URL Analysis:</strong>
-                  <div className="bg-white p-2 rounded border space-y-1">
-                    <div>Has Error: <span className={hasError ? 'text-red-600' : 'text-green-600'}>{hasError ? 'Yes' : 'No'}</span></div>
-                    <div>OTP Expired: <span className={isOtpExpired ? 'text-red-600' : 'text-green-600'}>{isOtpExpired ? 'Yes' : 'No'}</span></div>
-                    <div>Valid Auth Flow: <span className={isValidAuthFlow ? 'text-green-600' : 'text-red-600'}>{isValidAuthFlow ? 'Yes' : 'No'}</span></div>
-                    <div>Parameters Found: {Object.keys(params).length}</div>
-                  </div>
+                  
+                  {/* Success message */}
+                  {showNewLinkSuccess && (
+                    <Alert className="bg-green-50 border-green-200 mt-3">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <AlertTitle className="text-green-800">সফল!</AlertTitle>
+                      <AlertDescription className="text-green-700">
+                        নতুন পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে। অনুগ্রহ করে আপনার ইনবক্স (এবং স্প্যাম ফোল্ডার) চেক করুন।
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
-                
-                <div>
-                  <strong>Current URL:</strong>
-                  <pre className="bg-white p-2 rounded border text-xs overflow-x-auto">
-                    {debugInfo.url}
-                  </pre>
-                </div>
-                
-                <div>
-                  <strong>All Parameters:</strong>
-                  <pre className="bg-white p-2 rounded border text-xs">
-                    {JSON.stringify(params, null, 2)}
-                  </pre>
-                </div>
-                
-                <div>
-                  <strong>Debug Report:</strong>
-                  <pre className="bg-white p-2 rounded border text-xs max-h-40 overflow-y-auto">
-                    {urlParams.generateDebugReport()}
-                  </pre>
-                </div>
-                
-                <div>
-                  <strong>Expected Parameters:</strong>
-                  <ul className="list-disc list-inside space-y-1 text-xs">
-                    <li>PKCE Flow: <code>?token=xxx&type=recovery</code></li>
-                    <li>Traditional Flow: <code>?access_token=xxx&refresh_token=xxx&type=recovery</code></li>
-                    <li>Error Flow: <code>?error=xxx&error_code=xxx&error_description=xxx</code></li>
-                  </ul>
-                </div>
-              </div>
-            </details>
+              </AlertDescription>
+            </Alert>
             
             <div className="flex gap-2">
               <Button 
@@ -604,24 +409,13 @@ export default function ResetPasswordPage() {
               >
                 লগইন পেজে যান
               </Button>
-              {isOtpExpired ? (
-                <Button 
-                  onClick={() => navigate("/login")} 
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  নতুন রিসেট লিংক পান
-                </Button>
-              ) : (
-                <Button 
-                  onClick={() => window.location.reload()} 
-                  variant="outline"
-                  className="flex-1"
-                >
-                  পেজ রিলোড করুন
-                </Button>
-              )}
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline"
+                className="flex-1"
+              >
+                পেজ রিলোড করুন
+              </Button>
             </div>
           </CardContent>
         </Card>

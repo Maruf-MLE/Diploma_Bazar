@@ -7,9 +7,9 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/AuthContext"
-import { AlertCircle, Mail } from "lucide-react"
+import { AlertCircle, Mail, Eye, EyeOff, ArrowLeft, CheckCircle, RefreshCw, Shield } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 export default function LoginPage() {
   const navigate = useNavigate()
