@@ -49,17 +49,33 @@ const HeroSection = () => {
                   </Button>
                 </Link>
 
-                <Button
-                  variant="ghost"
-                  className="glass-button text-base px-8 py-6 rounded-full border border-primary/20 hover:border-primary/40 hover:shadow-lg transition-all duration-300"
-                  onClick={() => {
-                    // Button is clickable but does nothing
-                    console.log('Demo video button clicked - but no action taken');
-                  }}
-                >
-                  <Play className="mr-2 h-5 w-5" />
-                  ডেমো ভিডিও দেখুন
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="glass-button text-base px-8 py-6 rounded-full border border-primary/20 hover:border-primary/40 hover:shadow-lg transition-all duration-300"
+                    >
+                      <Play className="mr-2 h-5 w-5" />
+                      ডেমো ভিডিও দেখুন
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
+                    <DialogHeader>
+                      <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">ডিপ্লোমা বাজার - ডেমো ভিডিও</DialogTitle>
+                    </DialogHeader>
+                    <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
+                      <iframe
+                        className="absolute top-0 left-0 w-full h-full"
+                        src="https://www.youtube.com/embed/uYDqqdqAlcw?si=VjBBF0ZiWUPJ07GK"
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               {/* Modern Feature Highlights - Better Positioned */}
