@@ -30,7 +30,7 @@ const HeroSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-4 md:pt-12 lg:pt-16 pb-6 items-center">
             <div className="md:col-span-6 text-left space-y-5 px-3 md:px-5">
               <div>
-                <div className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+                <div className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 flex flex-col gap-2">
                   <div className="gradient-text mb-1.5 md:mb-2 leading-normal">ডিপ্লোমা বাজারে</div>
                   <div className="text-foreground">বই কিনুন বিক্রি করুন</div>
                   <div className="text-foreground">সহজেই এবং নিরাপদে</div>
