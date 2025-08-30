@@ -19,7 +19,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="relative border-t-0 min-h-screen" style={{ backgroundColor: '#EFF2FF' }}>
+    <div className="relative border-t-0 " style={{ backgroundColor: '#EFF2FF' }}>
       {/* Subtle Background Elements */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
