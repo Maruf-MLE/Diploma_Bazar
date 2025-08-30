@@ -69,6 +69,11 @@ const ProfilePage = () => {
   const [bookToDelete, setBookToDelete] = useState<BookEntity | null>(null);
   const [deletingBook, setDeletingBook] = useState(false);
 
+  // Handle verification badge click - redirect to verification page
+  const handleVerificationClick = () => {
+    window.location.href = 'http://localhost:8081/verification';
+  };
+
   // Check if the location state has an activeTab property or URL has tab parameter
   useEffect(() => {
     // URL থেকে tab প্যারামিটার নেওয়া
@@ -550,7 +555,7 @@ const ProfilePage = () => {
                     </AvatarFallback>
                   </Avatar>
                   <Button
-                    variant="filled"
+                    variant="default"
                     size="icon"
                     className="absolute bottom-0 right-0 rounded-full h-8 w-8 sm:h-10 sm:w-10 border-0 bg-blue-600 text-white hover:bg-blue-700"
                     onClick={() => fileInputRef.current?.click()}
@@ -575,11 +580,17 @@ const ProfilePage = () => {
                             <Loader2 className="h-3 w-3 mr-1 animate-spin" /> চেক করা হচ্ছে...
                           </Badge>
                         ) : userData.isVerified ? (
-                          <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-sm">
+                          <Badge 
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-sm cursor-pointer transition-all duration-200 hover:scale-105"
+                            onClick={handleVerificationClick}
+                          >
                             <Check className="h-3 w-3 mr-1" /> ভেরিফায়েড
                           </Badge>
                         ) : (
-                          <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-sm">
+                          <Badge 
+                            className="bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-sm cursor-pointer transition-all duration-200 hover:scale-105"
+                            onClick={handleVerificationClick}
+                          >
                             <HelpCircle className="h-3 w-3 mr-1" /> ভেরিফায়েড নয়
                           </Badge>
                         )}
@@ -625,10 +636,13 @@ const ProfilePage = () => {
                       <div className={`w-2 h-2 rounded-full mr-2 sm:mr-3 ${userData.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
                       <span className="text-sm text-slate-700">ইমেইল: <span className="font-semibold text-slate-800">{userData.email}</span></span>
                     </div>
-                    <div className={userData.isVerified ? 
-                      "bg-emerald-100 text-emerald-800 text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium" : 
-                      "bg-amber-100 text-amber-800 text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium"
-                    }>
+                    <div 
+                      className={userData.isVerified ? 
+                        "bg-emerald-100 text-emerald-800 text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium cursor-pointer transition-all duration-200 hover:scale-105 hover:bg-emerald-200" : 
+                        "bg-amber-100 text-amber-800 text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium cursor-pointer transition-all duration-200 hover:scale-105 hover:bg-amber-200"
+                      }
+                      onClick={handleVerificationClick}
+                    >
                       {userData.isVerified ? 'ভেরিফায়েড' : 'ভেরিফাই করুন'}
                     </div>
                   </div>

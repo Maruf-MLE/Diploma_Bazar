@@ -29,7 +29,7 @@ const SellBookPage: React.FC = () => {
   const [author] = useState('লেখক তথ্য'); // Hidden field with default value
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [condition, setCondition] = useState('new');
+  const [condition, setCondition] = useState('');
   const [conditionDescription] = useState(''); // Hidden field with default value
   const [category] = useState('বই'); // Hidden field with default value
   const [semester, setSemester] = useState('');
@@ -373,7 +373,7 @@ const SellBookPage: React.FC = () => {
           author: author.trim(),
           description: description.trim(),
           price: numericPrice,
-          condition,
+          condition: condition || 'good',
           condition_description: conditionDescription.trim() || null,
           category: category.trim(),
           semester: semester.trim() || null,
@@ -458,20 +458,20 @@ const SellBookPage: React.FC = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <div className="space-y-1.5">
-                    <Label htmlFor="title" className="text-sm font-medium text-gray-700">বইয়ের শিরোনাম *</Label>
+                    <Label htmlFor="title" className="text-sm font-medium text-gray-700">বিভাগের নাম অথবা বইয়ের শিরোনাম *</Label>
                     <Input
                       id="title"
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="বইয়ের নাম লিখুন"
+                      placeholder="বিভাগের নাম অথবা বইয়ের শিরোনাম লিখুন"
                       className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
                       required
                     />
                   </div>
                   
                   <div className="space-y-1.5">
-                    <Label htmlFor="publisher" className="text-sm font-medium text-gray-700">প্রকাশনী</Label>
+                    <Label htmlFor="publisher" className="text-sm font-medium text-gray-700">প্রকাশনী  (সংখ্যা গরিষ্ঠ বইয়ের যে প্রকাশনী)</Label>
                     <Select value={publisher} onValueChange={setPublisher}>
                       <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
                         <SelectValue placeholder="প্রকাশনী নির্বাচন করুন" />
@@ -490,7 +490,7 @@ const SellBookPage: React.FC = () => {
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="বই সম্পর্কে বিস্তারিত লিখুন"
+                    placeholder="বই সমূহ লিখুন"
                     rows={3}
                     className="border-gray-300 focus:border-primary focus:ring-primary md:rows-4"
                     required
@@ -520,10 +520,9 @@ const SellBookPage: React.FC = () => {
                     <Label htmlFor="condition" className="text-sm font-medium text-gray-700">অবস্থা *</Label>
                     <Select value={condition} onValueChange={setCondition}>
                       <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
-                        <SelectValue placeholder="অবস্থা নির্বাচন করুন" />
+                        <SelectValue placeholder="বইয়ের অবস্থা নির্বাচন করুন" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="new">নতুন</SelectItem>
                         <SelectItem value="like_new">প্রায় নতুন</SelectItem>
                         <SelectItem value="good">ভালো</SelectItem>
                         <SelectItem value="acceptable">গ্রহণযোগ্য</SelectItem>

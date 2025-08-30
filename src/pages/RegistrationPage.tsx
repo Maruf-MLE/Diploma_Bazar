@@ -14,6 +14,7 @@ import {
   SelectValue
 } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
@@ -27,6 +28,8 @@ export default function RegistrationPage() {
     instituteName: "",
   })
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
   const { signUp } = useAuth()
@@ -221,29 +224,59 @@ export default function RegistrationPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">পাসওয়ার্ড</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="পাসওয়ার্ড"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="পাসওয়ার্ড"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">পাসওয়ার্ড নিশ্চিত করুন</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="পাসওয়ার্ড আবার লিখুন"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="পাসওয়ার্ড আবার লিখুন"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="name">পূর্ণ নাম</Label>

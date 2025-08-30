@@ -332,7 +332,13 @@ const Navigation = () => {
                     {profileDropdownOpen && (
                       <div className="absolute right-0 top-full mt-2 w-64 bg-white/90 backdrop-blur-md rounded-lg shadow-lg border border-gray-100/50 z-50 overflow-hidden">
                         <div className="p-3 border-b border-gray-100">
-                          <div className="flex items-center space-x-3">
+                          <div 
+                            className="flex items-center space-x-3 cursor-pointer hover:bg-primary/5 rounded-lg p-2 -m-2 transition-colors duration-200"
+                            onClick={() => {
+                              setProfileDropdownOpen(false);
+                              navigate('/profile');
+                            }}
+                          >
                             <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
                               {user.user_metadata && user.user_metadata.avatar_url ? (
                                 <img 
@@ -340,17 +346,16 @@ const Navigation = () => {
                                   alt="Profile" 
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
-                                    console.log('Dropdown profile image failed to load');
-                                    e.currentTarget.src = '';
+                                    console.log('Dropdown profile image failed to load, showing fallback icon');
                                     e.currentTarget.style.display = 'none';
-                                    e.currentTarget.parentElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-gray-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
                                   }}
                                 />
-                              ) : (
+                              ) : null}
+                              {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
                                 <User className="h-6 w-6 text-gray-600" />
                               )}
                             </div>
-                            <div>
+                            <div className="flex-1">
                               <p className="font-medium">{user.user_metadata?.name || 'ব্যবহারকারী'}</p>
                               <p className="text-xs text-gray-500">{user.email}</p>
                             </div>
@@ -462,26 +467,20 @@ const Navigation = () => {
                       <div className="flex flex-col items-center">
                         <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm relative">
                           {user.user_metadata && user.user_metadata.avatar_url ? (
-                            <>
-                              <img 
-                                src={user.user_metadata.avatar_url} 
-                                alt="Profile" 
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  console.log('Profile image failed to load');
-                                  e.currentTarget.src = '';
-                                  e.currentTarget.style.display = 'none';
-                                  e.currentTarget.parentElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-gray-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
-                                }}
-                              />
-                              <ChevronDown className="h-9 w-9 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
-                            </>
-                          ) : (
-                            <>
-                              <User className="h-4 w-4 text-gray-600" />
-                              <ChevronDown className="h-6 w-6 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
-                            </>
+                            <img 
+                              src={user.user_metadata.avatar_url} 
+                              alt="Profile" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.log('Mobile profile image failed to load, showing fallback icon');
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : null}
+                          {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
+                            <User className="h-4 w-4 text-gray-600" />
                           )}
+                          <ChevronDown className="h-6 w-6 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
                         </div>
                       </div>
                     </div>
@@ -542,7 +541,13 @@ const Navigation = () => {
             
             {user && (
               <div className="p-4 border-b border-gray-100">
-                <div className="flex items-center space-x-3">
+                <div 
+                  className="flex items-center space-x-3 cursor-pointer hover:bg-primary/5 rounded-lg p-2 -m-2 transition-colors duration-200"
+                  onClick={() => {
+                    toggleMenu();
+                    navigate('/profile');
+                  }}
+                >
                   <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
                     {user.user_metadata && user.user_metadata.avatar_url ? (
                       <img 
@@ -550,17 +555,16 @@ const Navigation = () => {
                         alt="Profile" 
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          console.log('Sidebar profile image failed to load');
-                          e.currentTarget.src = '';
+                          console.log('Sidebar profile image failed to load, showing fallback icon');
                           e.currentTarget.style.display = 'none';
-                          e.currentTarget.parentElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-gray-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
                         }}
                       />
-                    ) : (
+                    ) : null}
+                    {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
                       <User className="h-6 w-6 text-gray-600" />
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{user.user_metadata?.name || 'ব্যবহারকারী'}</p>
                     <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
