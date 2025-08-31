@@ -9,6 +9,7 @@ import { BookOpen, Star, MessageCircle, Edit, ShoppingCart, DollarSign, Heart, H
 import { useToast } from '@/hooks/use-toast';
 import Navigation from '@/components/Navigation';
 import { supabase, updateUserProfile, uploadAvatar, subscribeToProfileChanges, getUserVerificationStatus, subscribeToVerificationChanges } from '@/lib/supabase';
+import { navigateToRoute } from '@/lib/urlHelper';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -71,7 +72,7 @@ const ProfilePage = () => {
 
   // Handle verification badge click - redirect to verification page
   const handleVerificationClick = () => {
-    window.location.href = 'http://localhost:8081/verification';
+    navigateToRoute('/verification');
   };
 
   // Check if the location state has an activeTab property or URL has tab parameter
