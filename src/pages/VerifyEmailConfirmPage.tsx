@@ -383,7 +383,7 @@ export default function VerifyEmailConfirmPage() {
                 <AlertCircle className="h-5 w-5 text-red-600" />
                 <AlertTitle className="text-red-800">ত্রুটি!</AlertTitle>
                 <AlertDescription className="text-red-700">
-                  ইমেইল ভেরিফিকেশন লিংকটি সঠিক নয় বা মেয়াদ শেষ হয়ে গেছে। আপনি নিচের বাটনে ক্লিক করে আবার চেষ্টা করতে পারেন।
+                  ইমেইল ভেরিফিকেশন লিংকটি সঠিক নয় বা মেয়াদ শেষ হয়ে গেছে। আপনি আবার লগিন করুন অথবা নিচের বাটনে ক্লিক করে করুন ।
                 </AlertDescription>
               </Alert>
               

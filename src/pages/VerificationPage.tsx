@@ -374,8 +374,8 @@ const VerificationPage = () => {
       // ভেরিফিকেশন সাকসেস স্টেট আপডেট করি
       setVerificationSuccess(true);
       
-      // হোম পেজে রিডাইরেক্ট করি
-      navigate('/');
+      // ভেরিফিকেশন পেজে রিডাইরেক্ট করি (পেজ রিফ্রেশ করার জন্য)
+      window.location.reload();
       
     } catch (error: any) {
       console.error('Error submitting verification data:', error);
@@ -483,7 +483,10 @@ const VerificationPage = () => {
               </div>
               <h2 className="text-2xl font-bold text-green-800 mb-2">ভেরিফিকেশন রিকুয়েস্ট সফল</h2>
               <p className="text-green-700 mb-6">
-                আপনার তথ্য সফলভাবে সংরক্ষণ করা হয়েছে। অ্যাডমিন আপনার তথ্য যাচাই করে অনুমোদন দেওয়ার পর আপনার অ্যাকাউন্ট ভেরিফাইড হবে।
+              আপনার তথ্য সফলভাবে সংরক্ষণ করা হয়েছে। অ্যাডমিন আপনার তথ্য যাচাই করে <span className="font-bold text-green-800">(সর্বোচ্চ ১২ ঘণ্টার মধ্যে)</span> অনুমোদন দেওয়ার পর আপনার অ্যাকাউন্ট ভেরিফাইড হবে। 
+              <p> </p>
+              <p>অনুগ্রহ করে একটু অপেক্ষা করুন 😊</p>
+            
               </p>
               <Button 
                 className="flex items-center gap-2"
@@ -494,7 +497,7 @@ const VerificationPage = () => {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-gray-50 border border-gray-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">রোল নম্বর</CardTitle>
@@ -503,16 +506,6 @@ const VerificationPage = () => {
                   <p className="text-lg font-medium">{formData.rollNo}</p>
                 </CardContent>
               </Card>
-              <Card className="bg-gray-50 border border-gray-200">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">রেজিস্ট্রেশন নম্বর</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg font-medium">{formData.regNo}</p>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="bg-gray-50 border border-gray-200">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">বিভাগ</CardTitle>

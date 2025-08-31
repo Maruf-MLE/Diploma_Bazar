@@ -18,7 +18,7 @@ const Footer = () => {
             </div>
             <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 max-w-md leading-relaxed">
               বাংলাদেশের সবচেয়ে নিরাপদ এবং জনপ্রিয় ডিপ্লোমা বাজার বুক এক্সচেঞ্জ প্ল্যাটফর্ম। 
-              AI প্রযুক্তির সাহায্যে নিশ্চিত করি সম্পূর্ণ নিরাপত্তা এবং সেরা অভিজ্ঞতা।
+              Manual Verification সাহায্যে নিশ্চিত করি সম্পূর্ণ নিরাপত্তা এবং সেরা অভিজ্ঞতা।
             </p>
             
             <div className="flex space-x-3">

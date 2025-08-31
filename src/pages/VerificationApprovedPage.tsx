@@ -230,10 +230,6 @@ const VerificationApprovedPage = () => {
                 <h3 className="text-sm font-medium text-gray-500 mb-1">রোল নম্বর</h3>
                 <p className="font-medium">{verificationData.roll_no}</p>
               </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">রেজিস্ট্রেশন নম্বর</h3>
-                <p className="font-medium">{verificationData.reg_no}</p>
-              </div>
             </div>
           </CardContent>
         </Card>
