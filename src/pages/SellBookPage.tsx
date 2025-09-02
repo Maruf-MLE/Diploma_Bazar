@@ -9,11 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
-import { BookOpen, Camera, MapPin, Tag, User, GraduationCap, Building, DollarSign, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { BookOpen, Camera, MapPin, Tag, User, GraduationCap, Building, DollarSign, Upload, X, Image as ImageIcon, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { navigateToRoute } from '@/lib/urlHelper';
 import { validateImageForBookCover, quickImageCheck } from '@/lib/lightweightImageScanner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const SellBookPage: React.FC = () => {
   const { user, isVerified, verificationLoading, checkVerification } = useAuth();
@@ -45,6 +46,7 @@ const SellBookPage: React.FC = () => {
   const [publisher, setPublisher] = useState('');
   const [isNegotiable] = useState(true); // Hidden field with default value
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
   // Fetch user profile data and check verification status
   useEffect(() => {
@@ -440,7 +442,18 @@ const SellBookPage: React.FC = () => {
         <div className="text-center mb-8 py-8 px-4 rounded-lg" style={{ backgroundColor: '#4653D5' }}>
           <BookOpen className="h-12 w-12 text-white mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-white mb-2">বই বিক্রি করুন</h1>
-          <p className="text-white/90">আপনার বই যোগ করুন এবং অন্যদের সাথে শেয়ার করুন</p>
+          <p className="text-white/90 mb-6">আপনার বই যোগ করুন এবং অন্যদের সাথে শেয়ার করুন</p>
+          
+          {/* Video Guide Button */}
+          <Button 
+            type="button"
+            variant="secondary" 
+            className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-sm font-medium px-6 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
+            onClick={() => setIsVideoDialogOpen(true)}
+          >
+            <Play className="h-4 w-4 mr-2" />
+            কিভাবে বই বিক্রয় করবেন দেখুন এই ভিডিও তে
+          </Button>
         </div>
 
         <Card className="bg-white border border-gray-200 shadow-lg">
@@ -725,6 +738,26 @@ const SellBookPage: React.FC = () => {
         </Card>
       </div>
     </div>
+    
+    {/* Video Dialog */}
+    <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+      <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
+        <DialogHeader>
+          <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">কিভাবে বই বিক্রয় করবেন - ভিডিও গাইড</DialogTitle>
+        </DialogHeader>
+        <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
+          <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src="https://www.youtube.com/embed/OJA_ygF5Fy0?si=iScjTTzaZNZzr2if"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
     </>
   );
 };

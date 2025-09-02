@@ -1180,7 +1180,7 @@ const fetchBooks = async () => {
                 
                 <Button 
                   variant="outline" 
-                  className="w-fit flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-primary/20 hover:border-primary/40 hover:bg-white hover:shadow-md transition-all duration-300 text-sm"
+                  className="w-fit flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-primary/20 text-sm text-gray-800 hover:bg-white/80 hover:border-primary/20 hover:text-gray-800"
                   onClick={() => setIsVideoDialogOpen(true)}
                 >
                   <Play className="h-4 w-4 text-primary" />

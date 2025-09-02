@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Check, AlertCircle, Loader2, FileCheck, X, BookOpen, School, User, ArrowRight, CheckCircle2, AlertTriangle, GraduationCap } from 'lucide-react';
+import { Upload, Check, AlertCircle, Loader2, FileCheck, X, BookOpen, School, User, ArrowRight, CheckCircle2, AlertTriangle, GraduationCap, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,9 @@ const VerificationPage = () => {
   // ওয়ার্নিং ডায়ালগ স্টেট
   const [warningDialogOpen, setWarningDialogOpen] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+  
+  // ভিডিও গাইড ডায়ালগ স্টেট
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   
   // ম্যানুয়াল ইনপুট ডেটা
   const [formData, setFormData] = useState<{
@@ -528,9 +531,20 @@ const VerificationPage = () => {
           <>
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">আইডি ভেরিফিকেশন</h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-600 mb-6">
                 অ্যাকাউন্ট ভেরিফিকেশন করার জন্য আপনার এডমিট কার্ড, স্টুডেন্ট আইডি কার্ড বা প্রথম বর্ষের ভর্তি নিশ্চিতকরণ পৃষ্ঠার স্ক্রিনশট আপলোড করুন
               </p>
+              
+              {/* ভিডিও গাইড বাটন */}
+              <Button 
+                type="button"
+                variant="outline" 
+                className="bg-blue-50 text-blue-700 border-blue-200 text-sm font-medium px-6 py-2.5 rounded-full shadow-md"
+                onClick={() => setIsVideoDialogOpen(true)}
+              >
+                <Play className="h-4 w-4 mr-2" />
+                কিভাবে অ্যাকাউন্ট খুলবেন দেখুন এই ভিডিও তে
+              </Button>
             </div>
             
             <form onSubmit={handleSubmit}>
@@ -725,6 +739,26 @@ const VerificationPage = () => {
           </>
         )}
       </div>
+      
+      {/* ভিডিও গাইড ডায়ালগ */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">কিভাবে অ্যাকাউন্ট খুলবেন - ভিডিও গাইড</DialogTitle>
+          </DialogHeader>
+          <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/b2B09bzM9GE?si=FkX8sFhGf4pA63HH"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

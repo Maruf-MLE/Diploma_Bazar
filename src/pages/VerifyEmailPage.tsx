@@ -5,8 +5,9 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, CheckCircle, AlertCircle, Mail, RefreshCw, Clock } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Mail, RefreshCw, Clock, Play } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function VerifyEmailPage() {
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,9 @@ export default function VerifyEmailPage() {
   const { toast } = useToast();
   const [countdown, setCountdown] = useState(0);
   const [emailSent, setEmailSent] = useState(false);
+  
+  // ভিডিও গাইড ডায়ালগ স্টেট
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
   // কাউন্টডাউন টাইমার ফাংশন
   useEffect(() => {
@@ -340,9 +344,20 @@ export default function VerifyEmailPage() {
       <Card className="w-full max-w-md shadow-lg border-0">
         <CardHeader className="space-y-1 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg">
           <CardTitle className="text-2xl font-bold">ইমেইল ভেরিফিকেশন</CardTitle>
-          <CardDescription className="text-blue-100">
+          <CardDescription className="text-blue-100 mb-4">
             আপনার অ্যাকাউন্ট সক্রিয় করতে ইমেইল ভেরিফাই করুন
           </CardDescription>
+          
+          {/* ভিডিও গাইড বাটন */}
+          <Button 
+            type="button"
+            variant="secondary" 
+            className="bg-yellow-500 text-black border-yellow-500 text-sm font-bold px-4 py-2 rounded-lg shadow-lg hover:bg-yellow-600 hover:shadow-xl hover:scale-105 transform transition-all duration-200"
+            onClick={() => setIsVideoDialogOpen(true)}
+          >
+            <Play className="h-4 w-4 mr-2 text-black" />
+            কিভাবে Email Verification সম্পূর্ণ করবেন দেখুন এই ভিডিওতে
+          </Button>
         </CardHeader>
         
         <CardContent className="space-y-6 pt-6">
@@ -438,6 +453,26 @@ export default function VerifyEmailPage() {
           </Button>
         </CardFooter>
       </Card>
+      
+      {/* ভিডিও গাইড ডায়ালগ */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">কিভাবে Email Verification সম্পূর্ণ করবেন - ভিডিও গাইড</DialogTitle>
+          </DialogHeader>
+          <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/usJoeC9V9U8?si=mWIEVCnoGpKR4S4g"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-} 
+}

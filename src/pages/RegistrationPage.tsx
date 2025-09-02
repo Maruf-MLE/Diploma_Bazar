@@ -14,7 +14,8 @@ import {
   SelectValue
 } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Eye, EyeOff, Play } from "lucide-react"
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
@@ -30,6 +31,7 @@ export default function RegistrationPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
   const { signUp } = useAuth()
@@ -203,9 +205,23 @@ export default function RegistrationPage() {
       <Card className="w-full max-w-md shadow-lg border-0">
         <CardHeader className="space-y-1 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg">
           <CardTitle className="text-2xl font-bold">রেজিস্টার করুন</CardTitle>
-          <CardDescription className="text-blue-100">
+          <CardDescription className="text-blue-100 mb-4">
             নতুন অ্যাকাউন্ট তৈরি করতে ফর্মটি পূরণ করুন
           </CardDescription>
+          
+          {/* Video Guide Button */}
+          <div className="pt-3">
+            <Button 
+              type="button"
+              variant="secondary" 
+              size="sm"
+              className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-xs font-medium px-4 py-2 rounded-full shadow-lg backdrop-blur-sm"
+              onClick={() => setIsVideoDialogOpen(true)}
+            >
+              <Play className="h-3 w-3 mr-2" />
+              কিভাবে অ্যাকাউন্ট খুলবেন দেখুন এই ভিডিও তে
+            </Button>
+          </div>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 pt-6">
@@ -390,6 +406,26 @@ export default function RegistrationPage() {
           </CardFooter>
         </form>
       </Card>
+      
+      {/* Video Dialog */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">কিভাবে অ্যাকাউন্ট খুলবেন - ভিডিও গাইড</DialogTitle>
+          </DialogHeader>
+          <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/TnFQT6uj6iU?si=CqQvhPgB7hxp0OzE"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
