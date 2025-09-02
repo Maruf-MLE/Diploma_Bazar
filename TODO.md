@@ -1,16 +1,15 @@
-# বই বিক্রি পেজ আপডেট - কাজের তালিকা
+# Video Button Implementation for SellBookPage
 
-## সম্পন্ন করার কাজ:
+## Tasks to Complete:
 
-- [x] প্রকাশনী ফিল্ডের লেবেলে "(সংখ্যা গরিষ্ঠ বইয়ের যে প্রকাশনী)" টেক্সটটি রঙিন/উৎসবমুখর করা
-- [x] "বই সমূহ" ফিল্ডের placeholder টেক্সট "বই সমূহ লিখুন" এ পরিবর্তন করা  
-- [x] "অবস্থা *" ফিল্ডের placeholder টেক্সট "বইয়ের অবস্থা নির্বাচন করুন" এ পরিবর্তন করা
-- [x] "বিভাগের নাম অথবা বইয়ের শিরোনাম *" ফিল্ডের placeholder টেক্সট আপডেট করা
-- [x] অবস্থা ফিল্ডের placeholder দেখানোর জন্য condition state খালি রাখা
-- [x] বই যোগ করার সময় condition খালি থাকলে ডিফল্ট 'good' ভ্যালু সেট করা
+- [ ] Add necessary imports (Dialog, DialogContent, DialogHeader, DialogTitle, Play icon)
+- [ ] Add state management for video dialog (isVideoDialogOpen)
+- [ ] Add video button in the header section with text "কিভাবে বিক্রি করবেন দেখুন এই ভিডিওতে"
+- [ ] Add Dialog component at the bottom with provided YouTube embed link
+- [ ] Test functionality and responsive design
 
-## সম্পন্ন:
-✅ সব পরিবর্তন সফলভাবে সম্পন্ন হয়েছে
-✅ অবস্থা ফিল্ডে এখন placeholder সঠিকভাবে দেখাচ্ছে
-✅ বই যোগ করার কার্যকারিতা ঠিকমতো কাজ করছে
-✅ সব placeholder টেক্সট বাংলায় আপডেট করা হয়েছে
+## Progress:
+- [x] Plan created and approved
+- [ ] Implementation in progress
+- [ ] Testing pending
+- [ ] Completion pending

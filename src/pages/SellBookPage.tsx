@@ -730,4 +730,3 @@ const SellBookPage: React.FC = () => {
 };
 
 export default SellBookPage;
-

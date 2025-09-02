@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Filter, MessageCircle, CheckCircle, Star, BookOpen, Loader2, Eye, Heart, ShoppingCart, ChevronDown, ChevronRight, ArrowUp, X } from 'lucide-react';
+import { Search, Filter, MessageCircle, CheckCircle, Star, BookOpen, Loader2, Eye, Heart, ShoppingCart, ChevronDown, ChevronRight, ArrowUp, X, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -503,6 +503,7 @@ const BrowseBooksPage = () => {
     Boolean(searchParams.get('max_price'))
   );
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   
   // Track filter dialog state changes
   useEffect(() => {
@@ -1164,16 +1165,27 @@ const fetchBooks = async () => {
                 হাজার হাজার বইয়ের মধ্যে আপনার পছন্দের বইটি খুঁজে নিন সহজেই। বিক্রি করুন আপনার পুরানো বইগুলি।
               </p>
               
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className="px-3 py-1.5 bg-primary/10 text-primary border-none text-xs font-normal hover:bg-primary/10 hover:text-primary">
-                  {books.length}+ বই উপলব্ধ
-                </Badge>
-                <Badge variant="outline" className="px-3 py-1.5 bg-accent/10 text-accent border-none text-xs font-normal hover:bg-accent/10 hover:text-accent">
-                  দ্রুত ডেলিভারি
-                </Badge>
-                <Badge variant="outline" className="px-3 py-1.5 bg-primary/10 text-primary border-none text-xs font-normal hover:bg-primary/10 hover:text-primary">
-                  সেরা মূল্য
-                </Badge>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="px-3 py-1.5 bg-primary/10 text-primary border-none text-xs font-normal hover:bg-primary/10 hover:text-primary">
+                    {books.length}+ বই উপলব্ধ
+                  </Badge>
+                  <Badge variant="outline" className="px-3 py-1.5 bg-accent/10 text-accent border-none text-xs font-normal hover:bg-accent/10 hover:text-accent">
+                    দ্রুত ডেলিভারি
+                  </Badge>
+                  <Badge variant="outline" className="px-3 py-1.5 bg-primary/10 text-primary border-none text-xs font-normal hover:bg-primary/10 hover:text-primary">
+                    সেরা মূল্য
+                  </Badge>
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-fit flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-primary/20 hover:border-primary/40 hover:bg-white hover:shadow-md transition-all duration-300 text-sm"
+                  onClick={() => setIsVideoDialogOpen(true)}
+                >
+                  <Play className="h-4 w-4 text-primary" />
+                  কিভাবে বই কিনবেন দেখুন এই ভিডিওতে
+                </Button>
               </div>
             </div>
 
@@ -1398,6 +1410,26 @@ const fetchBooks = async () => {
         setSortOption={setSortOption}
         resetAllFilters={resetAllFilters}
       />
+      
+      {/* Video Dialog */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">কিভাবে বই কিনবেন - ভিডিও গাইড</DialogTitle>
+          </DialogHeader>
+          <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/8SywvJirSMc?si=jWWXG02DoFb1v2-b"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
