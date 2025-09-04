@@ -13,6 +13,15 @@ export default function AuthCallback() {
   const urlParams = useAuthUrlParams()
   const { params, isValidAuthFlow } = urlParams
   const [checking, setChecking] = useState(false)
+  
+  console.log('🏠 AuthCallback render - State:', {
+    hasUser: !!user,
+    userId: user?.id,
+    userEmail: user?.email,
+    loading,
+    checking,
+    currentUrl: window.location.href
+  })
 
   useEffect(() => {
     // Check if this is a password reset flow
@@ -53,19 +62,24 @@ export default function AuthCallback() {
     if (!loading && !checking) {
       handleAuthComplete()
     }
-  }, [loading, user, navigate, params, isValidAuthFlow, checking])
+  }, [loading, user, checking])
   
   const handleAuthComplete = async () => {
+    console.log('🚀 handleAuthComplete started')
+    
     if (!user) {
-      console.log('No user found, redirecting to login')
+      console.log('❌ No user found, redirecting to login')
       navigate('/login')
       return
     }
     
+    console.log('✅ User found, continuing with profile check')
     setChecking(true)
     
     try {
       console.log('🔍 Checking user profile for:', user.id)
+      console.log('📧 User email:', user.email)
+      console.log('👤 User metadata:', user.user_metadata)
       
       // Check ban status first
       await checkBanStatus()
@@ -73,54 +87,18 @@ export default function AuthCallback() {
       // Check if user has a complete profile
       const profile = await getUserProfile(user.id)
       
-      console.log('User profile data:', profile)
+      console.log('📋 User profile data:', profile)
+      console.log('✅ Profile fields check:', {
+        hasProfile: !!profile,
+        hasName: !!profile?.name,
+        hasRollNumber: !!profile?.roll_number,
+        hasDepartment: !!profile?.department,
+        hasInstituteName: !!profile?.institute_name
+      })
       
       if (!profile || !profile.name || !profile.roll_number || !profile.department || !profile.institute_name) {
-        // Check if there's an existing user with same email but different auth method
-        const userEmail = user.email
-        
-        if (userEmail) {
-          console.log('🔍 Checking for duplicate email in Supabase Auth:', userEmail)
-          
-          // Check if this email already has an account with a different authentication method
-          try {
-            // Use admin functions to list users with this email (this won't work with client-side)
-            // Instead, we'll attempt to sign in with email/password to check if account exists
-            // If the attempt fails due to "Email not confirmed" or similar, it means email exists
-            
-            // We can detect duplicate email by trying password reset
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-              userEmail,
-              {
-                redirectTo: `${window.location.origin}/reset-password-check`,
-              }
-            )
-            
-            // If no error, it means email exists in auth system
-            if (!resetError) {
-              console.log('🔗 Found existing auth user with email:', userEmail)
-              toast({
-                title: "ইমেইল পাওয়া গেছে",
-                description: "এই ইমেইল দিয়ে আগে থেকেই একটি অ্যাকাউন্ট আছে। পাসওয়ার্ড দিয়ে যাচাই করুন।",
-                duration: 5000,
-              })
-              
-              // Sign out current Google user first
-              await supabase.auth.signOut()
-              
-              // Redirect to password verification page
-              navigate(`/verify-existing-account?email=${encodeURIComponent(userEmail)}`)
-              return
-            }
-            
-            // If error occurs, it might mean email doesn't exist or other issue
-            console.log('📧 Password reset result:', resetError)
-            
-          } catch (error) {
-            console.log('🔍 Email check error (probably new email):', error)
-            // Continue with normal registration flow
-          }
-        }
+        // For new users who don't have a complete profile, directly redirect to registration
+        // Don't do duplicate email check here since we're already authenticated via Google/OAuth
         
         console.log('🔄 Profile incomplete, redirecting to registration form')
         toast({
