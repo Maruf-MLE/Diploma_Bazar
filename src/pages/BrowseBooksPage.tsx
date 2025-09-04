@@ -243,6 +243,7 @@ const FilterDialog = ({
     console.log('Resetting local filters');
     setLocalFilters({});
     setLocalPriceRange([0, 5000]);
+    setSortOption('oldest');
   };
   
   // Apply reset globally
@@ -311,6 +312,27 @@ const FilterDialog = ({
                 onValueChange={(value) => setLocalPriceRange([value[0], value[1]])}
                 className="mt-2"
               />
+            </div>
+            
+            <Separator className="my-1" />
+            
+            {/* Sorting Options */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">সাজান</label>
+              <Select 
+                value={sortOption}
+                onValueChange={(value) => setSortOption(value)}
+              >
+                <SelectTrigger className="bg-background/50 border-primary/10 hover:border-primary/20 focus:border-primary/30 h-11">
+                  <SelectValue placeholder="সাজানোর ক্রম" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">সর্বশেষ যোগ করা (নতুন আগে)</SelectItem>
+                  <SelectItem value="oldest">পুরাতন আগে</SelectItem>
+                  <SelectItem value="price_low">কম দাম থেকে বেশি</SelectItem>
+                  <SelectItem value="price_high">বেশি দাম থেকে কম</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <Separator className="my-1" />
@@ -529,7 +551,7 @@ const BrowseBooksPage = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreBooks, setHasMoreBooks] = useState(true);
   const [page, setPage] = useState(0);
-  const [sortOption, setSortOption] = useState(searchParams.get('sort') || 'newest');
+  const [sortOption, setSortOption] = useState(searchParams.get('sort') || 'oldest');
   const BOOKS_PER_PAGE = 12;
   
   // State for message dialog
@@ -585,7 +607,7 @@ const BrowseBooksPage = () => {
           setSearchTerm(savedSearchTerm || '');
           setFilters(savedFilters || {});
           setPriceRange(savedPriceRange || [0, 5000]);
-          setSortOption(savedSortOption || 'newest');
+          setSortOption(savedSortOption || 'oldest');
         }
       } catch (err) {
         console.error('Error loading saved filter state:', err);
@@ -1050,7 +1072,7 @@ const fetchBooks = async () => {
     // সমস্ত ফিল্টার রিসেট করি
     setFilters({});
     setPriceRange([0, 5000]);
-    setSortOption('newest');
+    setSortOption('oldest');
     setSearchTerm('');
     
     // URL থেকে সমস্ত ফিল্টার পরিষ্কার করি
