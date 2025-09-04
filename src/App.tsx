@@ -20,6 +20,9 @@ import ProfilePage from "./pages/ProfilePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
+import AccountLinkingPage from "./pages/AccountLinkingPage";
+import AccountMergePage from "./pages/AccountMergePage";
+import VerifyExistingAccountPage from "./pages/VerifyExistingAccountPage";
 import BookDetailPage from "./pages/BookDetailPage";
 import BookPurchaseRequestPage from "./pages/BookPurchaseRequestPage";
 import AllDepartmentsPage from "./pages/AllDepartmentsPage";
@@ -184,6 +187,9 @@ const AppContent = () => {
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/auth/account-merge" element={<AccountMergePage />} />
+          <Route path="/account-linking" element={<AccountLinkingPage />} />
+          <Route path="/verify-existing-account" element={<VerifyExistingAccountPage />} />
           <Route path="/banned" element={<BannedUserPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/about" element={<AboutPage />} />

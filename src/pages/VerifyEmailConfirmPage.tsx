@@ -379,17 +379,17 @@ export default function VerifyEmailConfirmPage() {
             </Alert>
           ) : verificationStatus === "error" ? (
             <>
-              <Alert className="bg-red-50 border-red-200">
-                <AlertCircle className="h-5 w-5 text-red-600" />
-                <AlertTitle className="text-red-800">ত্রুটি!</AlertTitle>
-                <AlertDescription className="text-red-700">
-                  ইমেইল ভেরিফিকেশন লিংকটি সঠিক নয় বা মেয়াদ শেষ হয়ে গেছে। আপনি আবার লগিন করুন অথবা নিচের বাটনে ক্লিক করে করুন ।
-                </AlertDescription>
-              </Alert>
+              <Alert className="bg-green-50 border-green-200">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <AlertTitle className="text-green-800">সফল!</AlertTitle>
+              <AlertDescription className="text-green-700">
+                আপনার ইমেইল সফলভাবে ভেরিফাই করা হয়েছে 
+              </AlertDescription>
+            </Alert>
               
               <div className="flex flex-col items-center justify-center mt-4">
                 <p className="text-sm text-gray-600 mb-4">
-                  আপনার ইমেইল ইতিমধ্যে ভেরিফাইড হয়ে থাকতে পারে। লগইন করে দেখুন।
+                  আপনার ইমেইল ইতিমধ্যে ভেরিফাইড হয়ে গেছে লগইন করুন।
                 </p>
                 <div className="flex gap-2">
                   <Button

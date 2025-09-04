@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { supabase } from "@/lib/supabase"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,9 +20,6 @@ import { Eye, EyeOff, Play } from "lucide-react"
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
     name: "",
     rollNumber: "",
     semester: "",
@@ -29,12 +27,10 @@ export default function RegistrationPage() {
     instituteName: "",
   })
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { signUp } = useAuth()
+  const { user } = useAuth()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -48,64 +44,93 @@ export default function RegistrationPage() {
     e.preventDefault()
     setLoading(true)
 
-    if (formData.password !== formData.confirmPassword) {
+    // Check if user is authenticated via Google
+    if (!user) {
       toast({
         title: "ত্রুটি",
-        description: "পাসওয়ার্ড মিলছে না",
+        description: "আপনাকে প্রথমে Google দিয়ে লগইন করতে হবে।",
         variant: "destructive",
       })
+      navigate('/login')
       setLoading(false)
       return
     }
 
     try {
-      console.log("রেজিস্ট্রেশন শুরু হচ্ছে:", formData.email)
+      console.log("🚀 প্রোফাইল আপডেট শুরু হচ্ছে")
+      console.log("👤 User Info:", { 
+        id: user.id, 
+        email: user.email,
+        app_metadata: user.app_metadata,
+        user_metadata: user.user_metadata 
+      })
+      console.log("📝 Form Data:", formData)
+      
+      // First check if profile already exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+      
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('❌ Error checking existing profile:', checkError)
+        throw new Error(`Profile check failed: ${checkError.message}`)
+      }
+      
+      console.log("🔍 Existing profile:", existingProfile)
       
       const userData = {
+        id: user.id,
         name: formData.name,
+        // email field removed - it's handled by Supabase auth
         roll_number: formData.rollNumber,
         semester: formData.semester,
         department: formData.department,
-        institute_name: formData.instituteName
+        institute_name: formData.instituteName,
+        created_at: existingProfile?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
 
-      console.log("রেজিস্ট্রেশন ডাটা:", { email: formData.email, userData });
+      console.log("💾 Profile data to save:", userData);
 
-      // Use the AuthContext's signUp function
-      const { success, error } = await signUp(
-        formData.email, 
-        formData.password, 
-        userData
-      )
-
-      console.log("রেজিস্ট্রেশন রেসপন্স:", { success, error });
-
-      if (!success) {
+      // Insert or update the user's profile in the database using upsert
+      const { data, error } = await supabase
+        .from('profiles')
+        .upsert(userData, { 
+          onConflict: 'id',
+          ignoreDuplicates: false 
+        })
+        .select()
+        .single()
+      
+      if (error) {
+        console.error('❌ Profile upsert error:', {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        })
         throw error
       }
 
-      // সফলতার বার্তা দেখাই
+      console.log("✅ প্রোফাইল সফলভাবে সেভ হয়েছে:", data);
+
+      // Success message
       toast({
         title: "সফল",
-        description: "রেজিস্ট্রেশন সম্পন্ন হয়েছে। প্রথমে ইমেইল যাচাই করুন, তারপর ফোন নম্বর যাচাই করুন।",
+        description: "আপনার প্রোফাইল সফলভাবে সম্পূর্ণ হয়েছে।",
       })
       
-      // সতর্কতা বার্তা দেখাই
-      toast({
-        title: "পরবর্তী ধাপ",
-        description: "ইমেইল ও ফোন নম্বর যাচাই সম্পন্ন না করা পর্যন্ত আপনি সাইটের সকল ফিচার ব্যবহার করতে পারবেন না।",
-        variant: "default"
-      })
-      
-      // ইমেইল ভেরিফিকেশন পেজে রিডাইরেক্ট করি
-      // তবে ইমেইল ভেরিফিকেশনের পর ফোন ভেরিফিকেশনে যাবে
-      navigate("/verify-email")
+      // Redirect to home page
+      navigate("/")
       
     } catch (error: any) {
-      console.error("রেজিস্ট্রেশন ত্রুটি:", error)
+      console.error("প্রোফাইল আপডেট ত্রুটি:", error)
       toast({
         title: "ত্রুটি",
-        description: error.message || "রেজিস্ট্রেশন সম্পন্ন হয়নি। আবার চেষ্টা করুন।",
+        description: error.message || "প্রোফাইল আপডেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
         variant: "destructive",
       })
     } finally {
@@ -204,9 +229,9 @@ export default function RegistrationPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-8">
       <Card className="w-full max-w-md shadow-lg border-0">
         <CardHeader className="space-y-1 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-lg">
-          <CardTitle className="text-2xl font-bold">রেজিস্টার করুন</CardTitle>
+          <CardTitle className="text-2xl font-bold">প্রোফাইল সম্পূর্ণ করুন</CardTitle>
           <CardDescription className="text-blue-100 mb-4">
-            নতুন অ্যাকাউন্ট তৈরি করতে ফর্মটি পূরণ করুন
+            আপনার প্রোফাইল তথ্য পূরণ করে অ্যাকাউন্ট সম্পূর্ণ করুন
           </CardDescription>
           
           {/* Video Guide Button */}
@@ -225,75 +250,17 @@ export default function RegistrationPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 pt-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">ইমেইল</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="আপনার ইমেইল"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">পাসওয়ার্ড</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="পাসওয়ার্ড"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="focus:ring-2 focus:ring-blue-500"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
+            {/* User info section */}
+            {user && (
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-4">
+                <p className="text-sm text-blue-800">
+                  <strong>আপনার ইমেইল:</strong> {user.email}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Google দিয়ে সফলভাবে লগইন হয়েছে। এখন প্রোফাইল তথ্য পূরণ করুন।
+                </p>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">পাসওয়ার্ড নিশ্চিত করুন</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="পাসওয়ার্ড আবার লিখুন"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  className="focus:ring-2 focus:ring-blue-500"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="name">পূর্ণ নাম</Label>
               <Input
@@ -387,7 +354,7 @@ export default function RegistrationPage() {
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md" 
               disabled={loading}
             >
-              {loading ? "প্রক্রিয়াকরণ হচ্ছে..." : "রেজিস্টার করুন"}
+              {loading ? "প্রক্রিয়াকরণ হচ্ছে..." : "প্রোফাইল সম্পূর্ণ করুন"}
             </Button>
             <div className="text-sm text-center text-gray-600 space-y-2">
               <p>
