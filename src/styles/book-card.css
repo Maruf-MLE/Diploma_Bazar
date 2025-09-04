@@ -298,6 +298,87 @@
   color: var(--academic-value-color);
 }
 
+/* Seller Info Styles */
+.seller-info {
+  background: rgba(99, 102, 241, 0.02);
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.06);
+}
+
+.seller-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seller-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.seller-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.seller-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--primary);
+}
+
+.seller-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.seller-label {
+  color: var(--academic-label-color);
+  font-weight: 400;
+  font-size: 11px;
+}
+
+.seller-name {
+  font-weight: 500;
+  color: var(--academic-value-color);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* Desktop only class */
+.desktop-only {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+}
+
 .card-actions {
   display: flex;
   gap: 8px;
@@ -425,15 +506,37 @@
   }
 
   .card-actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 6px;
     margin-top: 8px;
   }
 
   .btn-primary,
   .btn-secondary {
-    width: 100%;
-    padding: 9px 12px;
+    flex: 1;
+    padding: 6px 12px;
     font-size: 12px;
+  }
+
+  /* Mobile seller info styles */
+  .seller-info {
+    padding: 6px;
+  }
+
+  .seller-avatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .seller-label {
+    font-size: 10px;
+  }
+
+  .seller-name {
+    font-size: 11px;
+  }
+
+  .seller-avatar-placeholder {
+    font-size: 10px;
   }
 }

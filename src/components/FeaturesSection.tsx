@@ -92,7 +92,7 @@ const BookCard = ({
         </div>
       </div>
 
-      {/* Academic Info - Only Institute */}
+      {/* Academic Info - Only Institute like home page */}
       <div className="academic-info">
         <div className="academic-details">
           <div className="academic-item">
@@ -104,10 +104,35 @@ const BookCard = ({
         </div>
       </div>
 
+      {/* Seller Info */}
+      <div className="seller-info">
+        <div className="seller-profile">
+          <div className="seller-avatar">
+            {book.seller_avatar_url ? (
+              <img 
+                src={book.seller_avatar_url} 
+                alt={book.seller_name || 'বিক্রেতা'}
+                className="seller-avatar-img"
+              />
+            ) : (
+              <div className="seller-avatar-placeholder">
+                {(book.seller_name || 'U').charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="seller-details">
+            <span className="seller-label desktop-only">বিক্রেতা: </span>
+            <span className="seller-name">
+              {book.seller_name || 'অজানা বিক্রেতা'}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Card Actions */}
-      <div className="card-actions">
+      <div className="card-actions flex gap-2">
         <button 
-          className="btn-primary"
+          className="btn-primary flex-1"
           onClick={(e) => {
             console.log('=== HOME PAGE: Message button clicked ===');
             console.log('Event object:', e);
@@ -116,10 +141,10 @@ const BookCard = ({
             handleContactSeller(book);
           }}
         >
-          মেসেজ করুন
+          মেসেজ
         </button>
         <button 
-          className="btn-secondary"
+          className="btn-secondary flex-1"
           onClick={(e) => {
             console.log('=== HOME PAGE: Details button clicked ===');
             e.stopPropagation();
@@ -152,13 +177,13 @@ const FeaturesSection = () => {
         setBooksLoading(true);
         console.log('Fetching featured books for home page...');
         
-        // Get 4 latest available books
+        // Get 4 oldest available books
         const { data: books, error } = await getBooks(
           { }, // No specific filter, get all available books
           4, // Limit to 4 books
           0, // Start from beginning
           'created_at', // Sort by creation date
-          'desc' // Newest first
+          'asc' // Oldest first
         );
 
         if (error) {
