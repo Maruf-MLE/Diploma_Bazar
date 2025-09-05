@@ -297,7 +297,28 @@ export async function secureProfilePhotoUpload(
   return secureUploadFile(file, {
     bucket: 'verification_photos',
     folder: userId,
-    maxSize: 5 * 1024 * 1024, // 5MB for profile photos
+    maxSize: 20 * 1024 * 1024, // 20MB for verification photos
+    allowedTypes: [
+      'image/jpeg',
+      'image/jpg',
+      'image/png'
+    ],
+    enableDeepScan: true
+  });
+}
+
+/**
+ * 🎓 Secure verification document upload
+ */
+export async function secureVerificationDocumentUpload(
+  file: File,
+  userId: string
+): Promise<SecureUploadResult> {
+  
+  return secureUploadFile(file, {
+    bucket: 'verification_documents',
+    folder: userId,
+    maxSize: 20 * 1024 * 1024, // 20MB for verification documents
     allowedTypes: [
       'image/jpeg',
       'image/jpg',

@@ -1,0 +1,27 @@
+# Security Headers for Netlify
+/*
+  # XSS Protection
+  X-XSS-Protection: 1; mode=block
+  
+  # Content Type Options
+  X-Content-Type-Options: nosniff
+  
+  # Frame Options
+  X-Frame-Options: DENY
+  
+  # Referrer Policy
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # Content Security Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://yryerjgidsyfiohmpeoc.supabase.co https://lh3.googleusercontent.com; connect-src 'self' https://yryerjgidsyfiohmpeoc.supabase.co wss://yryerjgidsyfiohmpeoc.supabase.co https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; media-src 'self'; frame-src 'self' https://accounts.google.com; base-uri 'self'; form-action 'self'
+  
+  # Strict Transport Security
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  
+  # Permissions Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  
+  # Cross-Origin Policies
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin

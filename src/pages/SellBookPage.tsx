@@ -516,7 +516,7 @@ const SellBookPage: React.FC = () => {
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
                   <div className="space-y-1.5">
-                    <Label htmlFor="price" className="text-sm font-medium text-gray-700">মূল্য (টাকা) *</Label>
+                    <Label htmlFor="price" className="text-sm font-medium text-gray-700">মূল্য (টাকা) মোট মূল্য*</Label>
                     <Input
                       id="price"
                       type="number"

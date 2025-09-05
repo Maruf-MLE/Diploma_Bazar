@@ -76,9 +76,9 @@ const AboutPage = () => {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">AI যাচাইকরণ</h3>
+                  <h3 className="text-lg font-semibold mb-2">Manual যাচাইকরণ</h3>
                   <p className="text-gray-600">
-                    ডিপ্লোমা বাজারে প্রতিটি ব্যবহারকারীর পরিচয় AI প্রযুক্তি দিয়ে যাচাই করা হয়।
+                    ডিপ্লোমা বাজারে প্রতিটি ব্যবহারকারীর Manual যাচাই করা হয়।
                   </p>
                 </div>
               </div>
@@ -106,7 +106,7 @@ const AboutPage = () => {
               <div className="flex items-start space-x-4">
                 <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">২৪/৭ সাপোর্ট</h3>
+                  <h3 className="text-lg font-semibold mb-2">২৪/১২ সাপোর্ট</h3>
                   <p className="text-gray-600">
                     ডিপ্লোমা বাজারের কাস্টমার সাপোর্ট টিম সর্বদা আপনার সেবায় নিয়োজিত।
                   </p>
@@ -116,34 +116,7 @@ const AboutPage = () => {
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div className="py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h2 className="text-3xl font-bold mb-12">ডিপ্লোমা বাজারের পরিসংখ্যান</h2>
-            
-            <div className="grid md:grid-cols-4 gap-8">
-              <div>
-                <div className="text-4xl font-bold text-blue-600 mb-2">১০০০+</div>
-                <div className="text-gray-600">নিবন্ধিত ব্যবহারকারী</div>
-              </div>
-              
-              <div>
-                <div className="text-4xl font-bold text-green-600 mb-2">৫০০০+</div>
-                <div className="text-gray-600">বই বিক্রি হয়েছে</div>
-              </div>
-              
-              <div>
-                <div className="text-4xl font-bold text-purple-600 mb-2">৫০+</div>
-                <div className="text-gray-600">পলিটেকনিক ইনস্টিটিউট</div>
-              </div>
-              
-              <div>
-                <div className="text-4xl font-bold text-orange-600 mb-2">৯৮%</div>
-                <div className="text-gray-600">সন্তুষ্ট গ্রাহক</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </main>
       <Footer />
     </div>
