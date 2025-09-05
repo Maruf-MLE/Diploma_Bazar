@@ -939,7 +939,8 @@ const ProfilePage = () => {
                   value={formData.roll_number}
                   onChange={handleFormChange}
                   required
-                  className="border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  readOnly
+                  className="border-slate-200 bg-slate-50 cursor-not-allowed text-slate-500"
                 />
               </div>
             </div>

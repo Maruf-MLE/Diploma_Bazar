@@ -20,11 +20,11 @@ const SellBookPage: React.FC = () => {
   const { user, isVerified, verificationLoading, checkVerification } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   // Local state for verification check
   const [isCheckingVerification, setIsCheckingVerification] = useState(true);
   const [userVerificationStatus, setUserVerificationStatus] = useState<boolean | null>(null);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState('');
   const [author] = useState('লেখক তথ্য'); // Hidden field with default value
@@ -56,10 +56,10 @@ const SellBookPage: React.FC = () => {
         setUserVerificationStatus(false);
         return;
       }
-      
+
       try {
         setIsCheckingVerification(true);
-        
+
         // Fetch profile data
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -74,14 +74,14 @@ const SellBookPage: React.FC = () => {
           setDepartment(profile.department || '');
           setInstituteName(profile.institute_name || '');
         }
-        
+
         // Check verification status using the RLS-safe function
         console.log('🔍 Checking verification status for user:', user.id);
         const { data: verificationResult, error: verificationError } = await supabase
           .rpc('check_user_verification_status', {
             user_uuid: user.id
           });
-          
+
         if (verificationError) {
           console.error('❌ Error checking verification:', verificationError);
           setUserVerificationStatus(false);
@@ -90,7 +90,7 @@ const SellBookPage: React.FC = () => {
           console.log('✅ Verification status:', isUserVerified);
           setUserVerificationStatus(isUserVerified);
         }
-        
+
       } catch (error) {
         console.error('❌ Error fetching user data:', error);
         setUserVerificationStatus(false);
@@ -106,23 +106,23 @@ const SellBookPage: React.FC = () => {
   const uploadImageToSupabase = async (file: File, folder: string = 'covers'): Promise<string | null> => {
     try {
       console.log('📸 Starting image upload:', file.name);
-      
+
       // Quick validation using lightweight scanner
       const validation = validateImageForBookCover(file);
       if (!validation.isValid || !validation.allowUpload) {
         console.error('Image validation failed:', validation.error);
         throw new Error(validation.error || 'Image validation failed');
       }
-      
+
       // Generate secure file path
       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 8);
       const fileName = `${folder}_${timestamp}_${randomId}.${fileExt}`;
       const filePath = `${user?.id}/${folder}/${fileName}`;
-      
+
       console.log('📁 Uploading to:', filePath);
-      
+
       // Upload directly to Supabase Storage
       const { data, error } = await supabase.storage
         .from('books')
@@ -130,20 +130,20 @@ const SellBookPage: React.FC = () => {
           cacheControl: '3600',
           upsert: true
         });
-      
+
       if (error) {
         console.error('❌ Upload error:', error);
         throw error;
       }
-      
+
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('books')
         .getPublicUrl(filePath);
-      
+
       console.log('✅ Upload successful:', publicUrl);
       return publicUrl;
-      
+
     } catch (error) {
       console.error('❌ Image upload failed:', error);
       throw error;
@@ -283,7 +283,7 @@ const SellBookPage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!user?.id) {
       toast({
         title: "ত্রুটি",
@@ -317,7 +317,7 @@ const SellBookPage: React.FC = () => {
 
     try {
       setIsUploadingImages(true);
-      
+
       // Upload cover image if file is selected
       let finalCoverImageUrl = coverImageUrl;
       if (coverImageFile) {
@@ -335,7 +335,7 @@ const SellBookPage: React.FC = () => {
           return;
         }
       }
-      
+
       // Upload additional images if files are selected
       let finalAdditionalImages = [...additionalImageUrls];
       if (additionalImageFiles.length > 0) {
@@ -352,7 +352,7 @@ const SellBookPage: React.FC = () => {
           }
         }
       }
-      
+
       setIsUploadingImages(false);
 
       // Process discount rate
@@ -398,7 +398,7 @@ const SellBookPage: React.FC = () => {
         title: "সফল",
         description: "বই সফলভাবে যোগ করা হয়েছে!",
       });
-      
+
       // Reset form
       setTitle('');
       // author, conditionDescription, location, isNegotiable are hidden and use default values
@@ -415,7 +415,7 @@ const SellBookPage: React.FC = () => {
       setAdditionalImageUrls([]);
       setDiscountRate('');
       setPublisher('');
-      
+
       // Redirect to browse page after success
       setTimeout(() => {
         navigate('/browse');
@@ -437,327 +437,327 @@ const SellBookPage: React.FC = () => {
     <>
       <Navigation />
       <div className="min-h-screen py-8 pt-24" style={{ backgroundColor: '#EEF4FF' }}>
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8 py-8 px-4 rounded-lg" style={{ backgroundColor: '#4653D5' }}>
-          <BookOpen className="h-12 w-12 text-white mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-white mb-2">বই বিক্রি করুন</h1>
-          <p className="text-white/90 mb-6">আপনার বই যোগ করুন এবং অন্যদের সাথে শেয়ার করুন</p>
-          
-          {/* Video Guide Button */}
-          <Button 
-            type="button"
-            variant="secondary" 
-            className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-sm font-medium px-6 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
-            onClick={() => setIsVideoDialogOpen(true)}
-          >
-            <Play className="h-4 w-4 mr-2" />
-            কিভাবে বই বিক্রয় করবেন দেখুন এই ভিডিও তে
-          </Button>
-        </div>
+        <div className="container mx-auto px-4 max-w-4xl">
+          {/* Header */}
+          <div className="text-center mb-8 py-8 px-4 rounded-lg" style={{ backgroundColor: '#4653D5' }}>
+            <BookOpen className="h-12 w-12 text-white mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-white mb-2">বই বিক্রি করুন</h1>
+            <p className="text-white/90 mb-6">আপনার বই যোগ করুন এবং অন্যদের সাথে শেয়ার করুন</p>
 
-        <Card className="bg-white border border-gray-200 shadow-lg">
-          <CardHeader className="border-b border-gray-100 pb-6">
-            <CardTitle className="flex items-center gap-2 text-2xl font-bold text-gray-800">
-              <BookOpen className="h-6 w-6 text-primary" />
-              বই বিক্রির ফর্ম
-            </CardTitle>
-            <p className="text-gray-600 mt-2">নিচের সকল তথ্য পূরণ করে আপনার বই বিক্রি করুন</p>
-          </CardHeader>
-          <CardContent className="p-4 md:p-8" style={{ backgroundColor: '#ECF2FE' }}>
-            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-8">
-              {/* Basic Information Section */}
-              <div className="space-y-3 md:space-y-6">
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="title" className="text-sm font-medium text-gray-700">বিভাগের নাম অথবা বইয়ের শিরোনাম *</Label>
-                    <Input
-                      id="title"
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="বিভাগের নাম অথবা বইয়ের শিরোনাম লিখুন"
-                      className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <Label htmlFor="publisher" className="text-sm font-medium text-gray-700">প্রকাশনী  (সংখ্যা গরিষ্ঠ বইয়ের যে প্রকাশনী)</Label>
-                    <Select value={publisher} onValueChange={setPublisher}>
-                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
-                        <SelectValue placeholder="প্রকাশনী নির্বাচন করুন" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="টেকনিক্যাল প্রকাশনী">টেকনিক্যাল প্রকাশনী</SelectItem>
-                        <SelectItem value="হক প্রকাশনী">হক প্রকাশনী</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="space-y-1.5">
-                  <Label htmlFor="description" className="text-sm font-medium text-gray-700">বই সমূহ *</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="বই সমূহ লিখুন"
-                    rows={3}
-                    className="border-gray-300 focus:border-primary focus:ring-primary md:rows-4"
-                    required
-                  />
-                </div>
-              </div>
+            {/* Video Guide Button */}
+            <Button
+              type="button"
+              variant="secondary"
+              className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-sm font-medium px-6 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
+              onClick={() => setIsVideoDialogOpen(true)}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              কিভাবে বই বিক্রয় করবেন দেখুন এই ভিডিও তে
+            </Button>
+          </div>
 
-              {/* Pricing & Condition Section */}
-              <div className="space-y-3 md:space-y-6">
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="price" className="text-sm font-medium text-gray-700">মূল্য (টাকা) মোট মূল্য*</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      placeholder="0"
-                      min="1"
-                      className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <Label htmlFor="condition" className="text-sm font-medium text-gray-700">অবস্থা *</Label>
-                    <Select value={condition} onValueChange={setCondition}>
-                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
-                        <SelectValue placeholder="বইয়ের অবস্থা নির্বাচন করুন" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="like_new">প্রায় নতুন</SelectItem>
-                        <SelectItem value="good">ভালো</SelectItem>
-                        <SelectItem value="acceptable">গ্রহণযোগ্য</SelectItem>
-                        <SelectItem value="poor">খারাপ</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-1.5 col-span-2 md:col-span-1">
-                    <Label htmlFor="discount" className="text-sm font-medium text-gray-700">ছাড়ের হার (%)</Label>
-                    <Input
-                      id="discount"
-                      type="number"
-                      value={discountRate}
-                      onChange={(e) => setDiscountRate(e.target.value)}
-                      placeholder="0-100"
-                      min="0"
-                      max="100"
-                      className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
-                    />
-                  </div>
-                </div>
-              </div>
+          <Card className="bg-white border border-gray-200 shadow-lg">
+            <CardHeader className="border-b border-gray-100 pb-6">
+              <CardTitle className="flex items-center gap-2 text-2xl font-bold text-gray-800">
+                <BookOpen className="h-6 w-6 text-primary" />
+                বই বিক্রির ফর্ম
+              </CardTitle>
+              <p className="text-gray-600 mt-2">নিচের সকল তথ্য পূরণ করে আপনার বই বিক্রি করুন</p>
+            </CardHeader>
+            <CardContent className="p-4 md:p-8" style={{ backgroundColor: '#ECF2FE' }}>
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-8">
+                {/* Basic Information Section */}
+                <div className="space-y-3 md:space-y-6">
 
-              {/* Academic Information Section */}
-              <div className="space-y-3 md:space-y-6">
-                
-                <div className="grid grid-cols-1 gap-3 md:gap-6">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="semester" className="text-sm font-medium text-gray-700">সেমিস্টার</Label>
-                    <Select value={semester} onValueChange={setSemester}>
-                      <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
-                        <SelectValue placeholder="সেমিস্টার নির্বাচন করুন" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="১য় সেমিস্টার">১য় সেমিস্টার</SelectItem>
-                        <SelectItem value="২য় সেমিস্টার">২য় সেমিস্টার</SelectItem>
-                        <SelectItem value="৩য় সেমিস্টার">৩য় সেমিস্টার</SelectItem>
-                        <SelectItem value="৪র্থ সেমিস্টার">৪র্থ সেমিস্টার</SelectItem>
-                        <SelectItem value="৫ম সেমিস্টার">৫ম সেমিস্টার</SelectItem>
-                        <SelectItem value="৬ষ্ঠ সেমিস্টার">৬ষ্ঠ সেমিস্টার</SelectItem>
-                        <SelectItem value="৭ম সেমিস্টার">৭ম সেমিস্টার</SelectItem>
-                        <SelectItem value="৮ম সেমিস্টার">৮ম সেমিস্টার</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                     <div className="space-y-1.5">
-                      <Label htmlFor="department" className="text-sm font-medium text-gray-700">বিভাগ</Label>
+                      <Label htmlFor="title" className="text-sm font-medium text-gray-700">বিভাগের নাম অথবা বইয়ের শিরোনাম *</Label>
                       <Input
-                        id="department"
+                        id="title"
                         type="text"
-                        value={department}
-                        readOnly
-                        disabled
-                        className="bg-gray-100 cursor-not-allowed border-gray-300 h-9 md:h-10"
-                        placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="বিভাগের নাম অথবা বইয়ের শিরোনাম লিখুন"
+                        className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
+                        required
                       />
-                      <p className="text-xs text-gray-500 hidden md:block">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
                     </div>
-                    
+
                     <div className="space-y-1.5">
-                      <Label htmlFor="institute" className="text-sm font-medium text-gray-700">প্রতিষ্ঠানের নাম</Label>
-                      <Input
-                        id="institute"
-                        type="text"
-                        value={instituteName}
-                        readOnly
-                        disabled
-                        className="bg-gray-100 cursor-not-allowed border-gray-300 h-9 md:h-10"
-                        placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
-                      />
-                      <p className="text-xs text-gray-500 hidden md:block">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
+                      <Label htmlFor="publisher" className="text-sm font-medium text-gray-700">প্রকাশনী  (সংখ্যা গরিষ্ঠ বইয়ের যে প্রকাশনী)</Label>
+                      <Select value={publisher} onValueChange={setPublisher}>
+                        <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
+                          <SelectValue placeholder="প্রকাশনী নির্বাচন করুন" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="টেকনিক্যাল প্রকাশনী">টেকনিক্যাল প্রকাশনী</SelectItem>
+                          <SelectItem value="হক প্রকাশনী">হক প্রকাশনী</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Images Section - Collapsible on Mobile */}
-              <div className="space-y-3 md:space-y-6">
-                
-                {/* Cover Image Upload - Compact */}
-                <div className="space-y-2 md:space-y-4">
-                  <Label className="text-sm font-medium text-gray-700">কভার ইমেজ</Label>
-                  <div className="space-y-2 md:space-y-4">
-                    {/* File Upload - Smaller on mobile */}
-                    <div>
-                      <Label htmlFor="coverImageFile" className="cursor-pointer">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 md:p-6 text-center hover:border-primary transition-colors">
-                          <ImageIcon className="h-8 w-8 md:h-12 md:w-12 mx-auto text-gray-400 mb-1 md:mb-2" />
-                          <p className="text-xs md:text-sm text-gray-600 mb-1">ছবি আপলোড করুন</p>
-                          <p className="text-xs text-gray-500 hidden md:block">JPG, PNG, WEBP (সর্বোচ্চ ১০MB)</p>
-                        </div>
-                      </Label>
-                      <Input
-                        id="coverImageFile"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverImageChange}
-                        className="hidden"
-                      />
-                    </div>
-                    
-                    {/* Show selected file - Compact */}
-                    {coverImageFile && (
-                      <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                        <ImageIcon className="h-4 w-4 text-green-600" />
-                        <span className="text-xs md:text-sm text-green-700 flex-1 truncate">{coverImageFile.name}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setCoverImageFile(null)}
-                          className="h-6 w-6 p-0 md:h-8 md:w-8"
-                        >
-                          <X className="h-3 w-3 md:h-4 md:w-4" />
-                        </Button>
-                      </div>
-                    )}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="description" className="text-sm font-medium text-gray-700">বই সমূহ *</Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="বই সমূহ লিখুন"
+                      rows={3}
+                      className="border-gray-300 focus:border-primary focus:ring-primary md:rows-4"
+                      required
+                    />
                   </div>
                 </div>
-                
-                {/* Additional Images Upload - More Compact */}
-                <div className="space-y-2 md:space-y-4">
-                  <Label className="text-sm font-medium text-gray-700">অতিরিক্ত ছবি (ঐচ্ছিক)</Label>
-                  <div className="space-y-2 md:space-y-4">
-                    {/* File Upload - Smaller */}
-                    <div>
-                      <Label htmlFor="additionalImagesFile" className="cursor-pointer">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 md:p-4 text-center hover:border-primary transition-colors">
-                          <Upload className="h-6 w-6 md:h-8 md:w-8 mx-auto text-gray-400 mb-1 md:mb-2" />
-                          <p className="text-xs md:text-sm text-gray-600">একাধিক ছবি নির্বাচন করুন</p>
-                          <p className="text-xs text-gray-500 hidden md:block">JPG, PNG, WEBP (প্রতিটি সর্বোচ্চ ১০MB)</p>
-                        </div>
-                      </Label>
+
+                {/* Pricing & Condition Section */}
+                <div className="space-y-3 md:space-y-6">
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="price" className="text-sm font-medium text-gray-700">মূল্য (টাকা) মোট মূল্য*</Label>
                       <Input
-                        id="additionalImagesFile"
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleAdditionalImagesChange}
-                        className="hidden"
+                        id="price"
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="0"
+                        min="1"
+                        className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
+                        required
                       />
                     </div>
-                    
-                    {/* Show selected files - Compact */}
-                    {additionalImageFiles.length > 0 && (
-                      <div className="space-y-1 md:space-y-2">
-                        <p className="text-xs md:text-sm font-medium text-gray-700">নির্বাচিত ছবি:</p>
-                        {additionalImageFiles.map((file, index) => (
-                          <div key={index} className="flex items-center gap-2 p-1.5 md:p-2 bg-blue-50 rounded-lg">
-                            <ImageIcon className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
-                            <span className="text-xs md:text-sm text-blue-700 flex-1 truncate">{file.name}</span>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeAdditionalImage(index)}
-                              className="h-5 w-5 p-0 md:h-6 md:w-6"
-                            >
-                              <X className="h-3 w-3 md:h-4 md:w-4" />
-                            </Button>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="condition" className="text-sm font-medium text-gray-700">অবস্থা *</Label>
+                      <Select value={condition} onValueChange={setCondition}>
+                        <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
+                          <SelectValue placeholder="বইয়ের অবস্থা নির্বাচন করুন" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="like_new">প্রায় নতুন</SelectItem>
+                          <SelectItem value="good">ভালো</SelectItem>
+                          <SelectItem value="acceptable">গ্রহণযোগ্য</SelectItem>
+                          <SelectItem value="poor">খারাপ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5 col-span-2 md:col-span-1">
+                      <Label htmlFor="discount" className="text-sm font-medium text-gray-700">ছাড়ের হার (%)</Label>
+                      <Input
+                        id="discount"
+                        type="number"
+                        value={discountRate}
+                        onChange={(e) => setDiscountRate(e.target.value)}
+                        placeholder="0-100"
+                        min="0"
+                        max="100"
+                        className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Academic Information Section */}
+                <div className="space-y-3 md:space-y-6">
+
+                  <div className="grid grid-cols-1 gap-3 md:gap-6">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="semester" className="text-sm font-medium text-gray-700">সেমিস্টার</Label>
+                      <Select value={semester} onValueChange={setSemester}>
+                        <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
+                          <SelectValue placeholder="সেমিস্টার নির্বাচন করুন" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="১য় সেমিস্টার">১য় সেমিস্টার</SelectItem>
+                          <SelectItem value="২য় সেমিস্টার">২য় সেমিস্টার</SelectItem>
+                          <SelectItem value="৩য় সেমিস্টার">৩য় সেমিস্টার</SelectItem>
+                          <SelectItem value="৪র্থ সেমিস্টার">৪র্থ সেমিস্টার</SelectItem>
+                          <SelectItem value="৫ম সেমিস্টার">৫ম সেমিস্টার</SelectItem>
+                          <SelectItem value="৬ষ্ঠ সেমিস্টার">৬ষ্ঠ সেমিস্টার</SelectItem>
+                          <SelectItem value="৭ম সেমিস্টার">৭ম সেমিস্টার</SelectItem>
+                          <SelectItem value="৮ম সেমিস্টার">৮ম সেমিস্টার</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="department" className="text-sm font-medium text-gray-700">বিভাগ</Label>
+                        <Input
+                          id="department"
+                          type="text"
+                          value={department}
+                          readOnly
+                          disabled
+                          className="bg-gray-100 cursor-not-allowed border-gray-300 h-9 md:h-10"
+                          placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
+                        />
+                        <p className="text-xs text-gray-500 hidden md:block">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="institute" className="text-sm font-medium text-gray-700">প্রতিষ্ঠানের নাম</Label>
+                        <Input
+                          id="institute"
+                          type="text"
+                          value={instituteName}
+                          readOnly
+                          disabled
+                          className="bg-gray-100 cursor-not-allowed border-gray-300 h-9 md:h-10"
+                          placeholder="আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে পূরণ হবে"
+                        />
+                        <p className="text-xs text-gray-500 hidden md:block">এটি আপনার প্রোফাইল থেকে স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Images Section - Collapsible on Mobile */}
+                <div className="space-y-3 md:space-y-6">
+
+                  {/* Cover Image Upload - Compact */}
+                  <div className="space-y-2 md:space-y-4">
+                    <Label className="text-sm font-medium text-gray-700">কভার ইমেজ</Label>
+                    <div className="space-y-2 md:space-y-4">
+                      {/* File Upload - Smaller on mobile */}
+                      <div>
+                        <Label htmlFor="coverImageFile" className="cursor-pointer">
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 md:p-6 text-center hover:border-primary transition-colors">
+                            <ImageIcon className="h-8 w-8 md:h-12 md:w-12 mx-auto text-gray-400 mb-1 md:mb-2" />
+                            <p className="text-xs md:text-sm text-gray-600 mb-1">ছবি আপলোড করুন</p>
+                            <p className="text-xs text-gray-500 hidden md:block">JPG, PNG, WEBP (সর্বোচ্চ ১০MB)</p>
                           </div>
-                        ))}
+                        </Label>
+                        <Input
+                          id="coverImageFile"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCoverImageChange}
+                          className="hidden"
+                        />
                       </div>
-                    )}
+
+                      {/* Show selected file - Compact */}
+                      {coverImageFile && (
+                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                          <ImageIcon className="h-4 w-4 text-green-600" />
+                          <span className="text-xs md:text-sm text-green-700 flex-1 truncate">{coverImageFile.name}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCoverImageFile(null)}
+                            className="h-6 w-6 p-0 md:h-8 md:w-8"
+                          >
+                            <X className="h-3 w-3 md:h-4 md:w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Additional Images Upload - More Compact */}
+                  <div className="space-y-2 md:space-y-4">
+                    <Label className="text-sm font-medium text-gray-700">অতিরিক্ত ছবি (ঐচ্ছিক)</Label>
+                    <div className="space-y-2 md:space-y-4">
+                      {/* File Upload - Smaller */}
+                      <div>
+                        <Label htmlFor="additionalImagesFile" className="cursor-pointer">
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 md:p-4 text-center hover:border-primary transition-colors">
+                            <Upload className="h-6 w-6 md:h-8 md:w-8 mx-auto text-gray-400 mb-1 md:mb-2" />
+                            <p className="text-xs md:text-sm text-gray-600">একাধিক ছবি নির্বাচন করুন</p>
+                            <p className="text-xs text-gray-500 hidden md:block">JPG, PNG, WEBP (প্রতিটি সর্বোচ্চ ১০MB)</p>
+                          </div>
+                        </Label>
+                        <Input
+                          id="additionalImagesFile"
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleAdditionalImagesChange}
+                          className="hidden"
+                        />
+                      </div>
+
+                      {/* Show selected files - Compact */}
+                      {additionalImageFiles.length > 0 && (
+                        <div className="space-y-1 md:space-y-2">
+                          <p className="text-xs md:text-sm font-medium text-gray-700">নির্বাচিত ছবি:</p>
+                          {additionalImageFiles.map((file, index) => (
+                            <div key={index} className="flex items-center gap-2 p-1.5 md:p-2 bg-blue-50 rounded-lg">
+                              <ImageIcon className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
+                              <span className="text-xs md:text-sm text-blue-700 flex-1 truncate">{file.name}</span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeAdditionalImage(index)}
+                                className="h-5 w-5 p-0 md:h-6 md:w-6"
+                              >
+                                <X className="h-3 w-3 md:h-4 md:w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Submit Button - Mobile Optimized */}
-              <div className="flex justify-center pt-4 md:pt-8 border-t border-gray-200">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || isUploadingImages}
-                  className="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 text-base md:text-lg bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  {isUploadingImages ? (
-                    <>
-                      <Upload className="h-4 w-4 mr-2 animate-spin" />
-                      <span className="hidden sm:inline">ছবি আপলোড হচ্ছে...</span>
-                      <span className="sm:hidden">আপলোড হচ্ছে...</span>
-                    </>
-                  ) : isSubmitting ? (
-                    <>
-                      <span className="hidden sm:inline">যোগ করা হচ্ছে...</span>
-                      <span className="sm:hidden">যোগ হচ্ছে...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="hidden sm:inline">বই যোগ করুন</span>
-                      <span className="sm:hidden">যোগ করুন</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-    
-    {/* Video Dialog */}
-    <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
-      <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
-        <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">কিভাবে বই বিক্রয় করবেন - ভিডিও গাইড</DialogTitle>
-        </DialogHeader>
-        <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src="https://www.youtube.com/embed/OJA_ygF5Fy0?si=iScjTTzaZNZzr2if"
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
+                {/* Submit Button - Mobile Optimized */}
+                <div className="flex justify-center pt-4 md:pt-8 border-t border-gray-200">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || isUploadingImages}
+                    className="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 text-base md:text-lg bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    {isUploadingImages ? (
+                      <>
+                        <Upload className="h-4 w-4 mr-2 animate-spin" />
+                        <span className="hidden sm:inline">ছবি আপলোড হচ্ছে...</span>
+                        <span className="sm:hidden">আপলোড হচ্ছে...</span>
+                      </>
+                    ) : isSubmitting ? (
+                      <>
+                        <span className="hidden sm:inline">যোগ করা হচ্ছে...</span>
+                        <span className="sm:hidden">যোগ হচ্ছে...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline">বই যোগ করুন</span>
+                        <span className="sm:hidden">যোগ করুন</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      {/* Video Dialog */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-3xl w-full p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl font-bold text-slate-800">কিভাবে বই বিক্রয় করবেন - ভিডিও গাইড</DialogTitle>
+          </DialogHeader>
+          <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/OJA_ygF5Fy0?si=iScjTTzaZNZzr2if"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
