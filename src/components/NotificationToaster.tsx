@@ -4,6 +4,58 @@ import { playNotificationSound } from "@/lib/playNotificationSound";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
 
+// Global storage for shown notification IDs to persist across component re-renders and page changes
+const SHOWN_NOTIFICATIONS_KEY = 'notificationToaster_shownIds';
+const NOTIFICATION_EXPIRY_TIME = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+// Helper functions for localStorage management
+const getShownNotifications = (): Record<string, number> => {
+  try {
+    const stored = localStorage.getItem(SHOWN_NOTIFICATIONS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+};
+
+const setShownNotifications = (notifications: Record<string, number>) => {
+  try {
+    localStorage.setItem(SHOWN_NOTIFICATIONS_KEY, JSON.stringify(notifications));
+  } catch (error) {
+    console.warn('Failed to save shown notifications to localStorage:', error);
+  }
+};
+
+const cleanExpiredNotifications = () => {
+  const now = Date.now();
+  const notifications = getShownNotifications();
+  const cleaned: Record<string, number> = {};
+  
+  Object.entries(notifications).forEach(([id, timestamp]) => {
+    if (now - timestamp < NOTIFICATION_EXPIRY_TIME) {
+      cleaned[id] = timestamp;
+    }
+  });
+  
+  setShownNotifications(cleaned);
+  return cleaned;
+};
+
+const hasNotificationBeenShown = (notificationId: string): boolean => {
+  const notifications = cleanExpiredNotifications();
+  return notificationId in notifications;
+};
+
+const markNotificationAsShown = (notificationId: string) => {
+  const notifications = getShownNotifications();
+  notifications[notificationId] = Date.now();
+  setShownNotifications(notifications);
+};
+
+// Track active toasts to prevent duplicates
+let activeNotificationToastCount = 0;
+const MAX_CONCURRENT_NOTIFICATION_TOASTS = 2;
+
 /**
  * Listens for new unread notifications and shows a toast that mimics
  * a subtle mobile push-notification. The toast slides in from the right
@@ -13,8 +65,19 @@ export default function NotificationToaster() {
   const { notifications } = useNotifications();
   const navigate = useNavigate();
 
-  // Track the IDs we've already shown to avoid duplicate toasts when state re-renders
-  const shownIds = useRef<Set<string>>(new Set());
+  // Clean up expired notifications on component mount
+  useEffect(() => {
+    cleanExpiredNotifications();
+    
+    // Debug info in development
+    if (process.env.NODE_ENV === 'development') {
+      const stats = {
+        shownNotifications: Object.keys(getShownNotifications()).length,
+        activeToasts: activeNotificationToastCount
+      };
+      console.log('NotificationToaster initialized with stats:', stats);
+    }
+  }, []);
 
   useEffect(() => {
     if (!notifications || notifications.length === 0) return;
@@ -22,16 +85,32 @@ export default function NotificationToaster() {
     // Only consider the most recent 10 to avoid looping through a huge list
     notifications.slice(0, 10).forEach((n) => {
       if (n.is_read) return; // Only toast unread items
-      if (shownIds.current.has(n.id)) return;
-
-      shownIds.current.add(n.id);
+      if (!n.id) return; // Skip if no ID
+      
+      // Check if we've already shown this notification
+      if (hasNotificationBeenShown(n.id)) {
+        console.log('Notification toast already shown for ID:', n.id);
+        return;
+      }
+      
+      // Check if we've reached the maximum concurrent toasts
+      if (activeNotificationToastCount >= MAX_CONCURRENT_NOTIFICATION_TOASTS) {
+        console.log('Maximum concurrent notification toasts reached, skipping new toast');
+        return;
+      }
+      
+      // Mark this notification as shown
+      markNotificationAsShown(n.id);
+      activeNotificationToastCount++;
 
       playNotificationSound();
-toast.custom((t) => (
+      
+      const toastId = toast.custom((t) => (
         <div
           onClick={() => {
-            navigate("/messages")
-            toast.dismiss(t.id)
+            navigate("/messages");
+            toast.dismiss(t.id);
+            activeNotificationToastCount = Math.max(0, activeNotificationToastCount - 1);
           }}
           role="button"
           tabIndex={0}
@@ -48,7 +127,15 @@ toast.custom((t) => (
             দেখুন
           </span>
         </div>
-      ), { duration: 5000 });
+      ), { 
+        duration: 5000,
+        onDismiss: () => {
+          activeNotificationToastCount = Math.max(0, activeNotificationToastCount - 1);
+        },
+        onAutoClose: () => {
+          activeNotificationToastCount = Math.max(0, activeNotificationToastCount - 1);
+        }
+      });
     });
   }, [notifications, navigate]);
 

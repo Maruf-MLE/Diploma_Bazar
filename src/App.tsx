@@ -52,6 +52,7 @@ import FallbackNotification from "@/components/FallbackNotification";
 import { initSafariNotificationFix } from "@/lib/safariNotificationFix";
 import NotificationPermissionRequest from "@/components/NotificationPermissionRequest";
 import NotificationReminder from "@/components/NotificationReminder";
+import { cleanAllExpiredToastData } from "@/lib/toastManager";
 
 // Debug utility for development
 
@@ -146,9 +147,30 @@ const BannedUserCheck = ({ children }: { children: React.ReactNode }) => {
 const AppContent = () => {
   const { user, isBanned, loading } = useAuth();
   
-  // Initialize Safari notification fix on app startup
+  // Initialize Safari notification fix and clean toast data on app startup
   useEffect(() => {
     initSafariNotificationFix();
+    cleanAllExpiredToastData();
+    
+    // Clean toast data when the page is about to unload
+    const handleBeforeUnload = () => {
+      cleanAllExpiredToastData();
+    };
+    
+    // Clean toast data when the page becomes hidden (tab switch, minimize, etc.)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        cleanAllExpiredToastData();
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
   
   // Initialize push notifications when user logs in

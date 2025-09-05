@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase, getUserVerificationStatus, checkUserBanStatus } from '@/lib/supabase'
 import { useToast } from '@/components/ui/use-toast'
+import { clearAllToastData } from '@/lib/toastManager'
 
 type AuthContextType = {
   user: User | null
@@ -65,6 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      // Clear all toast data on logout to prevent showing old notifications
+      clearAllToastData();
       console.log("User signed out successfully");
     } catch (error) {
       console.error("Error signing out:", error);

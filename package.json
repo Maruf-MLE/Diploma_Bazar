@@ -61,7 +61,8 @@
     "test:database": "node test-database-functions.js",
     "disable:phone-verification": "node disable_phone_verification.cjs",
     "test:notifications": "node test-notification-fix.js",
-    "fix:notifications-complete": "node complete-notification-fix.js"
+    "fix:notifications-complete": "node complete-notification-fix.js",
+    "clear:toast-data": "node clear-toast-data.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

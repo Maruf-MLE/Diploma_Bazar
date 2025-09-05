@@ -235,18 +235,7 @@ export default function RegistrationPage() {
           </CardDescription>
           
           {/* Video Guide Button */}
-          <div className="pt-3">
-            <Button 
-              type="button"
-              variant="secondary" 
-              size="sm"
-              className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-xs font-medium px-4 py-2 rounded-full shadow-lg backdrop-blur-sm"
-              onClick={() => setIsVideoDialogOpen(true)}
-            >
-              <Play className="h-3 w-3 mr-2" />
-              কিভাবে অ্যাকাউন্ট খুলবেন দেখুন এই ভিডিও তে
-            </Button>
-          </div>
+         
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 pt-6">

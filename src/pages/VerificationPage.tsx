@@ -24,14 +24,14 @@ const VerificationPage = () => {
   const [documentPreview, setDocumentPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
-  
+
   // ওয়ার্নিং ডায়ালগ স্টেট
   const [warningDialogOpen, setWarningDialogOpen] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
-  
+
   // ভিডিও গাইড ডায়ালগ স্টেট
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
-  
+
   // ম্যানুয়াল ইনপুট ডেটা
   const [formData, setFormData] = useState<{
     rollNo: string;
@@ -44,7 +44,7 @@ const VerificationPage = () => {
     department: '',
     instituteName: ''
   });
-  
+
   // ইউজারের ডেটা লোডিং স্টেট
   const [isLoading, setIsLoading] = useState(true);
   const [hasExistingData, setHasExistingData] = useState(false);
@@ -54,7 +54,7 @@ const VerificationPage = () => {
     department: string;
     institute_name: string;
   } | null>(null);
-  
+
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -63,16 +63,16 @@ const VerificationPage = () => {
   useEffect(() => {
     const checkVerificationStatus = async () => {
       if (!user) return;
-      
+
       try {
         // ভেরিফিকেশন স্ট্যাটাস চেক করি
         const { isVerified, error } = await getUserVerificationStatus(user.id);
-        
+
         if (error) {
           console.error('Error checking verification status:', error);
           return;
         }
-        
+
         // যদি ইউজার ভেরিফাইড হয়, তাহলে ভেরিফিকেশন অ্যাপ্রুভড পেজে রিডাইরেক্ট করি
         if (isVerified) {
           // ভেরিফিকেশন আইডি নেওয়ার জন্য ডাটাবেস থেকে ডাটা নেই
@@ -81,7 +81,7 @@ const VerificationPage = () => {
             .select('id')
             .eq('user_id', user.id)
             .single();
-          
+
           if (!fetchError && data?.id) {
             navigate(`/verification/approved/${data.id}`);
           } else {
@@ -97,7 +97,7 @@ const VerificationPage = () => {
         console.error('Error in verification status check:', error);
       }
     };
-    
+
     checkVerificationStatus();
   }, [user, navigate, toast]);
 
@@ -114,7 +114,7 @@ const VerificationPage = () => {
   const loadUserProfileAndVerificationData = async () => {
     try {
       setIsLoading(true);
-      
+
       // প্রোফাইল ডেটা লোড করি
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -134,7 +134,7 @@ const VerificationPage = () => {
 
       if (profile) {
         setProfileData(profile);
-        
+
         // প্রোফাইল থেকে তথ্য দিয়ে form ডেটা সেট করি
         setFormData(prev => ({
           ...prev,
@@ -143,7 +143,7 @@ const VerificationPage = () => {
           instituteName: profile.institute_name || ''
         }));
       }
-      
+
       // ভেরিফিকেশন ডেটা লোড করি
       const { data: verificationData, error: verificationError } = await supabase
         .from('verification_data')
@@ -164,11 +164,11 @@ const VerificationPage = () => {
           department: profile?.department || verificationData.department || '',
           instituteName: profile?.institute_name || verificationData.institute_name || ''
         });
-        
+
         if (verificationData.document_url) {
           setDocumentPreview(verificationData.document_url);
         }
-        
+
         // যদি ইউজারের আগে থেকে ভেরিফিকেশন ডেটা থাকে তাহলে সাকসেস স্টেট true করি
         setVerificationSuccess(true);
       } else if (profile) {
@@ -196,9 +196,9 @@ const VerificationPage = () => {
   // ফাইল আপলোড হ্যান্ডলার
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
-    
+
     if (!file) return;
-    
+
     // ফাইল টাইপ চেক করি
     if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
       toast({
@@ -208,17 +208,17 @@ const VerificationPage = () => {
       });
       return;
     }
-    
+
     // ফাইল সাইজ চেক করি (15MB)
     if (file.size > 15 * 1024 * 1024) {
       toast({
         title: "ফাইল সাইজ খুব বড়",
         description: "দয়া করে 15MB এর কম সাইজের ছবি আপলোড করুন।",
         variant: "destructive",
-        });
+      });
       return;
     }
-    
+
     // ফাইল এবং প্রিভিউ সেট করি
     setDocumentFile(file);
     const previewUrl = URL.createObjectURL(file);
@@ -250,7 +250,7 @@ const VerificationPage = () => {
   // ডেটা সাবমিট করার ফাংশন
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: "লগইন প্রয়োজন",
@@ -259,7 +259,7 @@ const VerificationPage = () => {
       });
       return;
     }
-    
+
     // কমপক্ষে একটি ছবি আপলোড করা আবশ্যক
     if (!documentFile && !documentPreview) {
       toast({
@@ -269,7 +269,7 @@ const VerificationPage = () => {
       });
       return;
     }
-    
+
     // রোল নম্বর চেক করি (প্রোফাইল থেকে আসা উচিত)
     if (!formData.rollNo.trim()) {
       toast({
@@ -279,9 +279,9 @@ const VerificationPage = () => {
       });
       return;
     }
-    
+
     setUploading(true);
-    
+
     try {
       // চেক করি যে roll_no দিয়ে আগে কেউ ভেরিফিকেশন করেছে কিনা
       const { data: existingVerification, error: verificationCheckError } = await supabase
@@ -289,12 +289,12 @@ const VerificationPage = () => {
         .select('*')
         .eq('roll_no', formData.rollNo.trim())
         .neq('user_id', user.id);
-      
+
       if (verificationCheckError) {
         console.error('Error checking existing verification:', verificationCheckError);
         throw new Error('ভেরিফিকেশন ডেটা চেক করতে সমস্যা হয়েছে।');
       }
-      
+
       // যদি আগে থেকে একই রোল ও রেজিস্ট্রেশন নম্বর দিয়ে কেউ ভেরিফিকেশন করে থাকে
       if (existingVerification && existingVerification.length > 0) {
         // ডায়ালগ দেখাই
@@ -302,30 +302,30 @@ const VerificationPage = () => {
         setUploading(false);
         return;
       }
-      
+
       let documentUrl = documentPreview;
-      
+
       // যদি নতুন ফাইল আপলোড করা হয়
       if (documentFile) {
         const fileExt = documentFile.name.split('.').pop();
         const fileName = `${user.id}-document-${Date.now()}.${fileExt}`;
-        
+
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('verification_documents')
           .upload(fileName, documentFile);
-          
+
         if (uploadError) {
           throw new Error(`ডকুমেন্ট আপলোড করতে সমস্যা: ${uploadError.message}`);
         }
-        
+
         // পাবলিক URL পাই
         const { data: publicData } = supabase.storage
           .from('verification_documents')
           .getPublicUrl(fileName);
-          
+
         documentUrl = publicData.publicUrl;
       }
-      
+
       // আগে থেকে ডেটা আছে কিনা চেক করি
       if (hasExistingData) {
         // ডেটা আপডেট করি
@@ -342,7 +342,7 @@ const VerificationPage = () => {
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id);
-          
+
         if (updateError) throw updateError;
       } else {
         // নতুন ডেটা তৈরি করি
@@ -360,35 +360,35 @@ const VerificationPage = () => {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
-          
+
         if (insertError) throw insertError;
       }
-      
+
       // সাফল্য মেসেজ দেখাই
       toast({
         title: "ভেরিফিকেশন রিকুয়েস্ট সফল",
         description: "আপনার তথ্য সফলভাবে জমা হয়েছে। অ্যাডমিন যাচাই করে ভেরিফিকেশন অনুমোদন করবে।",
         variant: "default",
       });
-      
+
       // হ্যাজএক্সিস্টিংডেটা আপডেট করি
       setHasExistingData(true);
-      
+
       // ভেরিফিকেশন সাকসেস স্টেট আপডেট করি
       setVerificationSuccess(true);
-      
+
       // ভেরিফিকেশন পেজে রিডাইরেক্ট করি (পেজ রিফ্রেশ করার জন্য)
       window.location.reload();
-      
+
     } catch (error: any) {
       console.error('Error submitting verification data:', error);
-      
+
       // ইউনিক কন্সট্রেইন্ট ভায়োলেশন চেক করি
       if (error.message && (
-          error.message.includes('unique constraint') || 
-          error.message.includes('duplicate key value') ||
-          error.message.includes('verification_data_roll_no_key')
-        )) {
+        error.message.includes('unique constraint') ||
+        error.message.includes('duplicate key value') ||
+        error.message.includes('verification_data_roll_no_key')
+      )) {
         // ডায়ালগ দেখাই
         showWarningDialog("এই এডমিট কার্ড দিয়ে এডমিট কার্ডের মালিক তার আইডি ভেরিফিকেশন করে ফেলেছে। দয়া করে আপনি আপনার নিজস্ব সঠিক এডমিট কার্ড দিয়ে ভেরিফিকেশন করুন।");
       } else {
@@ -402,7 +402,7 @@ const VerificationPage = () => {
       setUploading(false);
     }
   };
-  
+
   // লোডিং স্পিনার দেখাই
   if (isLoading) {
     return (
@@ -414,11 +414,11 @@ const VerificationPage = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      
+
       {/* ওয়ার্নিং ডায়ালগ */}
       <Dialog open={warningDialogOpen} onOpenChange={setWarningDialogOpen}>
         <DialogContent className="sm:max-w-md border-red-300 shadow-lg animate-in fade-in-90 slide-in-from-bottom-10">
@@ -432,12 +432,12 @@ const VerificationPage = () => {
               </DialogTitle>
             </div>
           </DialogHeader>
-          
+
           <div className="bg-white p-6">
             <DialogDescription className="text-lg font-medium text-center text-gray-800 leading-relaxed">
               {warningMessage}
             </DialogDescription>
-            
+
             <div className="flex items-center justify-center mt-4 bg-red-50 p-3 rounded-lg border border-red-100">
               <div className="flex items-center text-sm text-red-700">
                 <AlertCircle className="h-5 w-5 mr-2" />
@@ -445,9 +445,9 @@ const VerificationPage = () => {
               </div>
             </div>
           </div>
-          
+
           <DialogFooter className="bg-gray-50 p-4 rounded-b-lg border-t border-gray-200 space-y-2">
-            <Button 
+            <Button
               variant="default"
               className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2"
               onClick={() => setWarningDialogOpen(false)}
@@ -463,21 +463,13 @@ const VerificationPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <div className="max-w-3xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 pb-16">
+
+      <div className="max-w-3xl mx-auto pt-14 px-4 sm:px-6 lg:px-8 pb-16">
         {/* ভেরিফিকেশন ধাপ */}
         <div className="mb-8">
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h2 className="text-xl font-bold text-blue-800 flex items-center gap-2">
-              <FileCheck className="h-5 w-5" />
-              অ্যাকাউন্ট ভেরিফিকেশন
-            </h2>
-                          <p className="text-blue-700 mt-1">
-              আপনার পরিচয় নিশ্চিত করার জন্য এডমিট কার্ড, স্টুডেন্ট আইডি বা প্রথম বর্ষের ভর্তি নিশ্চিতকরণ পৃষ্ঠার স্ক্রিনশট আপলোড করুন। অ্যাডমিন আপনার তথ্য যাচাই করে অনুমোদন দেওয়ার পর আপনি সাইটের সকল সুবিধা পাবেন।
-            </p>
-          </div>
+
         </div>
-        
+
         {verificationSuccess ? (
           <div className="text-center">
             <div className="bg-green-50 p-8 rounded-lg border border-green-200 mb-8">
@@ -486,12 +478,12 @@ const VerificationPage = () => {
               </div>
               <h2 className="text-2xl font-bold text-green-800 mb-2">ভেরিফিকেশন রিকুয়েস্ট সফল</h2>
               <p className="text-green-700 mb-6">
-              আপনার তথ্য সফলভাবে সংরক্ষণ করা হয়েছে। অ্যাডমিন আপনার তথ্য যাচাই করে <span className="font-bold text-green-800">(সর্বোচ্চ ১২ ঘণ্টার মধ্যে)</span> অনুমোদন দেওয়ার পর আপনার অ্যাকাউন্ট ভেরিফাইড হবে। 
-              <p> </p>
-              <p>অনুগ্রহ করে একটু অপেক্ষা করুন 😊</p>
-            
+                আপনার তথ্য সফলভাবে সংরক্ষণ করা হয়েছে। অ্যাডমিন আপনার তথ্য যাচাই করে <span className="font-bold text-green-800">(সর্বোচ্চ ১২ ঘণ্টার মধ্যে)</span> অনুমোদন দেওয়ার পর আপনার অ্যাকাউন্ট ভেরিফাইড হবে।
+                <p> </p>
+                <p>অনুগ্রহ করে একটু অপেক্ষা করুন 😊</p>
+
               </p>
-              <Button 
+              <Button
                 className="flex items-center gap-2"
                 onClick={() => navigate('/')}
               >
@@ -499,7 +491,7 @@ const VerificationPage = () => {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-gray-50 border border-gray-200">
                 <CardHeader className="pb-2">
@@ -532,21 +524,21 @@ const VerificationPage = () => {
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">আইডি ভেরিফিকেশন</h1>
               <p className="text-lg text-gray-600 mb-6">
-                অ্যাকাউন্ট ভেরিফিকেশন করার জন্য আপনার এডমিট কার্ড, স্টুডেন্ট আইডি কার্ড বা প্রথম বর্ষের ভর্তি নিশ্চিতকরণ পৃষ্ঠার স্ক্রিনশট আপলোড করুন
+                আপনার পরিচয় যাচাইয়ের জন্য স্টুডেন্ট আইডি, এডমিট কার্ড বা ভর্তি কনফার্মেশনের স্ক্রিনশট আপলোড করুন। এডমিন তা দেখে অনুমোদন দিলে সাইটের সব সুবিধা ব্যবহার করতে পারবেন।
               </p>
-              
+
               {/* ভিডিও গাইড বাটন */}
-              <Button 
+              <Button
                 type="button"
-                variant="outline" 
+                variant="outline"
                 className="bg-blue-50 text-blue-700 border-blue-200 text-sm font-medium px-6 py-2.5 rounded-full shadow-md"
                 onClick={() => setIsVideoDialogOpen(true)}
               >
                 <Play className="h-4 w-4 mr-2" />
-                কিভাবে অ্যাকাউন্ট খুলবেন দেখুন এই ভিডিও তে
+                কিভাবে ভেরিফিকেশন করবেন দেখুন ভিডিও
               </Button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               {/* ম্যানুয়াল ইনপুট ফিল্ডস */}
               <div className="hidden">
@@ -629,29 +621,29 @@ const VerificationPage = () => {
                   </Card>
                 </div>
               </div>
-              
+
               {/* ডকুমেন্ট আপলোড কার্ড */}
               <Card className="shadow-sm border border-gray-200 mb-8">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <School className="h-5 w-5 text-primary" />
-                    এডমিট কার্ড / স্টুডেন্ট আইডি / ভর্তি নিশ্চিতকরণ পৃষ্ঠা
+                    স্টুডেন্ট আইডি কার্ড / এডমিট কার্ড / ভর্তি নিশ্চিতকরণ পৃষ্ঠা
                   </CardTitle>
                   <CardDescription>
-                    আপনার এডমিট কার্ড, স্টুডেন্ট আইডি কার্ড অথবা প্রথম বর্ষের ছাত্র/ছাত্রীদের জন্য ভর্তি নিশ্চিতকরণ পৃষ্ঠার স্ক্রিনশট আপলোড করুন
+                    আপনার স্টুডেন্ট আইডি কার্ড, এডমিট কার্ড  অথবা প্রথম বর্ষের ছাত্র/ছাত্রীদের জন্য ভর্তি নিশ্চিতকরণ পৃষ্ঠার স্ক্রিনশট আপলোড করুন
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {documentPreview ? (
                     <div className="relative">
-                      <img 
-                        src={documentPreview} 
-                        alt="Document Preview" 
+                      <img
+                        src={documentPreview}
+                        alt="Document Preview"
                         className="w-full h-64 object-contain rounded-md border border-gray-200 bg-white"
                       />
-                      <Button 
-                        type="button" 
-                        variant="destructive" 
+                      <Button
+                        type="button"
+                        variant="destructive"
                         size="icon"
                         className="absolute top-2 right-2 h-8 w-8 rounded-full"
                         onClick={removeFile}
@@ -661,7 +653,7 @@ const VerificationPage = () => {
                       </Button>
                     </div>
                   ) : (
-                    <div 
+                    <div
                       className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center cursor-pointer hover:border-primary transition-colors"
                       onClick={() => document.getElementById('document-input')?.click()}
                     >
@@ -684,10 +676,10 @@ const VerificationPage = () => {
                   />
                 </CardContent>
               </Card>
-              
+
               <div className="text-center">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="min-w-[200px]"
                   disabled={uploading || !documentPreview}
                 >
@@ -703,7 +695,7 @@ const VerificationPage = () => {
                   )}
                 </Button>
               </div>
-              
+
               <div className="mt-8 bg-blue-50 p-4 rounded-lg">
                 <h3 className="font-medium text-blue-800 flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
@@ -713,7 +705,7 @@ const VerificationPage = () => {
                   ভেরিফিকেশন করলে আপনার অ্যাকাউন্ট নিশ্চিত হবে এবং আপনি সাইটের সকল সুবিধা ব্যবহার করতে পারবেন।
                 </p>
               </div>
-              
+
               {/* Accepted Documents Info */}
               <div className="mt-4 bg-indigo-50 p-4 rounded-lg">
                 <h3 className="font-medium text-indigo-800 flex items-center gap-2">
@@ -739,7 +731,7 @@ const VerificationPage = () => {
           </>
         )}
       </div>
-      
+
       {/* ভিডিও গাইড ডায়ালগ */}
       <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
         <DialogContent className="max-w-3xl w-full p-4 sm:p-6">

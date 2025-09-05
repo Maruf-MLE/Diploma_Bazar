@@ -22,7 +22,7 @@ const Footer = () => {
             </p>
             
             <div className="flex space-x-3">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/70 flex items-center justify-center hover:bg-primary/10 transition-colors shadow-sm">
+              <a href="https://www.facebook.com/diplomabazar/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/70 flex items-center justify-center hover:bg-primary/10 transition-colors shadow-sm">
                 <Facebook className="h-5 w-5 text-gray-600" />
               </a>
               <a href="#" className="w-10 h-10 rounded-full bg-white/70 flex items-center justify-center hover:bg-primary/10 transition-colors shadow-sm">

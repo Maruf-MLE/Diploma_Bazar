@@ -230,3 +230,30 @@ npm run push-server
    - Clear browser storage
    - Unregister old service workers
    - Check browser DevTools > Application > Service Workers
+
+## 🍞 Toast Notification System
+
+The app includes an advanced toast notification system that prevents duplicate notifications and manages storage efficiently.
+
+### Features:
+- **Duplicate Prevention**: Each toast is shown only once using localStorage tracking
+- **Auto Cleanup**: Old toast data expires automatically (5-10 minutes)
+- **Concurrent Limits**: Maximum number of toasts shown simultaneously
+- **Age Verification**: Very old messages don't trigger toasts
+- **Cross-session Persistence**: Prevents showing same toast after page refresh
+
+### Troubleshooting Toast Issues:
+
+```bash
+# Clear all toast data
+npm run clear:toast-data
+
+# Check toast statistics in browser console
+const stats = {
+  messages: localStorage.getItem('messageToaster_shownIds'),
+  notifications: localStorage.getItem('notificationToaster_shownIds')
+};
+console.log('Toast data:', stats);
+```
+
+For detailed information, see [TOAST_SYSTEM.md](./TOAST_SYSTEM.md)
