@@ -401,9 +401,9 @@ const Navigation = () => {
           </div>
 
           {/* Mobile Top Navigation */}
-          <div className="md:hidden flex justify-between items-center h-16">
+          <div className="md:hidden flex items-center h-16 px-2">
             {/* Logo - Mobile */}
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center flex-shrink-0">
               <img 
                 src="/images/Logo.png" 
                 alt="ডিপ্লোমা বাজার লোগো" 
@@ -411,72 +411,73 @@ const Navigation = () => {
               />
             </Link>
 
-            {/* Main Navigation Items Group */}
-            <div className="flex items-center justify-center mx-1 ml-4">
-              <Link to="/" className="px-1 mx-1">
-                <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/')}`}>হোম</span>
-              </Link>
-              
-              <Link to="/browse" className="px-1 mx-1">
-                <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/browse')}`}>খুঁজুন</span>
-              </Link>
-              
-              <Link to="/sell-book" className="px-1 mx-1">
-                <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/sell-book')}`}>বিক্রি</span>
-              </Link>
-              
+            {/* Main Navigation Items Group - Centered */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex items-center space-x-0">
+                <Link to="/" className="px-1.5 py-1">
+                  <span className={`text-xs font-medium whitespace-nowrap ${isMobileActive('/')}`}>হোম</span>
+                </Link>
+                
+                <Link to="/browse" className="px-1.5 py-1">
+                  <span className={`text-xs font-medium whitespace-nowrap ${isMobileActive('/browse')}`}>খুঁজুন</span>
+                </Link>
+                
+                <Link to="/sell-book" className="px-1.5 py-1">
+                  <span className={`text-xs font-medium whitespace-nowrap ${isMobileActive('/sell-book')}`}>বিক্রি</span>
+                </Link>
+                
+                <Link to="/messages" className="px-1.5 py-1 relative">
+                  <span className={`text-xs font-medium whitespace-nowrap ${isMobileActive('/messages')}`}>মেসেজ</span>
+                  {user && unreadMessageCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
+                      {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                    </span>
+                  )}
+                </Link>
+                
+                {user && (
+                  <Link to="/profile" className="px-1.5 py-1">
+                    <span className={`text-xs font-medium whitespace-nowrap ${isMobileActive('/profile')}`}>প্রোফাইল</span>
+                  </Link>
+                )}
+              </div>
             </div>
 
-            {/* Spacer */}
-            <div className="flex-grow"></div>
-
-            {/* Action Icons Group */}
-            <div className="flex items-center">
+            {/* Right Side Actions */}
+            <div className="flex items-center flex-shrink-0">
               {user && (
                 <>
-                  {/* Messages - Mobile */}
-                  <Link to="/messages" className="relative p-0.5 mx-0.5">
-                    <MessageCircle className={`h-5 w-5 ${isMobileActive('/messages')}`} />
-                    {unreadMessageCount > 0 && (
-                      <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
-                        {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
-                      </span>
-                    )}
-                  </Link>
-                  
                   {/* Notifications - Mobile */}
                   <div className="p-0.5 mx-0.5">
                     <NotificationDropdown />
                   </div>
                   
-                  {/* Profile/Menu - Mobile - Only for logged in users - Hidden on messages page */}
-                  {location.pathname !== '/messages' && (
-                    <div className="p-0.5 mx-0.5 relative" onClick={toggleMenu}>
-                      <div className="flex flex-col items-center">
-                        <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm relative">
-                          {user.user_metadata && user.user_metadata.avatar_url ? (
-                            <img 
-                              src={user.user_metadata.avatar_url} 
-                              alt="Profile" 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                console.log('Mobile profile image failed to load, showing fallback icon');
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : null}
-                          {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
-                            <User className="h-4 w-4 text-gray-600" />
-                          )}
-                          <ChevronDown className="h-6 w-6 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
-                        </div>
+                  {/* Profile Menu - Mobile */}
+                  <div className="p-0.5 mx-0.5 relative" onClick={toggleMenu}>
+                    <div className="flex flex-col items-center">
+                      <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm relative">
+                        {user.user_metadata && user.user_metadata.avatar_url ? (
+                          <img 
+                            src={user.user_metadata.avatar_url} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.log('Mobile profile image failed to load, showing fallback icon');
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : null}
+                        {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
+                          <User className="h-4 w-4 text-gray-600" />
+                        )}
+                        <ChevronDown className="h-6 w-6 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
                       </div>
                     </div>
-                  )}
+                  </div>
                 </>
               )}
               
-              {/* Login button for logged out users - All pages */}
+              {/* Login button for logged out users */}
               {!user && (
                 <div className="flex items-center">
                   <Link to="/login">
