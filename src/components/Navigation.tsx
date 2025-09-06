@@ -494,7 +494,7 @@ const Navigation = () => {
 
             {/* Main Navigation Items Group - Centered */}
             <div className="flex-1 flex items-center justify-center">
-              <div className="flex items-center space-x-0">
+              <div className="flex items-center space-x-1">
                 <Link to="/" className="px-1.5 py-1">
                   <span className={`text-xs font-medium whitespace-nowrap ${isMobileActive('/')}`}>হোম</span>
                 </Link>
