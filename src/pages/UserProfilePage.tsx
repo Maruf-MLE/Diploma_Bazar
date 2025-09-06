@@ -286,6 +286,21 @@ const UserProfilePage = () => {
         }
         
         if (profile) {
+          // Determine the correct avatar URL - prefer manually uploaded over database value
+          const getAvatarUrl = () => {
+            // Check if there's a manually uploaded avatar (not from Google)
+            if (profile.avatar_url && 
+                !profile.avatar_url.includes('googleusercontent.com') && 
+                !profile.avatar_url.includes('googleapis.com') &&
+                profile.avatar_url !== '/placeholder.svg') {
+              console.log('✅ UserProfilePage: Using manually uploaded avatar:', profile.avatar_url);
+              return profile.avatar_url;
+            }
+            
+            // Otherwise use the database value (which might be Google photo or placeholder)
+            return profile.avatar_url || '/placeholder.svg';
+          };
+          
           const userData = {
             id: id,
             name: profile.name || '',
@@ -293,7 +308,7 @@ const UserProfilePage = () => {
             department: profile.department || '',
             semester: profile.semester || '',
             roll_number: profile.roll_number || '',
-            avatar_url: profile.avatar_url || '/placeholder.svg',
+            avatar_url: getAvatarUrl(),
             rating: profile.avg_rating || 0, // Initial value from profile
             totalReviews: profile.review_count || 0, // Initial value from profile
             totalPosts: 0,
@@ -449,12 +464,26 @@ const UserProfilePage = () => {
               <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
                 {/* Avatar section */}
                 <div className="relative">
-                  <Avatar className="h-32 w-32 border-4 border-white dark:border-gray-800 shadow-xl rounded-full">
-                    <AvatarImage src={userData.avatar_url} alt={userData.name} />
-                    <AvatarFallback className="text-4xl bg-primary/10 rounded-full">
+                  <div className="h-32 w-32 border-4 border-white dark:border-gray-800 shadow-xl rounded-full overflow-hidden">
+                    <img 
+                      src={userData.avatar_url} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLDivElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div 
+                      className="w-full h-full bg-primary/10 rounded-full text-4xl flex items-center justify-center"
+                      style={{ display: 'none' }}
+                    >
                       {userData.name ? userData.name.split(' ').map(n => n[0]).join('') : ''}
-                    </AvatarFallback>
-                  </Avatar>
+                    </div>
+                  </div>
                 </div>
                 
                 {/* User info section */}

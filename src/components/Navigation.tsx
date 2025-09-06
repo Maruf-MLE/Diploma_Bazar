@@ -15,6 +15,7 @@ const Navigation = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [userAvatarUrl, setUserAvatarUrl] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -71,6 +72,64 @@ const Navigation = () => {
     };
   }, []);
 
+  // Fetch user's correct avatar with proper priority logic
+  useEffect(() => {
+    if (user) {
+      fetchUserAvatar();
+    }
+  }, [user]);
+
+  const fetchUserAvatar = async () => {
+    if (!user) return;
+    
+    try {
+      // Get user's profile data from database
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching user profile for avatar:', error);
+        // Fallback to Google profile picture
+        const googleProfilePicture = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+        setUserAvatarUrl(googleProfilePicture || '');
+        return;
+      }
+      
+      // Use same priority logic as ProfilePage
+      const getAvatarUrl = () => {
+        // First priority: Check if there's a manually uploaded avatar
+        if (profile?.avatar_url && 
+            !profile.avatar_url.includes('googleusercontent.com') && 
+            !profile.avatar_url.includes('googleapis.com') &&
+            profile.avatar_url !== '/placeholder.svg') {
+          console.log('✅ Navigation: Using manually uploaded avatar:', profile.avatar_url);
+          return profile.avatar_url;
+        }
+        
+        // Second priority: Use Google profile picture if available
+        const googleProfilePicture = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+        if (googleProfilePicture) {
+          console.log('✅ Navigation: Using Google profile picture:', googleProfilePicture);
+          return googleProfilePicture;
+        }
+        
+        // Third priority: Empty string (will show User icon)
+        console.log('✅ Navigation: No avatar found, will show User icon');
+        return '';
+      };
+      
+      setUserAvatarUrl(getAvatarUrl());
+    } catch (error) {
+      console.error('Error in fetchUserAvatar:', error);
+      // Fallback to Google profile picture
+      const googleProfilePicture = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+      setUserAvatarUrl(googleProfilePicture || '');
+    }
+  };
+
   // Set up real-time updates for unread message count
   useEffect(() => {
     if (user) {
@@ -121,6 +180,27 @@ const Navigation = () => {
         .subscribe((status) => {
           console.log('Navigation message channel status:', status);
         });
+      
+      // Set up subscription for profile updates (especially avatar changes)
+      const profileChannel = supabase
+        .channel('profile-nav')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Profile updated in navigation:', payload);
+            // Re-fetch avatar when profile is updated
+            fetchUserAvatar();
+          }
+        )
+        .subscribe((status) => {
+          console.log('Navigation profile channel status:', status);
+        });
 
       // Set up interval to periodically refresh unread count
       const intervalId = setInterval(() => {
@@ -129,6 +209,7 @@ const Navigation = () => {
 
       return () => {
         supabase.removeChannel(messageChannel);
+        supabase.removeChannel(profileChannel);
         clearInterval(intervalId);
       };
     }
@@ -340,9 +421,9 @@ const Navigation = () => {
                             }}
                           >
                             <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
-                              {user.user_metadata && user.user_metadata.avatar_url ? (
+                              {userAvatarUrl ? (
                                 <img 
-                                  src={user.user_metadata.avatar_url} 
+                                  src={userAvatarUrl} 
                                   alt="Profile" 
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
@@ -351,7 +432,7 @@ const Navigation = () => {
                                   }}
                                 />
                               ) : null}
-                              {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
+                              {!userAvatarUrl && (
                                 <User className="h-6 w-6 text-gray-600" />
                               )}
                             </div>
@@ -434,12 +515,6 @@ const Navigation = () => {
                     </span>
                   )}
                 </Link>
-                
-                {user && (
-                  <Link to="/profile" className="px-1.5 py-1">
-                    <span className={`text-xs font-medium whitespace-nowrap ${isMobileActive('/profile')}`}>প্রোফাইল</span>
-                  </Link>
-                )}
               </div>
             </div>
 
@@ -456,9 +531,9 @@ const Navigation = () => {
                   <div className="p-0.5 mx-0.5 relative" onClick={toggleMenu}>
                     <div className="flex flex-col items-center">
                       <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm relative">
-                        {user.user_metadata && user.user_metadata.avatar_url ? (
+                        {userAvatarUrl ? (
                           <img 
-                            src={user.user_metadata.avatar_url} 
+                            src={userAvatarUrl} 
                             alt="Profile" 
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -467,7 +542,7 @@ const Navigation = () => {
                             }}
                           />
                         ) : null}
-                        {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
+                        {!userAvatarUrl && (
                           <User className="h-4 w-4 text-gray-600" />
                         )}
                         <ChevronDown className="h-6 w-6 text-gray-700 absolute bottom-[-2px] right-0 left-0 mx-auto stroke-[3px]" />
@@ -535,9 +610,9 @@ const Navigation = () => {
                   }}
                 >
                   <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm">
-                    {user.user_metadata && user.user_metadata.avatar_url ? (
+                    {userAvatarUrl ? (
                       <img 
-                        src={user.user_metadata.avatar_url} 
+                        src={userAvatarUrl} 
                         alt="Profile" 
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -546,7 +621,7 @@ const Navigation = () => {
                         }}
                       />
                     ) : null}
-                    {(!user.user_metadata?.avatar_url || user.user_metadata?.avatar_url === '') && (
+                    {!userAvatarUrl && (
                       <User className="h-6 w-6 text-gray-600" />
                     )}
                   </div>

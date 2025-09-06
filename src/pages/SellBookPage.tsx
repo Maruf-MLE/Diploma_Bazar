@@ -452,7 +452,7 @@ const SellBookPage: React.FC = () => {
               onClick={() => setIsVideoDialogOpen(true)}
             >
               <Play className="h-4 w-4 mr-2" />
-              কিভাবে বই বিক্রয় করবেন দেখুন এই ভিডিও তে
+              বই বিক্রয়ের ভিডিও দেখুন
             </Button>
           </div>
 
@@ -565,7 +565,7 @@ const SellBookPage: React.FC = () => {
 
                   <div className="grid grid-cols-1 gap-3 md:gap-6">
                     <div className="space-y-1.5">
-                      <Label htmlFor="semester" className="text-sm font-medium text-gray-700">সেমিস্টার</Label>
+                      <Label htmlFor="semester" className="text-sm font-medium text-gray-700">সেমিস্টার  (বইটি যে সেমিস্টার)</Label>
                       <Select value={semester} onValueChange={setSemester}>
                         <SelectTrigger className="border-gray-300 focus:border-primary focus:ring-primary h-9 md:h-10">
                           <SelectValue placeholder="সেমিস্টার নির্বাচন করুন" />

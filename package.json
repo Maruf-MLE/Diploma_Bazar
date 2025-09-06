@@ -62,6 +62,7 @@
     "disable:phone-verification": "node disable_phone_verification.cjs",
     "test:notifications": "node test-notification-fix.js",
     "fix:notifications-complete": "node complete-notification-fix.js",
+    "update:google-avatars": "node update_profile_with_google_avatar.js",
     "clear:toast-data": "node clear-toast-data.js"
   },
   "dependencies": {

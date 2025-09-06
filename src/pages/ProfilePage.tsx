@@ -109,6 +109,31 @@ const ProfilePage = () => {
           if (profileError) throw profileError;
           
           if (profile) {
+            // Get Google profile picture from user metadata if available
+            const googleProfilePicture = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+            
+            // Determine the correct avatar URL with proper priority
+            const getAvatarUrl = () => {
+              // First priority: Check if there's a manually uploaded avatar
+              if (profile.avatar_url && 
+                  !profile.avatar_url.includes('googleusercontent.com') && 
+                  !profile.avatar_url.includes('googleapis.com') &&
+                  profile.avatar_url !== '/placeholder.svg') {
+                console.log('✅ Using manually uploaded avatar:', profile.avatar_url);
+                return profile.avatar_url;
+              }
+              
+              // Second priority: Use Google profile picture if available
+              if (googleProfilePicture) {
+                console.log('✅ Using Google profile picture:', googleProfilePicture);
+                return googleProfilePicture;
+              }
+              
+              // Third priority: Use placeholder
+              console.log('✅ Using placeholder avatar');
+              return '/placeholder.svg';
+            };
+            
             const userData = {
               id: user.id,
               name: profile.name || '',
@@ -116,7 +141,7 @@ const ProfilePage = () => {
               department: profile.department || '',
               semester: profile.semester || '',
               roll_number: profile.roll_number || '',
-              avatar_url: profile.avatar_url || '/placeholder.svg',
+              avatar_url: getAvatarUrl(),
               email: user.email || '',
               isVerified: false, // Will be updated by fetchVerificationStatus
               rating: profile.avg_rating || 0, // Use rating from profile
@@ -140,6 +165,9 @@ const ProfilePage = () => {
             
             // Fetch user's reviews
             fetchReviews(user.id);
+            
+            // Sync Google profile picture if needed
+            syncGoogleProfilePicture(user, profile);
             
             // Fetch verification status
             fetchVerificationStatus(user.id);
@@ -184,6 +212,53 @@ const ProfilePage = () => {
     
     fetchUserProfile();
   }, [toast]);
+
+  // Sync Google profile picture only if no manual picture is set
+  const syncGoogleProfilePicture = async (user: any, profile: any) => {
+    try {
+      // Get Google profile picture from user metadata
+      const googleProfilePicture = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+      
+      // Check if current avatar is manually uploaded (using same logic as above)
+      const isManuallyUploaded = profile.avatar_url && 
+        !profile.avatar_url.includes('googleusercontent.com') && 
+        !profile.avatar_url.includes('googleapis.com') &&
+        profile.avatar_url !== '/placeholder.svg';
+      
+      // Only update with Google profile picture if no manual picture exists and Google avatar is available
+      // and the current avatar is not already the same Google profile picture
+      if (googleProfilePicture && 
+          !isManuallyUploaded && 
+          profile.avatar_url !== googleProfilePicture) {
+        console.log('🔄 Syncing Google profile picture:', googleProfilePicture);
+        
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ avatar_url: googleProfilePicture })
+          .eq('id', user.id);
+
+        if (updateError) {
+          console.error('❌ Error syncing Google profile picture:', updateError);
+        } else {
+          console.log('✅ Google profile picture synced successfully');
+          
+          // Update local state only if not manually uploaded
+          setUserData(prevData => ({
+            ...prevData,
+            avatar_url: googleProfilePicture
+          }));
+        }
+      } else if (isManuallyUploaded) {
+        console.log('✅ Manual profile picture detected, preserving it:', profile.avatar_url);
+      } else if (googleProfilePicture === profile.avatar_url) {
+        console.log('✅ Google profile picture already synced');
+      } else {
+        console.log('ℹ️ No Google profile picture available to sync');
+      }
+    } catch (error) {
+      console.error('❌ Error in syncGoogleProfilePicture:', error);
+    }
+  };
 
   // Fetch verification status using RLS-safe function
   const fetchVerificationStatus = async (userId: string) => {
@@ -549,12 +624,26 @@ const ProfilePage = () => {
               <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
                 {/* Avatar section with improved upload button */}
                 <div className="relative mx-auto">
-                  <Avatar className="h-28 w-28 sm:h-32 sm:w-32 border-4 border-gray-300 shadow-lg rounded-full">
-                    <AvatarImage src={userData.avatar_url} alt={userData.name} />
-                    <AvatarFallback className="text-2xl sm:text-3xl bg-blue-100 text-blue-700 rounded-full font-semibold">
+                  <div className="h-28 w-28 sm:h-32 sm:w-32 border-4 border-gray-300 shadow-lg rounded-full overflow-hidden">
+                    <img 
+                      src={userData.avatar_url} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLDivElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div 
+                      className="w-full h-full bg-blue-100 text-blue-700 rounded-full font-semibold text-2xl sm:text-3xl flex items-center justify-center"
+                      style={{ display: 'none' }}
+                    >
                       {userData.name ? userData.name.split(' ').map(n => n[0]).join('') : ''}
-                    </AvatarFallback>
-                  </Avatar>
+                    </div>
+                  </div>
                   <Button
                     variant="default"
                     size="icon"
@@ -661,47 +750,7 @@ const ProfilePage = () => {
           />
         </div>
 
-        {/* Stats Section - Redesigned */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="group relative overflow-hidden bg-white/60 backdrop-blur-sm p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 border border-slate-100">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-full -translate-y-4 translate-x-4 opacity-30"></div>
-            <div className="relative flex items-center">
-              <div className="p-3 bg-blue-100 rounded-2xl mr-4">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-slate-600 mb-1">পোস্ট করা বই</div>
-                <div className="text-3xl font-bold text-slate-800">{userData.totalPosts}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="group relative overflow-hidden bg-white/60 backdrop-blur-sm p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 border border-slate-100">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-full -translate-y-4 translate-x-4 opacity-30"></div>
-            <div className="relative flex items-center">
-              <div className="p-3 bg-emerald-100 rounded-2xl mr-4">
-                <ShoppingCart className="h-6 w-6 text-emerald-600" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-slate-600 mb-1">কেনাকাটা</div>
-                <div className="text-3xl font-bold text-slate-800">{userData.totalPurchases}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="group relative overflow-hidden bg-white/60 backdrop-blur-sm p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 border border-slate-100">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-full -translate-y-4 translate-x-4 opacity-30"></div>
-            <div className="relative flex items-center">
-              <div className="p-3 bg-purple-100 rounded-2xl mr-4">
-                <MessageCircle className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-slate-600 mb-1">মেসেজ</div>
-                <div className="text-3xl font-bold text-slate-800">{userData.totalMessages}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+       
 
         {/* Main Content */}
         <div className="bg-[#EEF4FF] backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border-0 p-4 sm:p-6 md:p-8">
