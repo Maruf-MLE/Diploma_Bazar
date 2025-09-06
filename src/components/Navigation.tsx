@@ -476,18 +476,15 @@ const Navigation = () => {
                 </>
               )}
               
-              {/* Login/Register buttons for logged out users - All pages */}
+              {/* Login button for logged out users - All pages */}
               {!user && (
-                <div className="flex items-center space-x-1">
-                  <Link to="/login" className="px-1">
-                    <span className={`text-sm font-medium whitespace-nowrap ${isMobileActive('/login')}`}>লগ ইন</span>
-                  </Link>
-                  <Link to="/register">
+                <div className="flex items-center">
+                  <Link to="/login">
                     <Button
                       size="sm"
                       className="primary-button text-xs px-2.5 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
                     >
-                      রেজিস্টার
+                      লগইন করুন
                     </Button>
                   </Link>
                 </div>
@@ -620,17 +617,9 @@ const Navigation = () => {
                   <Link 
                     to="/login"
                     onClick={toggleMenu}
-                    className="flex w-full items-center justify-center p-3 rounded-lg bg-white hover:bg-primary/10 hover:text-primary border border-gray-200 transition-colors duration-200"
-                  >
-                    <span className="font-medium">লগ ইন</span>
-                  </Link>
-                  
-                  <Link 
-                    to="/register"
-                    onClick={toggleMenu}
                     className="flex w-full items-center justify-center p-3 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
                   >
-                    <span className="font-medium">রেজিস্টার করুন</span>
+                    <span className="font-medium">লগইন করুন</span>
                   </Link>
                 </div>
               )}
