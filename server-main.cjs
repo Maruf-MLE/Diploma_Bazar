@@ -6,14 +6,40 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
 
+// Import rate limiting middleware
+const { authenticate, extractRequestIdentifier, requireAdmin, debugMiddleware } = require('./src/middleware/authMiddleware.cjs');
+const { rateLimitMiddleware, rateLimitStatus, clearRateLimitCache } = require('./src/middleware/rateLimitMiddleware.cjs');
+const { debugMiddleware: debugRateLimit } = require('./debug-middleware.cjs');
+const { RATE_LIMIT_CONFIG } = require('./src/config/rateLimitConfig.cjs');
+
 // Initialize Express app
 const app = express();
+
+// Trust proxy for accurate IP extraction
+app.set('trust proxy', true);
+
+// CORS middleware
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
-app.use(express.json());
+
+// Parse JSON and URL-encoded data
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Debug middleware (development only)
+app.use(debugMiddleware);
+
+// Authentication and security middleware
+app.use(authenticate);
+
+// Extract request identifier for rate limiting
+app.use(extractRequestIdentifier);
+
+// Apply rate limiting (FIXED VERSION)
+app.use(rateLimitMiddleware);
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -336,6 +362,23 @@ io.on('connection', (socket) => {
 
 // API Routes
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'Diploma Bazar API Server',
+    version: '1.0.0',
+    status: 'running',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/health',
+      rateLimit: '/api/rate-limit/status',
+      test: '/api/test',
+      admin: '/api/admin/*'
+    },
+    documentation: 'Visit /health for server status'
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).send({ 
@@ -345,6 +388,281 @@ app.get('/health', (req, res) => {
     clientUrl: process.env.CLIENT_URL || 'not set',
     connectedUsers: Object.keys(users).length
   });
+});
+
+// Test endpoint for rate limiting (not in skip list)
+app.get('/api/test', (req, res) => {
+  res.status(200).json({ 
+    message: 'Rate limiting test endpoint',
+    timestamp: new Date().toISOString(),
+    ip: req.clientIP,
+    identifier: req.requestIdentifier,
+    type: req.identifierType
+  });
+});
+
+// Rate Limiting API Endpoints
+
+// Get rate limit status for current identifier
+app.get('/api/rate-limit/status', rateLimitStatus);
+
+// Admin endpoints for rate limiting management
+app.get('/api/admin/rate-limit/statistics', requireAdmin, async (req, res) => {
+  try {
+    const hoursBack = parseInt(req.query.hours) || 24;
+    const { data, error } = await supabase.rpc('get_rate_limit_statistics', {
+      p_hours_back: hoursBack
+    });
+    
+    if (error) {
+      console.error('Error getting rate limit statistics:', error);
+      return res.status(500).json({
+        error: 'Failed to get statistics',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Rate limit statistics error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Block an identifier (admin only)
+app.post('/api/admin/rate-limit/block', requireAdmin, async (req, res) => {
+  try {
+    const { identifier, identifierType, reason, durationMinutes, isPermanent } = req.body;
+    
+    if (!identifier || !identifierType) {
+      return res.status(400).json({
+        error: 'Identifier and identifier type are required',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    const { data, error } = await supabase.rpc('block_identifier', {
+      p_identifier: identifier,
+      p_identifier_type: identifierType,
+      p_reason: reason || 'Manually blocked by admin',
+      p_duration_minutes: durationMinutes || 60,
+      p_is_permanent: isPermanent || false,
+      p_created_by: req.userId
+    });
+    
+    if (error) {
+      return res.status(500).json({
+        error: 'Failed to block identifier',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json({
+      message: `Successfully blocked ${identifierType.toLowerCase()}: ${identifier}`,
+      blocked: data,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Block identifier error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Unblock an identifier (admin only)
+app.delete('/api/admin/rate-limit/block', requireAdmin, async (req, res) => {
+  try {
+    const { identifier, identifierType } = req.body;
+    
+    if (!identifier || !identifierType) {
+      return res.status(400).json({
+        error: 'Identifier and identifier type are required',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    const { data, error } = await supabase.rpc('unblock_identifier', {
+      p_identifier: identifier,
+      p_identifier_type: identifierType
+    });
+    
+    if (error) {
+      return res.status(500).json({
+        error: 'Failed to unblock identifier',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json({
+      message: `Successfully unblocked ${identifierType.toLowerCase()}: ${identifier}`,
+      unblocked: data,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Unblock identifier error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Get violation statistics for an identifier
+app.get('/api/admin/rate-limit/violations/:identifierType/:identifier', requireAdmin, async (req, res) => {
+  try {
+    const { identifier, identifierType } = req.params;
+    const hoursBack = parseInt(req.query.hours) || 24;
+    
+    const { data, error } = await supabase.rpc('get_violation_stats', {
+      p_identifier: identifier,
+      p_identifier_type: identifierType,
+      p_hours_back: hoursBack
+    });
+    
+    if (error) {
+      return res.status(500).json({
+        error: 'Failed to get violation statistics',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Get violations error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Clear rate limit cache (admin only)
+app.post('/api/admin/rate-limit/cache/clear', requireAdmin, clearRateLimitCache);
+
+// Reset request counts for an identifier (admin only)
+app.post('/api/admin/rate-limit/reset', requireAdmin, async (req, res) => {
+  try {
+    const { identifier, identifierType, endpoint } = req.body;
+    
+    if (!identifier || !identifierType) {
+      return res.status(400).json({
+        error: 'Identifier and identifier type are required',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    const { data, error } = await supabase.rpc('reset_request_counts', {
+      p_identifier: identifier,
+      p_identifier_type: identifierType,
+      p_endpoint: endpoint || '*'
+    });
+    
+    if (error) {
+      return res.status(500).json({
+        error: 'Failed to reset request counts',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json({
+      message: `Successfully reset request counts for ${identifierType.toLowerCase()}: ${identifier}`,
+      reset: data,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Reset counts error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Update rate limit configuration (admin only)
+app.put('/api/admin/rate-limit/config', requireAdmin, async (req, res) => {
+  try {
+    const { endpoint, method, requestsPerMinute, requestsPerHour, requestsPerDay, isActive } = req.body;
+    
+    if (!endpoint || !method) {
+      return res.status(400).json({
+        error: 'Endpoint and method are required',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    const { data, error } = await supabase.rpc('update_rate_limit_config', {
+      p_endpoint: endpoint,
+      p_method: method,
+      p_requests_per_minute: requestsPerMinute,
+      p_requests_per_hour: requestsPerHour,
+      p_requests_per_day: requestsPerDay,
+      p_is_active: isActive
+    });
+    
+    if (error) {
+      return res.status(500).json({
+        error: 'Failed to update rate limit configuration',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json({
+      message: `Successfully updated rate limit configuration for ${method} ${endpoint}`,
+      updated: data,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Update config error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Perform rate limit maintenance (admin only)
+app.post('/api/admin/rate-limit/maintenance', requireAdmin, async (req, res) => {
+  try {
+    const { data, error } = await supabase.rpc('rate_limit_maintenance');
+    
+    if (error) {
+      return res.status(500).json({
+        error: 'Failed to perform maintenance',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.json({
+      message: 'Rate limit maintenance completed successfully',
+      results: data,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Maintenance error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Generate JWT token for authentication

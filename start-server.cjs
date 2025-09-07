@@ -19,5 +19,4 @@ console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
 console.log('JWT_SECRET is set:', !!process.env.JWT_SECRET);
 
 // Run the server
-require('./server.cjs'); 
-require('./server.js'); 
+require('./server-main.cjs');

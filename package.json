@@ -63,7 +63,8 @@
     "test:notifications": "node test-notification-fix.js",
     "fix:notifications-complete": "node complete-notification-fix.js",
     "update:google-avatars": "node update_profile_with_google_avatar.js",
-    "clear:toast-data": "node clear-toast-data.js"
+    "clear:toast-data": "node clear-toast-data.js",
+    "setup:rate-limiting": "node setup_rate_limiting.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
