@@ -1,7 +1,14 @@
 const { createClient } = require('@supabase/supabase-js')
+require('dotenv').config()
 
-const supabaseUrl = 'https://yryerjgidsyfiohmpeoc.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeWVyamdpZHN5ZmlvaG1wZW9jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk2MDU1MiwiZXhwIjoyMDY2NTM2NTUynQ.K-0vKJfwXyZmfYFLK4k2u-7KO4qbhwIQgc0LNm8rZe4'
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing Supabase credentials in environment variables')
+  console.error('Please set SUPABASE_URL and SUPABASE_SERVICE_KEY in your .env file')
+  process.exit(1)
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 

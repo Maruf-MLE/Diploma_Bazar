@@ -13,16 +13,21 @@ const {
 } = require('../config/rateLimitConfig.cjs');
 
 // Initialize Supabase client with service key for admin operations
-const supabaseUrl = process.env.SUPABASE_URL || 'https://yryerjgidsyfiohmpeoc.supabase.co';
+const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeWVyamdpZHN5ZmlvaG1wZW9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NjA1NTIsImV4cCI6MjA2NjUzNjU1Mn0.S2ki-0QyFabstnVnTh9qFiHoz7sqBZgkfPThn77wTno';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 // Use service key if available, fallback to anon key
 const supabaseKey = supabaseServiceKey || supabaseAnonKey;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // JWT secret
-const JWT_SECRET = process.env.JWT_SECRET || 'your-default-jwt-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error('❌ CRITICAL: Missing JWT_SECRET in environment variables');
+  process.exit(1);
+}
 
 // Valid API keys (in production, these should be stored in database)
 const VALID_API_KEYS = new Set([

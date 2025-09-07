@@ -38,8 +38,15 @@ const io = new Server(server, {
 });
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || 'https://yryerjgidsyfiohmpeoc.supabase.co';
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeWVyamdpZHN5ZmlvaG1wZW9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NjA1NTIsImV4cCI6MjA2NjUzNjU1Mn0.S2ki-0QyFabstnVnTh9qFiHoz7sqBZgkfPThn77wTno';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ CRITICAL: Missing Supabase credentials');
+  console.error('Please set SUPABASE_URL and SUPABASE_SERVICE_KEY in environment variables');
+  process.exit(1);
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Store active users and their socket IDs
@@ -47,7 +54,13 @@ const users = {};
 const callSessions = {};
 
 // JWT secret key
-const JWT_SECRET = process.env.JWT_SECRET || 'your-default-jwt-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error('❌ CRITICAL: Missing JWT_SECRET in environment variables');
+  console.error('Please set JWT_SECRET in your .env file or environment variables');
+  process.exit(1);
+}
 
 // Middleware to verify JWT token
 function authenticateToken(socket, next) {

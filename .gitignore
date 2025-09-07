@@ -7,21 +7,70 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+.npm/
+.yarn/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
 *.local
+
+# 🔒 SECURITY: Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.p8
+*.pfx
+secrets.json
+config/secrets.js
+keys.json
+
+# 🔒 SECURITY: Sensitive files that might contain credentials
+.env.production
+.env.local
+.env.development
+.env.test
+.env.staging
+
+# 🔒 SECURITY: Database and API keys
+supabase_keys.txt
+api_keys.txt
+auth_tokens.txt
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.env
-node_modules
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Deployment
+.vercel/
+.netlify/
+.firebase/
 
