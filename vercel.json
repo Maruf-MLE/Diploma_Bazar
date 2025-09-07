@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/server-main.js": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
       "source": "/sitemap.xml",
@@ -7,6 +12,14 @@
     {
       "source": "/robots.txt",
       "destination": "/robots.txt"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/server-main.js"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/server-main.js"
     },
     {
       "source": "/(.*)",
