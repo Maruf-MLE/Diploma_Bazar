@@ -11,6 +11,7 @@ const { authenticate, extractRequestIdentifier, requireAdmin, debugMiddleware } 
 const { rateLimitMiddleware, rateLimitStatus, clearRateLimitCache } = require('./src/middleware/rateLimitMiddleware.cjs');
 const { debugMiddleware: debugRateLimit } = require('./debug-middleware.cjs');
 const { RATE_LIMIT_CONFIG } = require('./src/config/rateLimitConfig.cjs');
+const { setupApiEndpoints } = require('./api-endpoints.cjs');
 
 // Initialize Express app
 const app = express();
@@ -40,6 +41,9 @@ app.use(extractRequestIdentifier);
 
 // Apply rate limiting (FIXED VERSION)
 app.use(rateLimitMiddleware);
+
+// Setup API endpoints for testing
+setupApiEndpoints(app, { rateLimitMiddleware });
 
 // Create HTTP server
 const server = http.createServer(app);

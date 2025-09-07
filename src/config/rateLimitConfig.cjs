@@ -2,64 +2,64 @@
 // This file contains all rate limiting and API security settings
 
 const RATE_LIMIT_CONFIG = {
-  // Default rate limits (requests per minute) - VERY LOW FOR TESTING
+  // Default rate limits (requests per minute) - Production settings
   DEFAULT_LIMITS: {
-    REQUESTS_PER_MINUTE: 5,  // Very low for easy testing
-    REQUESTS_PER_HOUR: 100,
-    REQUESTS_PER_DAY: 1000
+    REQUESTS_PER_MINUTE: 50,  // 50 requests per minute for general API usage
+    REQUESTS_PER_HOUR: 2000,  // 2000 requests per hour
+    REQUESTS_PER_DAY: 10000   // 10000 requests per day
   },
 
   // Endpoint-specific rate limits
   ENDPOINT_LIMITS: {
     // Authentication endpoints (more restrictive)
     '/api/auth/login': {
-      requests_per_minute: 10,
-      requests_per_hour: 100,
-      requests_per_day: 500
+      requests_per_minute: 20,
+      requests_per_hour: 300,
+      requests_per_day: 1000
     },
     '/api/auth/register': {
-      requests_per_minute: 5,
-      requests_per_hour: 50,
-      requests_per_day: 100
-    },
-    '/api/auth/reset-password': {
-      requests_per_minute: 3,
-      requests_per_hour: 20,
-      requests_per_day: 50
-    },
-    '/api/auth/verify-otp': {
       requests_per_minute: 10,
       requests_per_hour: 100,
-      requests_per_day: 200
+      requests_per_day: 300
+    },
+    '/api/auth/reset-password': {
+      requests_per_minute: 5,
+      requests_per_hour: 30,
+      requests_per_day: 100
+    },
+    '/api/auth/verify-otp': {
+      requests_per_minute: 15,
+      requests_per_hour: 200,
+      requests_per_day: 500
     },
 
     // API endpoints
     '/api/books': {
+      requests_per_minute: 100,
+      requests_per_hour: 3000,
+      requests_per_day: 15000
+    },
+    '/api/messages': {
+      requests_per_minute: 80,
+      requests_per_hour: 2000,
+      requests_per_day: 8000
+    },
+    '/api/upload': {
+      requests_per_minute: 20,
+      requests_per_hour: 300,
+      requests_per_day: 1000
+    },
+    '/api/notifications': {
+      requests_per_minute: 60,
+      requests_per_hour: 1000,
+      requests_per_day: 5000
+    },
+
+    // Admin endpoints (moderately restrictive)
+    '/api/admin': {
       requests_per_minute: 30,
       requests_per_hour: 500,
       requests_per_day: 2000
-    },
-    '/api/messages': {
-      requests_per_minute: 40,
-      requests_per_hour: 800,
-      requests_per_day: 3000
-    },
-    '/api/upload': {
-      requests_per_minute: 10,
-      requests_per_hour: 100,
-      requests_per_day: 200
-    },
-    '/api/notifications': {
-      requests_per_minute: 20,
-      requests_per_hour: 200,
-      requests_per_day: 1000
-    },
-
-    // Admin endpoints (very restrictive)
-    '/api/admin': {
-      requests_per_minute: 20,
-      requests_per_hour: 200,
-      requests_per_day: 500
     }
   },
 
