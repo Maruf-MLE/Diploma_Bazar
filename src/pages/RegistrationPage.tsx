@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Eye, EyeOff, Play } from "lucide-react"
+import { Eye, EyeOff, Play, AlertCircle } from "lucide-react"
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
@@ -28,20 +28,122 @@ export default function RegistrationPage() {
   })
   const [loading, setLoading] = useState(false)
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false)
+  const [errors, setErrors] = useState({
+    name: "",
+    rollNumber: "",
+    semester: "",
+    department: "",
+    instituteName: "",
+  })
+  const [touched, setTouched] = useState({
+    name: false,
+    rollNumber: false,
+    semester: false,
+    department: false,
+    instituteName: false,
+  })
   const navigate = useNavigate()
   const { toast } = useToast()
   const { user } = useAuth()
 
+  // Validation functions
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case 'name':
+        if (!value.trim()) return 'পূর্ণ নাম প্রয়োজন'
+        if (value.trim().length < 2) return 'নাম কমপক্ষে ২ অক্ষর হতে হবে'
+        if (!/^[\u0980-\u09FF\s]+$/.test(value.trim()) && !/^[a-zA-Z\s]+$/.test(value.trim())) {
+          return 'শুধুমাত্র বাংলা বা ইংরেজি অক্ষর ব্যবহার করুন'
+        }
+        return ''
+      case 'rollNumber':
+        if (!value.trim()) return 'রোল নম্বর প্রয়োজন'
+        if (!/^\d+$/.test(value.trim())) return 'রোল নম্বর শুধুমাত্র সংখ্যা হতে পারে'
+        if (value.trim().length < 3 || value.trim().length > 10) return 'রোল নম্বর ৩-১০ সংখ্যার মধ্যে হতে হবে'
+        return ''
+      case 'semester':
+        if (!value) return 'সেমিস্টার নির্বাচন করুন'
+        return ''
+      case 'department':
+        if (!value) return 'বিভাগ নির্বাচন করুন'
+        return ''
+      case 'instituteName':
+        if (!value) return 'প্রতিষ্ঠানের নাম নির্বাচন করুন'
+        return ''
+      default:
+        return ''
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors = {
+      name: validateField('name', formData.name),
+      rollNumber: validateField('rollNumber', formData.rollNumber),
+      semester: validateField('semester', formData.semester),
+      department: validateField('department', formData.department),
+      instituteName: validateField('instituteName', formData.instituteName),
+    }
+    setErrors(newErrors)
+    return !Object.values(newErrors).some(error => error !== '')
+  }
+
+  const isFormValid = () => {
+    return formData.name.trim() && 
+           formData.rollNumber.trim() && 
+           formData.semester && 
+           formData.department && 
+           formData.instituteName &&
+           !Object.values(errors).some(error => error !== '')
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    setFormData({ ...formData, [name]: value })
+    
+    // Clear error when user starts typing
+    if (touched[name as keyof typeof touched]) {
+      const error = validateField(name, value)
+      setErrors({ ...errors, [name]: error })
+    }
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setTouched({ ...touched, [name]: true })
+    const error = validateField(name, value)
+    setErrors({ ...errors, [name]: error })
   }
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value })
+    setTouched({ ...touched, [name]: true })
+    
+    const error = validateField(name, value)
+    setErrors({ ...errors, [name]: error })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Mark all fields as touched to show validation errors
+    setTouched({
+      name: true,
+      rollNumber: true,
+      semester: true,
+      department: true,
+      instituteName: true,
+    })
+    
+    // Validate form
+    if (!validateForm()) {
+      toast({
+        title: "ত্রুটি",
+        description: "সব তথ্য সঠিকভাবে পূরণ করুন।",
+        variant: "destructive",
+      })
+      return
+    }
+    
     setLoading(true)
 
     // Check if user is authenticated via Google
@@ -251,7 +353,9 @@ export default function RegistrationPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="name">পূর্ণ নাম</Label>
+              <Label htmlFor="name" className="flex items-center gap-1">
+                পূর্ণ নাম <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="name"
                 name="name"
@@ -259,30 +363,55 @@ export default function RegistrationPage() {
                 placeholder="আপনার পূর্ণ নাম"
                 value={formData.name}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 required
-                className="focus:ring-2 focus:ring-blue-500"
+                className={`focus:ring-2 focus:ring-blue-500 ${
+                  errors.name && touched.name ? 'border-red-500 focus:border-red-500' : ''
+                }`}
               />
+              {errors.name && touched.name && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.name}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="rollNumber">রোল নম্বর</Label>
+              <Label htmlFor="rollNumber" className="flex items-center gap-1">
+                রোল নম্বর <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="rollNumber"
                 name="rollNumber"
                 type="text"
-                placeholder="আপনার রোল নম্বর"
+                placeholder="আপনার রোল নম্বর (শুধুমাত্র সংখ্যা)"
                 value={formData.rollNumber}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 required
-                className="focus:ring-2 focus:ring-blue-500"
+                className={`focus:ring-2 focus:ring-blue-500 ${
+                  errors.rollNumber && touched.rollNumber ? 'border-red-500 focus:border-red-500' : ''
+                }`}
               />
+              {errors.rollNumber && touched.rollNumber && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.rollNumber}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="semester">সেমিস্টার</Label>
+              <Label htmlFor="semester" className="flex items-center gap-1">
+                সেমিস্টার <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={formData.semester}
                 onValueChange={(value) => handleSelectChange("semester", value)}
+                required
               >
-                <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500">
+                <SelectTrigger className={`w-full focus:ring-2 focus:ring-blue-500 ${
+                  errors.semester && touched.semester ? 'border-red-500' : ''
+                }`}>
                   <SelectValue placeholder="সেমিস্টার নির্বাচন করুন" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px] overflow-y-auto">
@@ -295,14 +424,25 @@ export default function RegistrationPage() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              {errors.semester && touched.semester && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.semester}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="department">বিভাগ</Label>
+              <Label htmlFor="department" className="flex items-center gap-1">
+                বিভাগ <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={formData.department}
                 onValueChange={(value) => handleSelectChange("department", value)}
+                required
               >
-                <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500">
+                <SelectTrigger className={`w-full focus:ring-2 focus:ring-blue-500 ${
+                  errors.department && touched.department ? 'border-red-500' : ''
+                }`}>
                   <SelectValue placeholder="বিভাগ নির্বাচন করুন" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px] overflow-y-auto">
@@ -315,14 +455,25 @@ export default function RegistrationPage() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              {errors.department && touched.department && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.department}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="instituteName">প্রতিষ্ঠানের নাম</Label>
+              <Label htmlFor="instituteName" className="flex items-center gap-1">
+                প্রতিষ্ঠানের নাম <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={formData.instituteName}
                 onValueChange={(value) => handleSelectChange("instituteName", value)}
+                required
               >
-                <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500">
+                <SelectTrigger className={`w-full focus:ring-2 focus:ring-blue-500 ${
+                  errors.instituteName && touched.instituteName ? 'border-red-500' : ''
+                }`}>
                   <SelectValue placeholder="প্রতিষ্ঠানের নাম নির্বাচন করুন" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px] overflow-y-auto">
@@ -335,16 +486,38 @@ export default function RegistrationPage() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              {errors.instituteName && touched.instituteName && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.instituteName}
+                </p>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md" 
-              disabled={loading}
-            >
-              {loading ? "প্রক্রিয়াকরণ হচ্ছে..." : "প্রোফাইল সম্পূর্ণ করুন"}
-            </Button>
+            <div className="space-y-3">
+              {/* Progress indicator */}
+              {!isFormValid() && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-sm text-amber-800 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    সব তথ্য পূরণ করুন। প্রয়োজনীয় ক্ষেত্রগুলো <span className="text-red-500">*</span> চিহ্ন দিয়ে চিহ্নিত।
+                  </p>
+                </div>
+              )}
+              
+              <Button 
+                type="submit" 
+                className={`w-full shadow-md transition-all duration-200 ${
+                  isFormValid() && !loading 
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                disabled={loading || !isFormValid()}
+              >
+                {loading ? "প্রক্রিয়াকরণ হচ্ছে..." : isFormValid() ? "প্রোফাইল সম্পূর্ণ করুন" : "সব তথ্য পূরণ করুন"}
+              </Button>
+            </div>
             <div className="text-sm text-center text-gray-600 space-y-2">
               <p>
                 ইতিমধ্যে অ্যাকাউন্ট আছে?{" "}
