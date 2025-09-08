@@ -167,7 +167,7 @@ module.exports = async (req, res) => {
       let supabaseTest = { connected: false, error: 'Not tested' };
       if (supabase) {
         try {
-          const { data, error } = await supabase.from('rate_limit_requests').select('count').limit(1);
+          const { data, error } = await supabase.from('rate_limit_tracker').select('count').limit(1);
           supabaseTest = {
             connected: !error,
             error: error?.message || null,
