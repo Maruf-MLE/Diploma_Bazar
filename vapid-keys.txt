@@ -1,0 +1,5 @@
+
+# VAPID Keys for Push Notifications
+VITE_VAPID_PUBLIC_KEY=BJ7nEIA6EYiLR8YPuw55iqFKEuB4iqb5dOz0u_ZF9qniYultfc3pcJUmqU3JLnfeglF63KWvaGxphuS1T2cY9P0
+VAPID_PRIVATE_KEY=FmIXvyIz_qg_PgOh2FVetgv2hrJvi62t--Tt4KPSKS8
+VAPID_SUBJECT=mailto:your-email@example.com

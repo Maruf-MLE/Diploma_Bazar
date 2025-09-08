@@ -15,9 +15,13 @@ const corsOptions = {
     'http://localhost:3000',  // Alternative dev server
     'http://localhost:8080',  // Production dev server
     // Add your production domains here
-    'https://your-production-domain.com',
-    'https://your-site.netlify.app',
-    'https://your-site.vercel.app'
+    
+    // Add your actual deployed domain
+    'https://diplomabazar.vercel.app/',
+    
+    // Allow any subdomain for flexibility
+    /^https:\/\/.*\.vercel\.app$/,
+    /^https:\/\/.*\.netlify\.app$/
   ],
   credentials: true,
   optionsSuccessStatus: 200
@@ -28,7 +32,7 @@ app.use(bodyParser.json());
 
 // Configure VAPID keys
 webpush.setVapidDetails(
-  'mailto:admin@example.com',
+  process.env.VAPID_SUBJECT || 'mailto:admin@diplomabazar.com',
   process.env.VITE_VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 );
