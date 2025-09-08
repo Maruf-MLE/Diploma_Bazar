@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/server-vercel.js": {
+    "api/server-main.js": {
       "maxDuration": 30
     }
   },
@@ -15,11 +15,11 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/server-vercel.js"
+      "destination": "/api/server-main.js"
     },
     {
       "source": "/health",
-      "destination": "/api/server-vercel.js"
+      "destination": "/api/server-main.js"
     },
     {
       "source": "/(.*)",
