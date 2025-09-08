@@ -1549,7 +1549,7 @@ export const countUnreadMessages = async (userId: string) => {
       .from('messages')
       .select('id, status')
       .eq('receiver_id', userId)
-      .not('status', 'eq', 'read');
+      .or('status.neq.read,status.is.null');
 
     if (error) {
       console.error('Error counting unread messages:', error);
@@ -1585,13 +1585,13 @@ export const directMarkMessagesAsRead = async (receiverId: string, senderId: str
 
     console.log(`Directly marking messages as read: receiver=${receiverId}, sender=${senderId}`);
 
-    // First check if there are any unread messages
+    // First check if there are any unread messages (including null status)
     const { data, error: checkError } = await supabase
       .from('messages')
-      .select('id')
+      .select('id, status')
       .eq('receiver_id', receiverId)
       .eq('sender_id', senderId)
-      .not('status', 'eq', 'read');
+      .or('status.neq.read,status.is.null');
     
     if (checkError) {
       console.error('Error checking unread messages:', checkError);
@@ -1600,16 +1600,17 @@ export const directMarkMessagesAsRead = async (receiverId: string, senderId: str
     
     if (!data || data.length === 0) {
       console.log('No unread messages to mark as read');
-      return { success: true, error: null };
+      return { success: true, count: 0, error: null };
     }
     
     console.log(`Found ${data.length} unread messages to mark as read`);
+    console.log('Messages to update:', data.map(m => ({ id: m.id.substring(0, 8), status: m.status })));
     
     // Update messages directly
     const messageIds = data.map(m => m.id);
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from('messages')
-      .update({ status: 'read' })
+      .update({ status: 'read', updated_at: new Date().toISOString() })
       .in('id', messageIds);
     
     if (error) {
@@ -1617,13 +1618,36 @@ export const directMarkMessagesAsRead = async (receiverId: string, senderId: str
       return { success: false, error };
     }
     
-    console.log(`Successfully marked ${messageIds.length} messages as read directly`);
+    console.log(`Successfully marked ${messageIds.length} messages as read directly (DB affected: ${count})`);
+    
+    // Double-check that the update was successful
+    const { data: verifyData, error: verifyError } = await supabase
+      .from('messages')
+      .select('id, status')
+      .in('id', messageIds);
+      
+    if (verifyError) {
+      console.error('Error verifying message updates:', verifyError);
+    } else {
+      const stillUnread = verifyData.filter(m => m.status !== 'read');
+      if (stillUnread.length > 0) {
+        console.warn(`Warning: ${stillUnread.length} messages still not marked as read:`, 
+          stillUnread.map(m => ({ id: m.id.substring(0, 8), status: m.status })));
+      } else {
+        console.log('✅ All messages successfully verified as read');
+      }
+    }
     
     // Trigger a custom event to notify all components that messages were read
     if (typeof window !== 'undefined') {
       console.log('Dispatching custom event: messages-marked-read');
       window.dispatchEvent(new CustomEvent('messages-marked-read', { 
         detail: { receiverId, senderId, count: messageIds.length }
+      }));
+      
+      // Also dispatch unread count update event
+      window.dispatchEvent(new CustomEvent('unread-messages-updated', {
+        detail: { action: 'marked-read', count: messageIds.length }
       }));
     }
     
@@ -1632,7 +1656,7 @@ export const directMarkMessagesAsRead = async (receiverId: string, senderId: str
     console.error('Error marking messages as read:', error);
     return { success: false, error };
   }
-}; 
+};
 
 /**
  * Download file from Supabase Storage by URL

@@ -164,12 +164,18 @@ const AppContent = () => {
       }
     };
     
+    // Clean toast data periodically to prevent buildup
+    const cleanupInterval = setInterval(() => {
+      cleanAllExpiredToastData();
+    }, 2 * 60 * 1000); // Every 2 minutes
+    
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(cleanupInterval);
     };
   }, []);
   

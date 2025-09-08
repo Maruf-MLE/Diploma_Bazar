@@ -271,12 +271,12 @@ const Navigation = () => {
     try {
       console.log('Directly checking unread messages from database');
       
-      // Query the database directly
+      // Query the database directly (including null status messages)
       const { data, error } = await supabase
         .from('messages')
-        .select('id')
+        .select('id, status')
         .eq('receiver_id', user.id)
-        .not('status', 'eq', 'read');
+        .or('status.neq.read,status.is.null');
       
       if (error) {
         console.error('Error directly checking unread messages:', error);

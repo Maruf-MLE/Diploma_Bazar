@@ -1092,6 +1092,7 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
           (async () => {
             if (user && otherUserId) {
               try {
+                console.log('Attempting to mark messages as read in fetchMessages');
                 const { success, count, error } = await directMarkMessagesAsRead(user.id, otherUserId);
                 
                 if (error) {
@@ -1099,17 +1100,26 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
                   return;
                 }
                 
-                if (count && count > 0) {
-                  // Update local message status
-                  setMessages(prevMessages => 
-                    prevMessages.map(msg => 
-                      (!msg.isOwn && msg.status !== 'read')
-                        ? { ...msg, status: 'read' }
-                        : msg
-                    )
-                  );
+                if (success) {
+                  console.log(`Successfully processed mark as read: ${count || 0} messages`);
                   
-                  // Force update unread count
+                  if (count && count > 0) {
+                    console.log(`Updating local state for ${count} messages`);
+                    
+                    // Update local message status
+                    setMessages(prevMessages => 
+                      prevMessages.map(msg => {
+                        if (!msg.isOwn && msg.status !== 'read') {
+                          console.log(`Marking local message as read: ${msg.id.substring(0, 8)}`);
+                          return { ...msg, status: 'read' };
+                        }
+                        return msg;
+                      })
+                    );
+                  }
+                  
+                  // Always force update unread count after marking messages
+                  console.log('Forcing unread count update after marking messages as read');
                   forceUpdateUnreadCount();
                 }
               } catch (error) {
@@ -1117,7 +1127,7 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
               }
             }
           })();
-        }, 500);
+        }, 300);
         
         // Extract all book IDs from messages and purchase requests
         const messageBookIds = processedMessages
@@ -1797,16 +1807,17 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
     // First dispatch the event
     window.dispatchEvent(new CustomEvent('unread-messages-updated'));
     
-    // Then directly update the count in this component
+    // Then directly update the count in this component immediately
     if (user) {
-      setTimeout(async () => {
+      // Use multiple approaches for better reliability
+      const updateCount = async () => {
         try {
-          // Directly query the database
+          // Directly query the database with improved query
           const { data, error } = await supabase
             .from('messages')
-            .select('id')
+            .select('id, status')
             .eq('receiver_id', user.id)
-            .not('status', 'eq', 'read');
+            .or('status.neq.read,status.is.null');
           
           if (error) {
             console.error('Error checking unread messages:', error);
@@ -1814,12 +1825,27 @@ const scrollBehaviorRef = useRef<'auto' | 'smooth'>('auto');
           }
           
           const count = data ? data.length : 0;
-          console.log('Updated unread count in MessagingPage:', count);
+          console.log(`Updated unread count in MessagingPage: ${unreadMessageCount} → ${count}`);
           setUnreadMessageCount(count);
+          
+          // Also update conversation unread indicators
+          if (selectedReceiverId) {
+            setConversations(prev => prev.map(conv => 
+              conv.user.id === selectedReceiverId 
+                ? { ...conv, unread: false }
+                : conv
+            ));
+          }
         } catch (error) {
           console.error('Error updating unread count:', error);
         }
-      }, 1000);
+      };
+      
+      // Update immediately
+      updateCount();
+      
+      // Also update after a short delay to catch any delayed updates
+      setTimeout(updateCount, 500);
     }
   };
 

@@ -10,6 +10,10 @@ import { supabase } from '@/lib/supabase';
 const SHOWN_MESSAGES_KEY = 'messageToaster_shownIds';
 const MESSAGE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
 
+// Session-based tracking to prevent duplicates within the same session
+const sessionShownMessages = new Set<string>();
+const sessionStartTime = Date.now();
+
 // Helper functions for localStorage management
 const getShownMessages = (): Record<string, number> => {
   try {
@@ -118,14 +122,15 @@ export default function MessageToaster() {
         }
       }
 
-      // Check if we've already shown this message
-      if (hasMessageBeenShown(message.id)) {
+      // Check if we've already shown this message (both session and persistent storage)
+      if (hasMessageBeenShown(message.id) || sessionShownMessages.has(message.id)) {
         console.log('Message toast already shown for ID:', message.id);
         return;
       }
 
-      // Mark this message as shown
+      // Mark this message as shown in both session and persistent storage
       markMessageAsShown(message.id);
+      sessionShownMessages.add(message.id);
 
       const preview = message.content?.trim() ? message.content.slice(0, 60) : 'আপনার জন্য একটি নতুন বার্তা আছে';
 
@@ -179,7 +184,7 @@ export default function MessageToaster() {
             </div>
           ),
           {
-            duration: 5000,
+            duration: 2000, // Changed to 2 seconds
             onDismiss: () => {
               activeToastCount = Math.max(0, activeToastCount - 1);
             },

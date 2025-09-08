@@ -8,6 +8,9 @@ import { useNavigate } from "react-router-dom";
 const SHOWN_NOTIFICATIONS_KEY = 'notificationToaster_shownIds';
 const NOTIFICATION_EXPIRY_TIME = 10 * 60 * 1000; // 10 minutes in milliseconds
 
+// Session-based tracking to prevent duplicates within the same session
+const sessionShownNotifications = new Set<string>();
+
 // Helper functions for localStorage management
 const getShownNotifications = (): Record<string, number> => {
   try {
@@ -87,8 +90,8 @@ export default function NotificationToaster() {
       if (n.is_read) return; // Only toast unread items
       if (!n.id) return; // Skip if no ID
       
-      // Check if we've already shown this notification
-      if (hasNotificationBeenShown(n.id)) {
+      // Check if we've already shown this notification (both session and persistent storage)
+      if (hasNotificationBeenShown(n.id) || sessionShownNotifications.has(n.id)) {
         console.log('Notification toast already shown for ID:', n.id);
         return;
       }
@@ -99,8 +102,9 @@ export default function NotificationToaster() {
         return;
       }
       
-      // Mark this notification as shown
+      // Mark this notification as shown in both session and persistent storage
       markNotificationAsShown(n.id);
+      sessionShownNotifications.add(n.id);
       activeNotificationToastCount++;
 
       playNotificationSound();
@@ -128,7 +132,7 @@ export default function NotificationToaster() {
           </span>
         </div>
       ), { 
-        duration: 5000,
+        duration: 2000, // Changed to 2 seconds
         onDismiss: () => {
           activeNotificationToastCount = Math.max(0, activeNotificationToastCount - 1);
         },
