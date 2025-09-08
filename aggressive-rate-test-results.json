@@ -1,0 +1,329 @@
+{
+  "config": {
+    "baseUrl": "http://localhost:3001",
+    "endpoint": "/api/test",
+    "totalRequests": 60,
+    "requestInterval": 50,
+    "concurrentBatch": 10,
+    "apiKey": "prod-DiplomaBazar-11fdfe4fa5bfe8e6ae569a79cef1cbfd9ba54430"
+  },
+  "results": {
+    "successful": 0,
+    "rateLimited": 0,
+    "errors": 60,
+    "responses": [
+      {
+        "requestNumber": 1,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.051Z"
+      },
+      {
+        "requestNumber": 2,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.054Z"
+      },
+      {
+        "requestNumber": 3,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.055Z"
+      },
+      {
+        "requestNumber": 4,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.056Z"
+      },
+      {
+        "requestNumber": 5,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.058Z"
+      },
+      {
+        "requestNumber": 6,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.059Z"
+      },
+      {
+        "requestNumber": 7,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.060Z"
+      },
+      {
+        "requestNumber": 8,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.061Z"
+      },
+      {
+        "requestNumber": 9,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.063Z"
+      },
+      {
+        "requestNumber": 10,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.065Z"
+      },
+      {
+        "requestNumber": 11,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.155Z"
+      },
+      {
+        "requestNumber": 12,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.157Z"
+      },
+      {
+        "requestNumber": 13,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.159Z"
+      },
+      {
+        "requestNumber": 14,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.160Z"
+      },
+      {
+        "requestNumber": 15,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.161Z"
+      },
+      {
+        "requestNumber": 17,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.163Z"
+      },
+      {
+        "requestNumber": 16,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.165Z"
+      },
+      {
+        "requestNumber": 19,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.166Z"
+      },
+      {
+        "requestNumber": 18,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.167Z"
+      },
+      {
+        "requestNumber": 20,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.167Z"
+      },
+      {
+        "requestNumber": 21,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.245Z"
+      },
+      {
+        "requestNumber": 22,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.246Z"
+      },
+      {
+        "requestNumber": 23,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.247Z"
+      },
+      {
+        "requestNumber": 24,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.248Z"
+      },
+      {
+        "requestNumber": 25,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.249Z"
+      },
+      {
+        "requestNumber": 26,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.250Z"
+      },
+      {
+        "requestNumber": 27,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.251Z"
+      },
+      {
+        "requestNumber": 28,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.252Z"
+      },
+      {
+        "requestNumber": 29,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.253Z"
+      },
+      {
+        "requestNumber": 30,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.256Z"
+      },
+      {
+        "requestNumber": 31,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.343Z"
+      },
+      {
+        "requestNumber": 32,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.344Z"
+      },
+      {
+        "requestNumber": 33,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.345Z"
+      },
+      {
+        "requestNumber": 34,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.346Z"
+      },
+      {
+        "requestNumber": 35,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.347Z"
+      },
+      {
+        "requestNumber": 36,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.348Z"
+      },
+      {
+        "requestNumber": 37,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.349Z"
+      },
+      {
+        "requestNumber": 38,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.350Z"
+      },
+      {
+        "requestNumber": 39,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.351Z"
+      },
+      {
+        "requestNumber": 40,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.353Z"
+      },
+      {
+        "requestNumber": 41,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.437Z"
+      },
+      {
+        "requestNumber": 42,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.438Z"
+      },
+      {
+        "requestNumber": 43,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.439Z"
+      },
+      {
+        "requestNumber": 44,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.441Z"
+      },
+      {
+        "requestNumber": 45,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.442Z"
+      },
+      {
+        "requestNumber": 46,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.443Z"
+      },
+      {
+        "requestNumber": 48,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.444Z"
+      },
+      {
+        "requestNumber": 47,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.445Z"
+      },
+      {
+        "requestNumber": 50,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.447Z"
+      },
+      {
+        "requestNumber": 49,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.448Z"
+      },
+      {
+        "requestNumber": 51,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.534Z"
+      },
+      {
+        "requestNumber": 52,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.535Z"
+      },
+      {
+        "requestNumber": 53,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.536Z"
+      },
+      {
+        "requestNumber": 54,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.537Z"
+      },
+      {
+        "requestNumber": 55,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.539Z"
+      },
+      {
+        "requestNumber": 56,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.540Z"
+      },
+      {
+        "requestNumber": 57,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.541Z"
+      },
+      {
+        "requestNumber": 58,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.544Z"
+      },
+      {
+        "requestNumber": 59,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.545Z"
+      },
+      {
+        "requestNumber": 60,
+        "error": "",
+        "timestamp": "2025-09-08T04:57:46.547Z"
+      }
+    ],
+    "timing": {
+      "start": 1757307465910,
+      "end": 1757307466548
+    }
+  },
+  "summary": {
+    "duration": 0.638,
+    "requestsPerSecond": 94.04388714733543,
+    "requestsPerMinute": 5642.633228840125,
+    "avgResponseTime": null,
+    "rateLimitingEffective": false,
+    "productionReady": false
+  }
+}

@@ -1,0 +1,991 @@
+{
+  "config": {
+    "baseUrl": "http://localhost:3001",
+    "endpoints": {
+      "test": "/api/test",
+      "books": "/api/books",
+      "messages": "/api/messages",
+      "health": "/health"
+    },
+    "totalRequests": 60,
+    "requestInterval": 100,
+    "apiKey": "prod-DiplomaBazar-11fdfe4fa5bfe8e6ae569a79cef1cbfd9ba54430"
+  },
+  "results": {
+    "successful": 40,
+    "rateLimited": 0,
+    "errors": 20,
+    "responses": [
+      {
+        "requestNumber": 1,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 66,
+        "timestamp": "2025-09-08T04:23:21.989Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:21.975Z"
+        }
+      },
+      {
+        "requestNumber": 2,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:22.102Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:22.094Z"
+        }
+      },
+      {
+        "requestNumber": 3,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 11,
+        "timestamp": "2025-09-08T04:23:22.214Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 4,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:22.323Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:22.315Z"
+        }
+      },
+      {
+        "requestNumber": 5,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 13,
+        "timestamp": "2025-09-08T04:23:22.466Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:22.457Z"
+        }
+      },
+      {
+        "requestNumber": 6,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 13,
+        "timestamp": "2025-09-08T04:23:22.582Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 7,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 12,
+        "timestamp": "2025-09-08T04:23:22.707Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:22.698Z"
+        }
+      },
+      {
+        "requestNumber": 8,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 12,
+        "timestamp": "2025-09-08T04:23:22.835Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:22.827Z"
+        }
+      },
+      {
+        "requestNumber": 9,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 15,
+        "timestamp": "2025-09-08T04:23:22.968Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 10,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 11,
+        "timestamp": "2025-09-08T04:23:23.092Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:23.083Z"
+        }
+      },
+      {
+        "requestNumber": 11,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:23.220Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:23.212Z"
+        }
+      },
+      {
+        "requestNumber": 12,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:23.348Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 13,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:23.474Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:23.466Z"
+        }
+      },
+      {
+        "requestNumber": 14,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:23.581Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:23.575Z"
+        }
+      },
+      {
+        "requestNumber": 15,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:23.693Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 16,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 4,
+        "timestamp": "2025-09-08T04:23:23.803Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:23.797Z"
+        }
+      },
+      {
+        "requestNumber": 17,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:23.918Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:23.911Z"
+        }
+      },
+      {
+        "requestNumber": 18,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 20,
+        "timestamp": "2025-09-08T04:23:24.041Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 19,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:24.158Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:24.151Z"
+        }
+      },
+      {
+        "requestNumber": 20,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:24.268Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:24.261Z"
+        }
+      },
+      {
+        "requestNumber": 21,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 11,
+        "timestamp": "2025-09-08T04:23:24.383Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 22,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:24.508Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:24.500Z"
+        }
+      },
+      {
+        "requestNumber": 23,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:24.620Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:24.612Z"
+        }
+      },
+      {
+        "requestNumber": 24,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 11,
+        "timestamp": "2025-09-08T04:23:24.733Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 25,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:24.858Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:24.851Z"
+        }
+      },
+      {
+        "requestNumber": 26,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:24.971Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:24.963Z"
+        }
+      },
+      {
+        "requestNumber": 27,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:25.083Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 28,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:25.195Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:25.187Z"
+        }
+      },
+      {
+        "requestNumber": 29,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:25.307Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:25.300Z"
+        }
+      },
+      {
+        "requestNumber": 30,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:25.419Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 31,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:25.532Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:25.525Z"
+        }
+      },
+      {
+        "requestNumber": 32,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:25.643Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:25.635Z"
+        }
+      },
+      {
+        "requestNumber": 33,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:25.754Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 34,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:25.861Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:25.855Z"
+        }
+      },
+      {
+        "requestNumber": 35,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 12,
+        "timestamp": "2025-09-08T04:23:25.979Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:25.972Z"
+        }
+      },
+      {
+        "requestNumber": 36,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:26.103Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 37,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:26.215Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:26.208Z"
+        }
+      },
+      {
+        "requestNumber": 38,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:26.326Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:26.318Z"
+        }
+      },
+      {
+        "requestNumber": 39,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 7,
+        "timestamp": "2025-09-08T04:23:26.435Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 40,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:26.543Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:26.537Z"
+        }
+      },
+      {
+        "requestNumber": 41,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:26.655Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:26.648Z"
+        }
+      },
+      {
+        "requestNumber": 42,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:26.766Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 43,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 4,
+        "timestamp": "2025-09-08T04:23:26.877Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:26.871Z"
+        }
+      },
+      {
+        "requestNumber": 44,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:26.988Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:26.982Z"
+        }
+      },
+      {
+        "requestNumber": 45,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 6,
+        "timestamp": "2025-09-08T04:23:27.100Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 46,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 5,
+        "timestamp": "2025-09-08T04:23:27.209Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:27.203Z"
+        }
+      },
+      {
+        "requestNumber": 47,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:27.324Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:27.317Z"
+        }
+      },
+      {
+        "requestNumber": 48,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:27.436Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 49,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:27.550Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:27.543Z"
+        }
+      },
+      {
+        "requestNumber": 50,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:27.662Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:27.654Z"
+        }
+      },
+      {
+        "requestNumber": 51,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 11,
+        "timestamp": "2025-09-08T04:23:27.776Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 52,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 12,
+        "timestamp": "2025-09-08T04:23:27.903Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:27.895Z"
+        }
+      },
+      {
+        "requestNumber": 53,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 10,
+        "timestamp": "2025-09-08T04:23:28.028Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:28.021Z"
+        }
+      },
+      {
+        "requestNumber": 54,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 9,
+        "timestamp": "2025-09-08T04:23:28.139Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 55,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:28.250Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:28.243Z"
+        }
+      },
+      {
+        "requestNumber": 56,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 11,
+        "timestamp": "2025-09-08T04:23:28.365Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:28.358Z"
+        }
+      },
+      {
+        "requestNumber": 57,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 7,
+        "timestamp": "2025-09-08T04:23:28.489Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      },
+      {
+        "requestNumber": 58,
+        "endpoint": "/api/test",
+        "statusCode": 200,
+        "responseTime": 7,
+        "timestamp": "2025-09-08T04:23:28.599Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "API test endpoint",
+          "timestamp": "2025-09-08T04:23:28.592Z"
+        }
+      },
+      {
+        "requestNumber": 59,
+        "endpoint": "/api/books",
+        "statusCode": 200,
+        "responseTime": 8,
+        "timestamp": "2025-09-08T04:23:28.711Z",
+        "rateLimitHeaders": {},
+        "data": {
+          "message": "This is a test endpoint that should be rate limited",
+          "books": [
+            {
+              "id": 1,
+              "title": "Test Book 1"
+            },
+            {
+              "id": 2,
+              "title": "Test Book 2"
+            },
+            {
+              "id": 3,
+              "title": "Test Book 3"
+            }
+          ],
+          "timestamp": "2025-09-08T04:23:28.704Z"
+        }
+      },
+      {
+        "requestNumber": 60,
+        "endpoint": "/api/messages",
+        "statusCode": 404,
+        "responseTime": 15,
+        "timestamp": "2025-09-08T04:23:28.829Z",
+        "rateLimitHeaders": {},
+        "data": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/messages</pre>\n</body>\n</html>\n"
+      }
+    ],
+    "timing": {
+      "start": 1757305401923,
+      "end": 1757305408831
+    }
+  },
+  "endpointStats": {
+    "/api/test": {
+      "total": 20,
+      "success": 20,
+      "rateLimited": 0,
+      "errors": 0
+    },
+    "/api/books": {
+      "total": 20,
+      "success": 20,
+      "rateLimited": 0,
+      "errors": 0
+    },
+    "/api/messages": {
+      "total": 20,
+      "success": 0,
+      "rateLimited": 0,
+      "errors": 20
+    }
+  },
+  "summary": {
+    "duration": 6.908,
+    "requestsPerSecond": 8.685581933989576,
+    "avgResponseTime": 10,
+    "rateLimitingEffective": false
+  }
+}
