@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/toaster";
-import NotificationToaster from "@/components/NotificationToaster";
 import MessageToaster from "@/components/MessageToaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -199,9 +198,8 @@ const AppContent = () => {
     <>
       <Toaster />
       <Sonner />
-      {/* Toast realtime notifications */}
-      <NotificationToaster />
-      {/* Toast for incoming chat messages */}
+      {/* NotificationToaster removed - no general notifications */}
+      {/* Message toasts enabled */}
       <MessageToaster />
       {/* Fallback notification for unsupported browsers */}
       <FallbackNotification show={!!user} />
