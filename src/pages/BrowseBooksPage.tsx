@@ -341,8 +341,8 @@ const FilterDialog = ({
             
             <Separator className="my-1" />
             
-            {/* Sorting Options */}
-            <div>
+            {/* Sorting Options - Hidden but functionality preserved */}
+            <div style={{ display: 'none' }}>
               <label className="text-sm font-medium mb-2 block">সাজান</label>
               <Select 
                 value={sortOption}
