@@ -339,7 +339,7 @@ const FilterDialog = ({
               />
             </div>
             
-            <Separator className="my-1" />
+            <Separator className="my-1 hidden" />
             
             {/* Sorting Options - Hidden but functionality preserved */}
             <div className="hidden">
@@ -360,7 +360,7 @@ const FilterDialog = ({
               </Select>
             </div>
             
-            <Separator className="my-1" />
+            <Separator className="my-1 hidden" />
             
             {/* Department Filter */}
             <div>
