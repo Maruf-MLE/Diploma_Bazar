@@ -30,6 +30,34 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
+// API Key Authentication Middleware
+const API_KEYS = [
+  process.env.API_KEY_1,
+  process.env.API_KEY_2,
+  process.env.API_KEY_3
+].filter(Boolean); // Remove any undefined keys
+
+function authenticateApiKey(req, res, next) {
+  const apiKey = req.headers['authorization']?.replace('Bearer ', '') || 
+                req.headers['x-api-key'];
+
+  if (!apiKey) {
+    return res.status(401).json({ 
+      error: 'API key required', 
+      message: 'Please provide an API key in Authorization header or X-API-Key header' 
+    });
+  }
+
+  if (!API_KEYS.includes(apiKey)) {
+    return res.status(403).json({ 
+      error: 'Invalid API key', 
+      message: 'The provided API key is not valid' 
+    });
+  }
+
+  next();
+}
+
 // Configure VAPID keys
 webpush.setVapidDetails(
   process.env.VAPID_SUBJECT || 'mailto:admin@diplomabazar.com',
@@ -41,7 +69,7 @@ webpush.setVapidDetails(
 // Structure: { userId: subscription }
 const subscriptions = new Map();
 
-app.post('/subscribe', (req, res) => {
+app.post('/subscribe', authenticateApiKey, (req, res) => {
   const { userId, ...subscription } = req.body;
   console.log('New subscription for user:', userId);
   
@@ -53,7 +81,7 @@ app.post('/subscribe', (req, res) => {
   res.status(201).json({ success: true });
 });
 
-app.post('/notify', async (req, res) => {
+app.post('/notify', authenticateApiKey, async (req, res) => {
   const { userId, title, body, url } = req.body;
   console.log('Notification request:', { userId, title, body, url });
   

@@ -35,7 +35,7 @@ const NotificationDropdown = () => {
     console.log('NotificationDropdown - Unread count:', unreadCount);
   }, [notifications, unreadCount]);
 
-  // Refresh notifications only on manual open, not auto refresh
+  // Refresh notifications and mark unread as read when dropdown opens
   useEffect(() => {
     if (isOpen && manualRefresh) {
       console.log('Dropdown opened manually, refreshing notifications...');
@@ -43,6 +43,19 @@ const NotificationDropdown = () => {
       setManualRefresh(false);
     }
   }, [isOpen, manualRefresh, refreshNotifications]);
+
+  // Auto mark all unread notifications as read when dropdown opens
+  useEffect(() => {
+    if (isOpen && unreadCount > 0) {
+      console.log('Dropdown opened with unread notifications, marking all as read...');
+      // Use a small delay to ensure the dropdown is fully opened
+      const timeoutId = setTimeout(() => {
+        markAllAsRead();
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen, unreadCount, markAllAsRead]);
 
   // Handle dropdown open
   const handleOpenChange = (open: boolean) => {

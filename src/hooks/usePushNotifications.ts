@@ -8,6 +8,7 @@ import {
 } from '@/lib/notificationUtils';
 
 const PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+const API_KEY = import.meta.env.VITE_API_KEY_1 || import.meta.env.VITE_API_KEY_2 || import.meta.env.VITE_API_KEY_3;
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -95,7 +96,10 @@ export function usePushNotifications(userId?: string) {
 
         const response = await fetch(`${serverUrl}/subscribe`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
           body: JSON.stringify(subscriptionData),
         });
 
@@ -113,13 +117,23 @@ export function usePushNotifications(userId?: string) {
       }
     }
     
-    // Check for VAPID key with detailed logging
+    // Check for VAPID key and API key with detailed logging
     if (!PUBLIC_KEY) {
       console.error('❌ VAPID public key not found in environment variables');
       console.log('📋 Current environment variables:');
       console.log('- VITE_VAPID_PUBLIC_KEY:', import.meta.env.VITE_VAPID_PUBLIC_KEY ? 'Present' : 'Missing');
       console.log('- VITE_PUSH_SERVER_URL:', import.meta.env.VITE_PUSH_SERVER_URL || 'Not set');
       console.log('💡 Please check your .env file and restart the development server');
+      return;
+    }
+
+    if (!API_KEY) {
+      console.error('❌ API key not found in environment variables');
+      console.log('📋 Please set one of these API keys in your .env file:');
+      console.log('- VITE_API_KEY_1:', import.meta.env.VITE_API_KEY_1 ? 'Present' : 'Missing');
+      console.log('- VITE_API_KEY_2:', import.meta.env.VITE_API_KEY_2 ? 'Present' : 'Missing');
+      console.log('- VITE_API_KEY_3:', import.meta.env.VITE_API_KEY_3 ? 'Present' : 'Missing');
+      console.log('💡 Please add API key to your .env file and restart the development server');
       return;
     }
 

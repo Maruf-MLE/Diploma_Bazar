@@ -319,8 +319,8 @@ const FilterDialog = ({
         
         <div className="overflow-y-auto flex-grow p-4 max-h-[60vh]">
           <div className="space-y-5">
-            {/* Price Range Slider */}
-            <div>
+            {/* Price Range Slider - Hidden but functionality preserved */}
+            <div className="hidden">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-medium">মূল্য পরিসীমা</p>
                 <div className="flex items-center gap-2 text-xs">
@@ -341,8 +341,8 @@ const FilterDialog = ({
             
             <Separator className="my-1" />
             
-            {/* Sorting Options */}
-            <div>
+            {/* Sorting Options - Hidden but functionality preserved */}
+            <div className="hidden">
               <label className="text-sm font-medium mb-2 block">সাজান</label>
               <Select 
                 value={sortOption}

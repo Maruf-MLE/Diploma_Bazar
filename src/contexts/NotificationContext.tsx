@@ -32,6 +32,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialMount = useRef(true);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check connection status
   const checkConnection = useCallback(async () => {
@@ -190,20 +191,38 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = async (notificationId: string) => {
     try {
+      // Optimistically update local state first for better UX
+      const wasUnread = notifications.find(n => n.id === notificationId && !n.is_read);
+      
+      if (wasUnread) {
+        setNotifications(prev => 
+          prev.map(notification => 
+            notification.id === notificationId 
+              ? { ...notification, is_read: true } 
+              : notification
+          )
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+      
+      // Then update the database
       const { error } = await markNotificationAsRead(notificationId);
-      if (error) throw error;
+      if (error) {
+        // Revert optimistic update on error
+        if (wasUnread) {
+          setNotifications(prev => 
+            prev.map(notification => 
+              notification.id === notificationId 
+                ? { ...notification, is_read: false } 
+                : notification
+            )
+          );
+          setUnreadCount(prev => prev + 1);
+        }
+        throw error;
+      }
       
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, is_read: true } 
-            : notification
-        )
-      );
-      
-      // Update unread count
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      console.log('Notification marked as read:', notificationId);
     } catch (err) {
       console.error('Error marking notification as read:', err);
     }
@@ -213,16 +232,25 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     
     try {
-      const { error } = await markAllNotificationsAsRead(user.id);
-      if (error) throw error;
+      const previousUnreadCount = unreadCount;
+      const previousNotifications = notifications;
       
-      // Update local state
+      // Optimistically update local state first for better UX
       setNotifications(prev => 
         prev.map(notification => ({ ...notification, is_read: true }))
       );
-      
-      // Reset unread count
       setUnreadCount(0);
+      
+      // Then update the database
+      const { error } = await markAllNotificationsAsRead(user.id);
+      if (error) {
+        // Revert optimistic update on error
+        setNotifications(previousNotifications);
+        setUnreadCount(previousUnreadCount);
+        throw error;
+      }
+      
+      console.log('All notifications marked as read for user:', user.id);
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
     }

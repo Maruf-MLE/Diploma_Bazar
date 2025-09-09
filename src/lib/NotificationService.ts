@@ -48,7 +48,8 @@ async function sendPushNotification({ userId, title, body, url }: {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-API-Key': import.meta.env.VITE_PUSH_SERVER_API_KEY || 'development-key'
       },
       body: JSON.stringify(requestBody)
     });
