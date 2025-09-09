@@ -8,8 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Supabase configuration
-const supabaseUrl = 'https://yryerjgidsyfiohmpeoc.supabase.co';
-const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeWVyamdpZHN5ZmlvaG1wZW9jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk2MDU1MiwiZXhwIjoyMDY2NTM2NTUyfQ.lXQ_3fMpKJZoKhgrkFOjSJp1fP8WCUGCCMWQh-E9U0g'; // Service role key
+const supabaseUrl = process.env.SUPABASE_URL || 'https://yryerjgidsyfiohmpeoc.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'your-service-role-key-here'; // Service role key from environment
 
 // Create Supabase client with service role
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
