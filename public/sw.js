@@ -48,8 +48,8 @@ self.addEventListener('push', event => {
   let notificationData = {
     title: 'নতুন নোটিফিকেশন',
     body: 'আপনার জন্য নতুন আপডেট এসেছে',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: '/images/Logo.png',
+    badge: '/images/Logo.png',
     data: {
       url: '/'
     }
@@ -84,7 +84,7 @@ self.addEventListener('push', event => {
         {
           action: 'open',
           title: 'দেখুন',
-          icon: '/icons/icon-192.png'
+          icon: '/images/Logo.png'
         }
       ]
     }

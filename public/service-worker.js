@@ -94,17 +94,17 @@ self.addEventListener('push', event => {
   const {
     title = 'নতুন বিজ্ঞপ্তি',
     body = 'আপনার একটি নতুন বিজ্ঞপ্তি আছে',
-    icon = '/favicon.ico',
+    icon = '/images/Logo.png',
     url = '/',
-    badge = '/favicon.ico',
+    badge = '/images/Logo.png',
     tag = 'notification-' + Date.now(),
     timestamp = Date.now()
   } = data;
 
   const notificationOptions = {
     body,
-    icon: icon || '/favicon.ico',
-    badge: badge || '/favicon.ico',
+    icon: icon || '/images/Logo.png',
+    badge: badge || '/images/Logo.png',
     tag,
     timestamp,
     data: { url },
