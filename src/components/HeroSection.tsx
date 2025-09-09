@@ -66,7 +66,7 @@ const HeroSection = () => {
                     <div className="relative pb-[56.25%] h-0 mt-4 rounded-lg overflow-hidden shadow-xl border border-slate-200">
                       <iframe
                         className="absolute top-0 left-0 w-full h-full"
-                        src="https://www.youtube.com/embed/uYDqqdqAlcw?si=VjBBF0ZiWUPJ07GK"
+                        src="https://www.youtube.com/embed/k23jrmLbIX8?si=tc0O-1P__mC09cih"
                         title="YouTube video player"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
