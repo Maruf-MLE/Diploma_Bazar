@@ -444,16 +444,33 @@ const SellBookPage: React.FC = () => {
             <h1 className="text-3xl font-bold text-white mb-2">বই বিক্রি করুন</h1>
             <p className="text-white/90 mb-6">আপনার বই যোগ করুন এবং অন্যদের সাথে শেয়ার করুন</p>
 
-            {/* Video Guide Button */}
-            <Button
-              type="button"
-              variant="secondary"
-              className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-sm font-medium px-6 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
-              onClick={() => setIsVideoDialogOpen(true)}
-            >
-              <Play className="h-4 w-4 mr-2" />
-              বই বিক্রয়ের ভিডিও দেখুন
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+              {/* Video Guide Button */}
+              <Button
+                type="button"
+                variant="secondary"
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-sm font-medium px-6 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
+                onClick={() => setIsVideoDialogOpen(true)}
+              >
+                <Play className="h-4 w-4 mr-2" />
+                বই বিক্রয়ের ভিডিও দেখুন
+              </Button>
+              
+              {/* My Books Button */}
+              <Button
+                type="button"
+                variant="secondary"
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 transition-all duration-300 text-sm font-medium px-6 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
+                onClick={() => {
+                  console.log('📋 SellBookPage: Navigating to profile with mybooks tab');
+                  navigate('/profile?tab=mybooks');
+                }}
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                আমার বই
+              </Button>
+            </div>
           </div>
 
           <Card className="bg-white border border-gray-200 shadow-lg">

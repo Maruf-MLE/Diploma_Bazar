@@ -53,6 +53,8 @@ const ProfilePage = () => {
   });
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const tabsSectionRef = useRef<HTMLDivElement>(null);
+  const tabsListRef = useRef<HTMLDivElement>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [userBooks, setUserBooks] = useState<BookEntity[]>([]);
   const [loadingBooks, setLoadingBooks] = useState(false);
@@ -81,12 +83,129 @@ const ProfilePage = () => {
     const searchParams = new URLSearchParams(location.search);
     const tabParam = searchParams.get('tab');
     
-    if (tabParam && ['mybooks', 'purchases'].includes(tabParam)) {
+    console.log('🔍 ProfilePage: Tab param from URL:', tabParam);
+    
+    if (tabParam && ['mybooks', 'purchases', 'reviews'].includes(tabParam)) {
+      console.log('✅ ProfilePage: Setting active tab to:', tabParam);
       setActiveTab(tabParam);
+      
+      // Auto scroll to bottom of page to show tabs section
+      setTimeout(() => {
+        console.log('📜 ProfilePage: Auto scrolling to bottom');
+        
+        // Multiple scroll attempts to ensure we reach the very bottom
+        const scrollToBottom = () => {
+          const scrollHeight = Math.max(
+            document.documentElement.scrollHeight,
+            document.body.scrollHeight,
+            window.innerHeight
+          );
+          
+          console.log('📜 Scroll height:', scrollHeight, 'Current scroll:', window.scrollY);
+          
+          // Scroll to absolute bottom
+          window.scrollTo({
+            top: scrollHeight + 1000, // Add extra pixels to ensure we reach bottom
+            behavior: 'smooth'
+          });
+          
+          // Try again after smooth scroll completes
+          setTimeout(() => {
+            window.scrollTo({
+              top: document.documentElement.scrollHeight + 1000,
+              behavior: 'smooth'
+            });
+          }, 1000);
+        };
+        
+        scrollToBottom();
+      }, 2000); // Wait 2 seconds for everything to load
+      
     } else if (location.state && location.state.activeTab) {
+      console.log('✅ ProfilePage: Setting active tab from location state:', location.state.activeTab);
       setActiveTab(location.state.activeTab);
+      
+      // Auto scroll to bottom of page to show tabs section
+      setTimeout(() => {
+        console.log('📜 ProfilePage: Auto scrolling to bottom (from state)');
+        
+        // Multiple scroll attempts to ensure we reach the very bottom
+        const scrollToBottom = () => {
+          const scrollHeight = Math.max(
+            document.documentElement.scrollHeight,
+            document.body.scrollHeight,
+            window.innerHeight
+          );
+          
+          console.log('📜 Scroll height (from state):', scrollHeight, 'Current scroll:', window.scrollY);
+          
+          // Scroll to absolute bottom
+          window.scrollTo({
+            top: scrollHeight + 1000, // Add extra pixels to ensure we reach bottom
+            behavior: 'smooth'
+          });
+          
+          // Try again after smooth scroll completes
+          setTimeout(() => {
+            window.scrollTo({
+              top: document.documentElement.scrollHeight + 1000,
+              behavior: 'smooth'
+            });
+          }, 1000);
+        };
+        
+        scrollToBottom();
+      }, 2000);
+      
+    } else {
+      console.log('ℹ️ ProfilePage: No valid tab param found, using default: mybooks');
     }
   }, [location]);
+
+  // Scroll to tabs section when activeTab changes (especially useful for external navigation)
+  useEffect(() => {
+    // Only scroll if we're on a tab that came from URL parameter
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get('tab');
+    
+    if (tabParam && activeTab === tabParam) {
+      console.log('📜 ProfilePage: Active tab changed, scrolling to bottom');
+      
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          console.log('📜 ProfilePage: Scrolling to bottom of page');
+          
+          // Multiple scroll attempts to ensure we reach the very bottom
+          const scrollToBottom = () => {
+            const scrollHeight = Math.max(
+              document.documentElement.scrollHeight,
+              document.body.scrollHeight,
+              window.innerHeight
+            );
+            
+            console.log('📜 Scroll height (tab change):', scrollHeight, 'Current scroll:', window.scrollY);
+            
+            // Scroll to absolute bottom
+            window.scrollTo({
+              top: scrollHeight + 1000, // Add extra pixels to ensure we reach bottom
+              behavior: 'smooth'
+            });
+            
+            // Try again after smooth scroll completes
+            setTimeout(() => {
+              window.scrollTo({
+                top: document.documentElement.scrollHeight + 1000,
+                behavior: 'smooth'
+              });
+            }, 1000);
+          };
+          
+          scrollToBottom();
+        }, 1500);
+      });
+    }
+  }, [activeTab, location.search]);
 
   useEffect(() => {
     async function fetchUserProfile() {
@@ -753,9 +872,9 @@ const ProfilePage = () => {
        
 
         {/* Main Content */}
-        <div className="bg-[#EEF4FF] backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border-0 p-4 sm:p-6 md:p-8">
+        <div ref={tabsSectionRef} className="bg-[#EEF4FF] backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border-0 p-4 sm:p-6 md:p-8">
           <Tabs defaultValue="mybooks" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-6 bg-[#F8FBFF] p-1.5 sm:p-2 rounded-lg sm:rounded-xl shadow-sm border border-slate-200/40">
+            <TabsList ref={tabsListRef} className="grid grid-cols-3 mb-6 bg-[#F8FBFF] p-1.5 sm:p-2 rounded-lg sm:rounded-xl shadow-sm border border-slate-200/40">
               <TabsTrigger value="mybooks" className="data-[state=active]:bg-[#4C4EE7] data-[state=active]:text-white text-slate-600 font-medium rounded-lg py-2 px-3 text-sm transition-all duration-300 hover:bg-slate-100">
                 <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="text-xs sm:text-sm">আমার বই</span>
