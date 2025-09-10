@@ -219,6 +219,77 @@ export default function RegistrationPage() {
 
       console.log("✅ প্রোফাইল সফলভাবে সেভ হয়েছে:", data);
 
+      // Create verification data entry with verified status
+      try {
+        console.log("🔄 Creating verification data entry...")
+        
+        const verificationData = {
+          user_id: user.id,
+          name: formData.name,
+          roll_no: formData.rollNumber,
+          reg_no: `REG-${formData.rollNumber}-${Date.now()}`, // Generate a registration number
+          is_verified: true,
+          status: 'approved',
+          department: formData.department,
+          institute_name: formData.instituteName,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+        
+        // Check if verification data already exists for this user
+        const { data: existingVerification, error: checkVerificationError } = await supabase
+          .from('verification_data')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        let verificationResult;
+        let verificationError;
+        
+        if (checkVerificationError && checkVerificationError.code !== 'PGRST116') {
+          console.error('❌ Error checking existing verification data:', checkVerificationError)
+          verificationError = checkVerificationError
+        } else if (existingVerification) {
+          console.log('📝 Updating existing verification data...')
+          const { data, error } = await supabase
+            .from('verification_data')
+            .update({
+              name: verificationData.name,
+              roll_no: verificationData.roll_no,
+              reg_no: verificationData.reg_no,
+              is_verified: verificationData.is_verified,
+              status: verificationData.status,
+              department: verificationData.department,
+              institute_name: verificationData.institute_name,
+              updated_at: verificationData.updated_at
+            })
+            .eq('user_id', user.id)
+            .select()
+            .single()
+          verificationResult = data
+          verificationError = error
+        } else {
+          console.log('🆕 Creating new verification data...')
+          const { data, error } = await supabase
+            .from('verification_data')
+            .insert(verificationData)
+            .select()
+            .single()
+          verificationResult = data
+          verificationError = error
+        }
+        
+        if (verificationError) {
+          console.error('❌ Verification data creation error:', verificationError)
+          // Don't throw error, just log it - verification can be done later
+        } else {
+          console.log('✅ Verification data created successfully:', verificationResult)
+        }
+      } catch (verificationErr) {
+        console.error('❌ Error creating verification data:', verificationErr)
+        // Don't fail the whole process for verification data creation
+      }
+
       // Success message
       toast({
         title: "সফল",
